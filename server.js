@@ -87,7 +87,7 @@ app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
-        const r = await pool.query(q, [nome, data_nascimento || null, telefone, posicao, nivel, status_mensalidade, gols, id]);
+        const r = await pool.query(q, [nome, data_nascimento || null, telefone, posicao, nivel, status_mensalidade || 'Pendente', gols, id]);
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); }
 });

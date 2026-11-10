@@ -93,9 +93,15 @@
             <!-- ABA PRESENÇA & SORTEIO -->
             <div id="tab-presenca" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-emerald-400">Marcar Presença</h3>
-                        <div id="presenca-lista" class="space-y-2 max-h-[400px] overflow-y-auto pr-2"></div>
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-base text-emerald-400">Marcar Presença</h3>
+                            <label class="flex items-center space-x-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" id="selecionar-todos" onclick="toggleSelecionarTodos(this)" class="w-4 h-4 accent-emerald-500 rounded">
+                                <span>Selecionar Todos</span>
+                            </label>
+                        </div>
+                        <div id="presenca-lista" class="space-y-2 max-h-[400px] overflow-y-auto pr-2 flex-1"></div>
                     </div>
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
                         <h3 class="font-bold text-base mb-4 text-amber-400">Configurar Sorteio</h3>
@@ -143,8 +149,8 @@
 
                 <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl mb-6 flex justify-between items-center admin-only">
                     <div>
-                        <h3 class="font-bold text-base text-emerald-400">Lançamento Avulso no Caixa</h3>
-                        <p class="text-xs text-gray-400">Adicione receitas ou despesas rapidamente.</p>
+                        <h3 class="font-bold text-base text-emerald-400">Lançamento de Mensalidades & Caixa</h3>
+                        <p class="text-xs text-gray-400">Mensalidade padrão: Goleiro (R$ 20) | Jogador (R$ 40).</p>
                     </div>
                     <button onclick="openModal('modal-lancamento')" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl text-sm font-bold text-white shadow-lg">
                         <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
@@ -164,9 +170,7 @@
                                     <th class="pb-3 text-right admin-only">Ação</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabela-financeiro-body">
-                                <!-- Preenchido dinamicamente -->
-                            </tbody>
+                            <tbody id="tabela-financeiro-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -191,7 +195,7 @@
         </div>
     </main>
 
-    <!-- MODAL DE CADASTRO / EDIÇÃO DE JOGADOR -->
+    <!-- MODAL DE JOGADOR -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
@@ -212,12 +216,12 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-xs text-gray-300">Posição</label>
-                        <select id="input-posicao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                            <option value="Goleiro">Goleiro</option>
-                            <option value="Zagueiro">Zagueiro</option>
-                            <option value="Lateral">Lateral</option>
-                            <option value="Meia">Meia</option>
-                            <option value="Atacante">Atacante</option>
+                        <select id="input-posicao" onchange="sugerirValorMensalidade()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                            <option value="Goleiro">Goleiro (R$ 20)</option>
+                            <option value="Zagueiro">Zagueiro (R$ 40)</option>
+                            <option value="Lateral">Lateral (R$ 40)</option>
+                            <option value="Meia">Meia (R$ 40)</option>
+                            <option value="Atacante">Atacante (R$ 40)</option>
                         </select>
                     </div>
                     <div>
@@ -244,10 +248,15 @@
     <div id="modal-lancamento" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-emerald-400 mb-4">Novo Lançamento no Caixa</h3>
+            <div class="flex space-x-2 mb-3">
+                <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-emerald-400 font-bold">Goleiro (R$ 20)</button>
+                <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-emerald-400 font-bold">Jogador (R$ 40)</button>
+                <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-rose-400 font-bold">Campo (R$ 100)</button>
+            </div>
             <form onsubmit="salvarLancamento(event)" class="space-y-3">
                 <div>
                     <label class="text-xs text-gray-300">Descrição</label>
-                    <input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João, Pagamento Campo..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    <input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -432,6 +441,11 @@
             });
         }
 
+        function toggleSelecionarTodos(masterCb) {
+            const checkboxes = document.querySelectorAll('.atleta-checkbox');
+            checkboxes.forEach(cb => { cb.checked = masterCb.checked; });
+        }
+
         async function salvarJogador(e) {
             e.preventDefault();
             const id = document.getElementById('input-jogador-id').value;
@@ -485,6 +499,12 @@
         }
 
         // FINANCEIRO
+        function preencherValorFin(desc, valor, tipo) {
+            document.getElementById('fin-desc').value = desc;
+            document.getElementById('fin-valor').value = valor;
+            document.getElementById('fin-tipo').value = tipo;
+        }
+
         async function carregarFinanceiro() {
             try {
                 const res = await fetch(`${API_URL}/api/financeiro`);
