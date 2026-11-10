@@ -87,9 +87,7 @@
 
             <!-- ABA ELENCO -->
             <div id="tab-elenco" class="tab-content hidden">
-                <div id="jogadores-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <!-- Preenchido via JavaScript -->
-                </div>
+                <div id="jogadores-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
             </div>
 
             <!-- ABA PRESENÇA & SORTEIO -->
@@ -131,7 +129,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
                         <p class="text-xs text-gray-400">Saldo Atual em Caixa</p>
-                        <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 150,00</h3>
+                        <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
                         <p class="text-xs text-gray-400">Total de Entradas</p>
@@ -142,17 +140,51 @@
                         <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
                     </div>
                 </div>
+
+                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl mb-6 flex justify-between items-center admin-only">
+                    <div>
+                        <h3 class="font-bold text-base text-emerald-400">Lançamento Avulso no Caixa</h3>
+                        <p class="text-xs text-gray-400">Adicione receitas ou despesas rapidamente.</p>
+                    </div>
+                    <button onclick="openModal('modal-lancamento')" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl text-sm font-bold text-white shadow-lg">
+                        <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
+                    </button>
+                </div>
+
                 <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                    <h3 class="font-bold text-base mb-4 text-emerald-400">Próxima Partida & Livro Caixa</h3>
-                    <p class="text-sm text-gray-300">Local: Campo Principal | Horário: 19:00 | Custo do Campo: R$ 100,00</p>
+                    <h3 class="font-bold text-base mb-4 text-white">Extrato do Livro Caixa</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                    <th class="pb-3">Data</th>
+                                    <th class="pb-3">Descrição</th>
+                                    <th class="pb-3">Tipo</th>
+                                    <th class="pb-3">Valor</th>
+                                    <th class="pb-3 text-right admin-only">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-financeiro-body">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- ABA USUÁRIOS -->
+            <!-- ABA USUÁRIOS (ADMIN) -->
             <div id="tab-usuarios" class="tab-content hidden">
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl max-w-2xl">
-                    <h3 class="font-bold text-base mb-4 text-emerald-400">Usuários com Acesso ao Sistema</h3>
-                    <div id="usuarios-lista" class="space-y-2"></div>
+                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl max-w-4xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="font-bold text-lg text-emerald-400">Gestão de Usuários & Acessos</h3>
+                            <p class="text-xs text-gray-400">Crie contas, defina níveis de permissão e altere senhas.</p>
+                        </div>
+                        <button onclick="abrirModalNovoUsuario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg">
+                            <i class="fa-solid fa-user-plus mr-2"></i>Novo Usuário
+                        </button>
+                    </div>
+                    <div id="usuarios-lista" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -162,7 +194,7 @@
     <!-- MODAL DE CADASTRO / EDIÇÃO DE JOGADOR -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 id="modal-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
+            <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
             <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3">
                 <input type="hidden" id="input-jogador-id">
                 <div>
@@ -170,8 +202,8 @@
                     <input type="text" id="input-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">Apelido</label>
-                    <input type="text" id="input-apelido" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    <label class="text-xs text-gray-300">Data de Nascimento</label>
+                    <input type="date" id="input-nascimento" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
                     <label class="text-xs text-gray-300">Telefone / WhatsApp</label>
@@ -208,6 +240,73 @@
         </div>
     </div>
 
+    <!-- MODAL DE LANÇAMENTO FINANCEIRO -->
+    <div id="modal-lancamento" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-lg font-bold text-emerald-400 mb-4">Novo Lançamento no Caixa</h3>
+            <form onsubmit="salvarLancamento(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-gray-300">Descrição</label>
+                    <input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João, Pagamento Campo..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-gray-300">Tipo</label>
+                        <select id="fin-tipo" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                            <option value="Entrada">Entrada (Receita)</option>
+                            <option value="Saida">Saída (Despesa)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-300">Valor (R$)</label>
+                        <input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Data</label>
+                    <input type="date" id="fin-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE USUÁRIO -->
+    <div id="modal-usuario" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 id="modal-usuario-titulo" class="text-lg font-bold text-emerald-400 mb-4">Gerenciar Usuário</h3>
+            <form onsubmit="salvarUsuario(event)" class="space-y-3">
+                <input type="hidden" id="input-usuario-id">
+                <div>
+                    <label class="text-xs text-gray-300">Nome</label>
+                    <input type="text" id="user-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">E-mail</label>
+                    <input type="email" id="user-email" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Senha <span id="senha-aviso" class="text-gray-500">(Deixe em branco para não alterar)</span></label>
+                    <input type="password" id="user-senha" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Nível de Permissão</label>
+                    <select id="user-perfil" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <option value="usuario">Usuário Comum</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('modal-usuario')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- SCRIPT PRINCIPAL -->
     <script>
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
@@ -224,7 +323,9 @@
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
             }
             carregarJogadores();
+            carregarFinanceiro();
             carregarUsuariosSistema();
+            document.getElementById('fin-data').valueAsDate = new Date();
         });
 
         function logout() {
@@ -253,7 +354,7 @@
         function abrirModalNovoJogador() {
             document.getElementById('form-novo-jogador').reset();
             document.getElementById('input-jogador-id').value = '';
-            document.getElementById('modal-titulo').innerText = 'Cadastrar Novo Atleta';
+            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta';
             openModal('modal-novo-jogador');
         }
 
@@ -285,6 +386,14 @@
             const isAdmin = usuarioLogado.perfil === 'admin';
             grid.innerHTML = '';
             jogadores.forEach(j => {
+                let idadeStr = '-';
+                if (j.data_nascimento) {
+                    const nascimento = new Date(j.data_nascimento);
+                    const diff = Date.now() - nascimento.getTime();
+                    const idadeDate = new Date(diff);
+                    idadeStr = `${Math.abs(idadeDate.getUTCFullYear() - 1970)} anos`;
+                }
+
                 grid.innerHTML += `
                     <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
                         <div>
@@ -293,7 +402,7 @@
                                 <span class="text-xs px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
                             </div>
                             <h4 class="font-bold text-white text-base mt-2">${j.nome}</h4>
-                            <p class="text-xs text-gray-400">Apelido: ${j.apelido || '-'}</p>
+                            <p class="text-xs text-gray-400">Idade: ${idadeStr}</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
                             <span>⚽ Gols: <strong>${j.gols || 0}</strong></span>
@@ -328,7 +437,7 @@
             const id = document.getElementById('input-jogador-id').value;
             const dados = {
                 nome: document.getElementById('input-nome').value,
-                apelido: document.getElementById('input-apelido').value,
+                data_nascimento: document.getElementById('input-nascimento').value || null,
                 telefone: document.getElementById('input-telefone').value,
                 posicao: document.getElementById('input-posicao').value,
                 status_mensalidade: document.getElementById('input-mensalidade').value,
@@ -348,21 +457,19 @@
                     alert('Atleta salvo com sucesso!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
-                } else {
-                    alert('Erro ao salvar atleta.');
-                }
+                } else { alert('Erro ao salvar atleta.'); }
             } catch (err) { console.error(err); }
         }
 
         function prepararEdicaoJogador(j) {
             document.getElementById('input-jogador-id').value = j.id;
             document.getElementById('input-nome').value = j.nome;
-            document.getElementById('input-apelido').value = j.apelido || '';
+            document.getElementById('input-nascimento').value = j.data_nascimento ? j.data_nascimento.split('T')[0] : '';
             document.getElementById('input-telefone').value = j.telefone || '';
             document.getElementById('input-posicao').value = j.posicao;
             document.getElementById('input-mensalidade').value = j.status_mensalidade || 'Pendente';
             document.getElementById('input-gols').value = j.gols || 0;
-            document.getElementById('modal-titulo').innerText = 'Editar Atleta';
+            document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta';
             openModal('modal-novo-jogador');
         }
 
@@ -377,6 +484,169 @@
             } catch (err) { console.error(err); }
         }
 
+        // FINANCEIRO
+        async function carregarFinanceiro() {
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`);
+                const dados = await res.json();
+                if (Array.isArray(dados)) {
+                    let totalEntradas = 0;
+                    let totalSaidas = 0;
+                    const tbody = document.getElementById('tabela-financeiro-body');
+                    tbody.innerHTML = '';
+
+                    dados.forEach(l => {
+                        const val = parseFloat(l.valor) || 0;
+                        if (l.tipo === 'Entrada') totalEntradas += val;
+                        else totalSaidas += val;
+
+                        const dataFmt = l.data_lancamento ? new Date(l.data_lancamento).toLocaleDateString('pt-BR') : '-';
+                        const isAdmin = usuarioLogado.perfil === 'admin';
+
+                        tbody.innerHTML += `
+                            <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
+                                <td class="py-3 text-gray-300">${dataFmt}</td>
+                                <td class="py-3 font-medium text-white">${l.descricao}</td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${l.tipo}</span></td>
+                                <td class="py-3 font-bold ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
+                                <td class="py-3 text-right admin-only">
+                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs">Excluir</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    const saldo = totalEntradas - totalSaidas;
+                    document.getElementById('fin-entradas').innerText = `R$ ${totalEntradas.toFixed(2)}`;
+                    document.getElementById('fin-saidas').innerText = `R$ ${totalSaidas.toFixed(2)}`;
+                    document.getElementById('fin-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+                    const dashSaldo = document.getElementById('dash-saldo-val');
+                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldo.toFixed(2)}`;
+                }
+            } catch (err) { console.error('Erro financeiro:', err); }
+        }
+
+        async function salvarLancamento(e) {
+            e.preventDefault();
+            const dados = {
+                descricao: document.getElementById('fin-desc').value,
+                tipo: document.getElementById('fin-tipo').value,
+                valor: parseFloat(document.getElementById('fin-valor').value),
+                data_lancamento: document.getElementById('fin-data').value || new Date()
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(dados)
+                });
+                if (res.ok) {
+                    alert('Lançamento efetuado com sucesso!');
+                    closeModal('modal-lancamento');
+                    document.getElementById('fin-desc').value = '';
+                    document.getElementById('fin-valor').value = '';
+                    carregarFinanceiro();
+                } else { alert('Erro ao lançar.'); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function excluirLancamento(id) {
+            if (!confirm('Excluir este lançamento?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) carregarFinanceiro();
+            } catch (err) { console.error(err); }
+        }
+
+        // USUÁRIOS
+        async function carregarUsuariosSistema() {
+            const container = document.getElementById('usuarios-lista');
+            if (!container) return;
+            try {
+                const res = await fetch(`${API_URL}/api/usuarios`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const usuarios = await res.json();
+                    container.innerHTML = usuarios.map(u => `
+                        <div class="p-4 bg-pitch-900 rounded-xl border border-pitch-700/50 flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-bold text-white">${u.nome} (${u.email})</p>
+                                <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span>
+                            </div>
+                            <div class="space-x-3">
+                                <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 text-xs hover:underline">Editar</button>
+                                <button onclick="excluirUsuario(${u.id})" class="text-rose-400 text-xs hover:underline">Excluir</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function abrirModalNovoUsuario() {
+            document.getElementById('input-usuario-id').value = '';
+            document.getElementById('user-nome').value = '';
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-senha').value = '';
+            document.getElementById('user-perfil').value = 'usuario';
+            document.getElementById('modal-usuario-titulo').innerText = 'Criar Novo Usuário';
+            openModal('modal-usuario');
+        }
+
+        function prepararEdicaoUsuario(u) {
+            document.getElementById('input-usuario-id').value = u.id;
+            document.getElementById('user-nome').value = u.nome;
+            document.getElementById('user-email').value = u.email;
+            document.getElementById('user-senha').value = '';
+            document.getElementById('user-perfil').value = u.perfil;
+            document.getElementById('modal-usuario-titulo').innerText = 'Editar Usuário';
+            openModal('modal-usuario');
+        }
+
+        async function salvarUsuario(e) {
+            e.preventDefault();
+            const id = document.getElementById('input-usuario-id').value;
+            const dados = {
+                nome: document.getElementById('user-nome').value,
+                email: document.getElementById('user-email').value,
+                senha: document.getElementById('user-senha').value,
+                perfil: document.getElementById('user-perfil').value
+            };
+
+            const metodo = id ? 'PUT' : 'POST';
+            const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
+
+            try {
+                const res = await fetch(url, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(dados)
+                });
+                if (res.ok) {
+                    alert('Usuário salvo com sucesso!');
+                    closeModal('modal-usuario');
+                    carregarUsuariosSistema();
+                } else { alert('Erro ao salvar usuário.'); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function excluirUsuario(id) {
+            if (!confirm('Deseja excluir este usuário?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/usuarios/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) carregarUsuariosSistema();
+            } catch (err) { console.error(err); }
+        }
+
+        // SORTEIO
         function sortearTimesAvancado() {
             const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
                 nome: cb.dataset.nome,
@@ -385,15 +655,13 @@
 
             const numTimes = parseInt(document.getElementById('qtd-times').value) || 2;
             if (selecionados.length < numTimes) {
-                alert(`Selecione pelo menos ${numTimes} atletas marcados na presença para sortear.`);
+                alert(`Selecione pelo menos ${numTimes} atletas para sortear.`);
                 return;
             }
 
             const embaralhados = selecionados.sort(() => 0.5 - Math.random());
             const times = Array.from({ length: numTimes }, () => []);
-            embaralhados.forEach((atleta, index) => {
-                times[index % numTimes].push(atleta);
-            });
+            embaralhados.forEach((atleta, index) => { times[index % numTimes].push(atleta); });
 
             const paletaCores = [
                 { nome: 'Time Verde', classe: 'border-emerald-500 text-emerald-400' },
@@ -422,27 +690,6 @@
                     </div>
                 `;
             });
-        }
-
-        async function carregarUsuariosSistema() {
-            const container = document.getElementById('usuarios-lista');
-            if (!container) return;
-            try {
-                const res = await fetch(`${API_URL}/api/usuarios`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const usuarios = await res.json();
-                    container.innerHTML = usuarios.map(u => `
-                        <div class="p-3 bg-pitch-900 rounded-xl border border-pitch-700/50 flex justify-between items-center mb-2">
-                            <div>
-                                <p class="text-sm font-bold text-white">${u.nome} (${u.email})</p>
-                                <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">${u.perfil}</span>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) { console.error(err); }
         }
     </script>
 </body>

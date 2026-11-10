@@ -34,6 +34,9 @@ function verificarAdmin(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.usuario = decoded;
+        if (decoded.perfil !== 'admin') {
+            return res.status(403).json({ erro: 'Acesso negado. Apenas administradores.' });
+        }
         next();
     } catch (err) {
         return res.status(403).json({ erro: 'Token inválido ou expirado.' });
@@ -58,12 +61,11 @@ app.post('/api/login', async (req, res) => {
         const token = jwt.sign({ id: usuario.id, nome: usuario.nome, perfil: usuario.perfil }, JWT_SECRET, { expiresIn: '8h' });
         res.json({ mensagem: 'Login realizado com sucesso!', token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil } });
     } catch (err) {
-        console.error('Erro no login:', err);
-        res.status(500).json({ erro: 'Erro interno ao realizar login.' });
+        res.status(500).json({ erro: 'Erro interno no login.' });
     }
 });
 
-// --- GESTÃO DE JOGADORES ---
+// --- JOGADORES ---
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
@@ -72,20 +74,20 @@ app.get('/api/jogadores', async (req, res) => {
 });
 
 app.post('/api/jogadores', verificarAdmin, async (req, res) => {
-    const { nome, apelido, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
-        const q = `INSERT INTO jogadores (nome, apelido, telefone, posicao, nivel, status_mensalidade, gols) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
-        const r = await pool.query(q, [nome, apelido || '', telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0]);
+        const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+        const r = await pool.query(q, [nome, data_nascimento || null, telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0]);
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ erro: 'Erro ao cadastrar atleta.' }); }
 });
 
 app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nome, apelido, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
-        const q = `UPDATE jogadores SET nome=$1, apelido=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
-        const r = await pool.query(q, [nome, apelido, telefone, posicao, nivel, status_mensalidade, gols, id]);
+        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
+        const r = await pool.query(q, [nome, data_nascimento || null, telefone, posicao, nivel, status_mensalidade, gols, id]);
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); }
 });
@@ -98,17 +100,32 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
 });
 
-// --- CONFIGURAÇÕES ---
-app.get('/api/configuracoes', async (req, res) => {
+// --- MÓDULO FINANCEIRO (LIVRO CAIXA) ---
+app.get('/api/financeiro', async (req, res) => {
     try {
-        const r = await pool.query('SELECT * FROM configuracoes_clube');
-        const configs = {};
-        r.rows.forEach(row => { configs[row.chave] = row.valor; });
-        res.json(configs);
-    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar configurações' }); }
+        const r = await pool.query('SELECT * FROM financeiro_lancamentos ORDER BY data_lancamento DESC, id DESC');
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar financeiro.' }); }
 });
 
-// --- GESTÃO DE UTILIZADORES ---
+app.post('/api/financeiro', verificarAdmin, async (req, res) => {
+    const { descricao, tipo, valor, data_lancamento } = req.body;
+    try {
+        const q = `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, $2, $3, $4) RETURNING *;`;
+        const r = await pool.query(q, [descricao, tipo, valor, data_lancamento || new Date()]);
+        res.status(201).json(r.rows[0]);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao lançar transação.' }); }
+});
+
+app.delete('/api/financeiro/:id', verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM financeiro_lancamentos WHERE id=$1', [id]);
+        res.json({ mensagem: 'Lançamento removido.' });
+    } catch (err) { res.status(500).json({ erro: 'Erro ao excluir lançamento.' }); }
+});
+
+// --- GESTÃO DE UTILIZADORES (ADMIN) ---
 app.get('/api/usuarios', verificarAdmin, async (req, res) => {
     try {
         const r = await pool.query('SELECT id, nome, email, perfil FROM usuarios ORDER BY id ASC');
@@ -125,6 +142,21 @@ app.post('/api/usuarios', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao criar utilizador.' }); }
 });
 
+app.put('/api/usuarios/:id', verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { nome, email, senha, perfil } = req.body;
+    try {
+        if (senha && senha.trim() !== '') {
+            const hashed = await bcrypt.hash(senha, 10);
+            const r = await pool.query('UPDATE usuarios SET nome=$1, email=$2, senha=$3, perfil=$4 WHERE id=$5 RETURNING id, nome, email, perfil;', [nome, email, hashed, perfil, id]);
+            return res.json(r.rows[0]);
+        } else {
+            const r = await pool.query('UPDATE usuarios SET nome=$1, email=$2, perfil=$3 WHERE id=$4 RETURNING id, nome, email, perfil;', [nome, email, perfil, id]);
+            return res.json(r.rows[0]);
+        }
+    } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar utilizador.' }); }
+});
+
 app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -133,7 +165,15 @@ app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir utilizador.' }); }
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+// --- CONFIGURAÇÕES ---
+app.get('/api/configuracoes', async (req, res) => {
+    try {
+        const r = await pool.query('SELECT * FROM configuracoes_clube');
+        const configs = {};
+        r.rows.forEach(row => { configs[row.chave] = row.valor; });
+        res.json(configs);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar configurações' }); }
 });
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
