@@ -17,10 +17,17 @@
             }
         }
     </script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #modal-recibo-conteudo, #modal-recibo-conteudo * { visibility: visible; }
+            #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
 
-    <!-- MENU LATERAL DINÂMICO -->
+    <!-- MENU LATERAL COM LOGO OFICIAL -->
     <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex">
         <div>
             <div class="p-6 border-b border-pitch-700/60 text-center relative group">
@@ -71,7 +78,6 @@
 
             <!-- ABA DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Alerta de Aniversariante -->
                 <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/30 to-pitch-800 border border-amber-500/50 p-6 rounded-2xl shadow-xl flex items-center space-x-4">
                     <div class="bg-amber-500 text-gray-950 p-4 rounded-xl text-2xl font-bold shadow-lg">
                         <i class="fa-solid fa-cake-candles"></i>
@@ -105,7 +111,6 @@
                     </div>
                 </div>
 
-                <!-- Painel de Próxima Partida Editável -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
                         <div class="flex justify-between items-center mb-4">
@@ -222,7 +227,7 @@
                                     <th class="pb-3">Descrição</th>
                                     <th class="pb-3">Tipo</th>
                                     <th class="pb-3">Valor</th>
-                                    <th class="pb-3 text-right admin-only">Ação</th>
+                                    <th class="pb-3 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-financeiro-body"></tbody>
@@ -250,6 +255,44 @@
         </div>
     </main>
 
+    <!-- MODAL DE RECIBO DE PAGAMENTO -->
+    <div id="modal-recibo" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white text-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
+            <div class="text-center border-b pb-4 mb-4">
+                <h2 id="recibo-clube-nome" class="font-extrabold text-lg text-emerald-800 uppercase">CLUBE MENINOS DA VILA</h2>
+                <p id="recibo-clube-sub" class="text-xs text-gray-500">Comprovativo Oficial de Tesouraria</p>
+            </div>
+            
+            <div class="flex justify-between items-center mb-6 bg-gray-100 p-3 rounded-xl">
+                <div>
+                    <span class="text-xs text-gray-500 block">Recibo Nº:</span>
+                    <strong id="recibo-id" class="text-sm">#0001</strong>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-gray-500 block">Data do Pagamento:</span>
+                    <strong id="recibo-data" class="text-sm">-</strong>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-sm mb-6">
+                <p>Recebemos de: <strong id="recibo-descricao" class="text-gray-800">-</strong></p>
+                <p>A quantia correspondente a: <strong id="recibo-valor" class="text-emerald-700 text-lg font-bold">R$ 0,00</strong></p>
+                <p class="text-xs text-gray-500 italic">Referente à contribuição de mensalidade / taxa desportiva do clube amador.</p>
+            </div>
+
+            <div class="pt-8 border-t text-center mt-8">
+                <div class="w-48 mx-auto border-b border-gray-400 mb-1"></div>
+                <p class="text-xs text-gray-600 font-bold">Tesouraria / Diretoria</p>
+                <p class="text-[10px] text-gray-400">Clube Meninos da Vila</p>
+            </div>
+
+            <div class="flex space-x-3 pt-6 mt-6 border-t print:hidden">
+                <button type="button" onclick="closeModal('modal-recibo')" class="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2.5 rounded-xl text-sm font-bold">Fechar</button>
+                <button type="button" onclick="window.print()" class="w-1/2 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-bold"><i class="fa-solid fa-print mr-2"></i>Imprimir / PDF</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE CONFIGURAÇÃO DO CLUBE / LOGO -->
     <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
@@ -266,11 +309,10 @@
                 <div>
                     <label class="text-xs text-gray-300">URL da Logo (Imagem)</label>
                     <input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1" placeholder="https://exemplo.com/logo.jpg">
-                    <p class="text-[10px] text-gray-400 mt-1">Insira o link direto da imagem hospedada ou do GitHub.</p>
                 </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Alterações</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
                 </div>
             </form>
         </div>
@@ -482,8 +524,10 @@
                 const res = await fetch(`${API_URL}/api/configuracoes`);
                 configsGlobal = await res.json();
                 
-                // Dados do Clube na Sidebar
-                if (configsGlobal.nome_clube) document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
+                if (configsGlobal.nome_clube) {
+                    document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
+                    document.getElementById('recibo-clube-nome').innerText = configsGlobal.nome_clube;
+                }
                 if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerText = configsGlobal.subtitulo_clube;
                 if (configsGlobal.logo_url) {
                     const imgEl = document.getElementById('sidebar-logo');
@@ -493,7 +537,6 @@
                     };
                 }
 
-                // Dados da Partida
                 document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
                 document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
@@ -524,7 +567,7 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    alert('Identidade do clube atualizada com sucesso!');
+                    alert('Identidade atualizada com sucesso!');
                     closeModal('modal-config-clube');
                     carregarConfiguracoes();
                 } else { alert('Erro ao atualizar.'); }
@@ -730,7 +773,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO
+        // FINANCEIRO & GERADOR DE RECIBOS
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
@@ -765,7 +808,8 @@
                                 <td class="py-3 font-medium text-white">${l.descricao}</td>
                                 <td class="py-3"><span class="px-2 py-0.5 rounded text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${l.tipo}</span></td>
                                 <td class="py-3 font-bold ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
-                                <td class="py-3 text-right admin-only">
+                                <td class="py-3 text-right space-x-2">
+                                    ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:underline text-xs"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
                                     ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs">Excluir</button>` : ''}
                                 </td>
                             </tr>
@@ -780,6 +824,14 @@
                     if(dashSaldo) dashSaldo.innerText = `R$ ${saldo.toFixed(2)}`;
                 }
             } catch (err) { console.error('Erro financeiro:', err); }
+        }
+
+        function gerarRecibo(id, descricao, valor, data) {
+            document.getElementById('recibo-id').innerText = `#${String(id).padStart(4, '0')}`;
+            document.getElementById('recibo-data').innerText = data;
+            document.getElementById('recibo-descricao').innerText = descricao;
+            document.getElementById('recibo-valor').innerText = `R$ ${parseFloat(valor).toFixed(2)}`;
+            openModal('modal-recibo');
         }
 
         async function salvarLancamento(e) {
@@ -941,7 +993,7 @@
 
                 container.innerHTML += `
                     <div class="bg-pitch-800 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
-                        <h4 class="font-bold text-sm ${cor.classe.split(' ')[1]} mb-3">${cor.nome} (${tJogadores.length})</h4>
+                        <h4 class="font-bold text-sm ${cor.classe.str ? '' : cor.classe.split(' ')[1]} mb-3">${cor.nome} (${tJogadores.length})</h4>
                         <div class="space-y-1">${htmlMembros}</div>
                     </div>
                 `;
