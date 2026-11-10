@@ -217,19 +217,45 @@ app.post('/api/usuarios', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao criar utilizador.' }); }
 });
 
-app.put('/api/usuarios/:id', verificarAdmin, async (req, res) => {
+app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nome, email, senha, perfil } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
-        if (senha && senha.trim() !== '') {
-            const hashed = await bcrypt.hash(senha, 10);
-            const r = await pool.query('UPDATE usuarios SET nome=$1, email=$2, senha=$3, perfil=$4 WHERE id=$5 RETURNING id, nome, email, perfil;', [nome, email, hashed, perfil, id]);
-            return res.json(r.rows[0]);
-        } else {
-            const r = await pool.query('UPDATE usuarios SET nome=$1, email=$2, perfil=$3 WHERE id=$4 RETURNING id, nome, email, perfil;', [nome, email, perfil, id]);
-            return res.json(r.rows[0]);
+        // Trata data vazia para evitar erro de sintaxe no PostgreSQL
+        const dataFormatada = (data_nascimento && data_nascimento.trim() !== '') ? data_nascimento : null;
+
+        // Busca o status anterior para verificar mudança para "Pago"
+        const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
+
+        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
+        const r = await pool.query(q, [
+            nome, 
+            dataFormatada, 
+            telefone || '', 
+            posicao, 
+            parseInt(nivel) || 3, 
+            status_mensalidade || 'Pendente', 
+            parseInt(gols) || 0, 
+            id
+        ]);
+
+        const jogadorAtualizado = r.rows[0];
+
+        // Se mudou para 'Pago', lança automaticamente no Livro Caixa
+        if (statusAnterior !== 'Pago' && status_mensalidade === 'Pago') {
+            const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
+            await pool.query(
+                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                [`Mensalidade - ${nome}`, valorMensalidade]
+            );
         }
-    } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar utilizador.' }); }
+
+        res.json(jogadorAtualizado);
+    } catch (err) { 
+        console.error('Erro detalhado ao atualizar jogador:', err.message);
+        res.status(500).json({ erro: 'Erro ao atualizar jogador: ' + err.message }); 
+    }
 });
 
 app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
