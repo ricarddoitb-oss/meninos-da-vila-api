@@ -11,7 +11,7 @@
             theme: {
                 extend: {
                     colors: {
-                        pitch: { 900: '#122017', 800: '#1a2e21', 700: '#2d4d38' }
+                        pitch: { 900: '#122017', 800: '#1a2e21', 700: '#2d4d38', gold: '#f59e0b' }
                     }
                 }
             }
@@ -20,12 +20,15 @@
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
 
-    <!-- MENU LATERAL -->
+    <!-- MENU LATERAL COM LOGO OFICIAL -->
     <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex">
         <div>
-            <div class="p-6 border-b border-pitch-700/60">
-                <h1 class="font-bold text-lg text-emerald-400 club-name-target">CLUBE MENINOS DA VILA</h1>
-                <p class="text-xs text-gray-400 mt-0.5">Gestão Completa de Clube</p>
+            <div class="p-6 border-b border-pitch-700/60 text-center">
+                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg bg-pitch-900">
+                    <img src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/main/logo.jpg" alt="Logo Clube Meninos da Vila" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=120&auto=format&fit=crop&q=80'">
+                </div>
+                <h1 class="font-bold text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
+                <p class="text-[10px] text-gray-400 mt-0.5">Clube Amador • Est. 2018</p>
             </div>
             <nav class="p-4 space-y-1">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -63,24 +66,66 @@
 
         <div class="p-8 flex-1 overflow-y-auto">
 
-            <!-- ABA DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+            <!-- ABA DASHBOARD ENRIQUECIDA -->
+            <div id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Alerta de Aniversariante -->
+                <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/30 to-pitch-800 border border-amber-500/50 p-6 rounded-2xl shadow-xl flex items-center space-x-4">
+                    <div class="bg-amber-500 text-gray-950 p-4 rounded-xl text-2xl font-bold shadow-lg">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-amber-400 font-bold text-lg">Parabéns aos Aniversariantes de Hoje! 🎉</h3>
+                        <p id="aniversariante-texto" class="text-sm text-gray-200 mt-1"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                     <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Elenco Total</p>
                         <h3 id="dash-total-jogadores" class="text-3xl font-extrabold text-white mt-2">0</h3>
+                        <span class="text-xs text-emerald-400 mt-2 inline-block"><i class="fa-solid fa-arrow-up mr-1"></i>Ativos no plantel</span>
                     </div>
                     <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Mensalidades em Dia</p>
                         <h3 id="dash-pagos-count" class="text-3xl font-extrabold text-emerald-400 mt-2">0/0</h3>
+                        <span class="text-xs text-gray-400 mt-2 inline-block">Controle financeiro</span>
                     </div>
                     <div onclick="switchTab('financeiro')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Saldo do Caixa</p>
                         <h3 id="dash-saldo-val" class="text-3xl font-extrabold text-amber-400 mt-2">R$ 0,00</h3>
+                        <span class="text-xs text-amber-400/80 mt-2 inline-block">Livro caixa atualizado</span>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro</p>
+                        <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro do Clube</p>
                         <h3 id="dash-artilheiro-nome" class="text-xl font-extrabold text-white mt-2">-</h3>
+                        <span id="dash-artilheiro-gols" class="text-xs text-amber-400 mt-2 inline-block">0 gols marcados</span>
+                    </div>
+                </div>
+
+                <!-- Painel de Próxima Partida & Resumo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
+                        <h3 class="font-bold text-base text-emerald-400 mb-4"><i class="fa-solid fa-futbol mr-2"></i>Informações da Próxima Partida</h3>
+                        <div class="space-y-3 text-sm text-gray-300">
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Local:</span> <strong class="text-white">Campo Principal - CMV</strong></p>
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Horário Habitual:</span> <strong class="text-white">19:00</strong></p>
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Custo do Aluguel:</span> <strong class="text-amber-400">R$ 100,00</strong></p>
+                            <p class="flex justify-between"><span>Mensalidades:</span> <strong class="text-emerald-400">Goleiro R$ 20 | Jogador R$ 40</strong></p>
+                        </div>
+                    </div>
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-base text-amber-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>Ações Rápidas</h3>
+                            <p class="text-xs text-gray-400 mb-4">Gerencie convocações, sorteie os times da semana ou registre entradas de mensalidades num clique.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="switchTab('presenca')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-emerald-400 text-left transition">
+                                <i class="fa-solid fa-shuffle mb-1 block text-base"></i>Realizar Sorteio
+                            </button>
+                            <button onclick="switchTab('financeiro')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-amber-400 text-left transition">
+                                <i class="fa-solid fa-wallet mb-1 block text-base"></i>Livro Caixa
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -216,7 +261,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-xs text-gray-300">Posição</label>
-                        <select id="input-posicao" onchange="sugerirValorMensalidade()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <select id="input-posicao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                             <option value="Goleiro">Goleiro (R$ 20)</option>
                             <option value="Zagueiro">Zagueiro (R$ 40)</option>
                             <option value="Lateral">Lateral (R$ 40)</option>
@@ -298,7 +343,7 @@
                     <input type="email" id="user-email" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">Senha <span id="senha-aviso" class="text-gray-500">(Deixe em branco para não alterar)</span></label>
+                    <label class="text-xs text-gray-300">Senha <span class="text-gray-500">(Deixe em branco para não alterar)</span></label>
                     <input type="password" id="user-senha" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
@@ -384,8 +429,37 @@
             document.getElementById('dash-total-jogadores').innerText = jogadores.length;
             const pagos = jogadores.filter(j => j.status_mensalidade === 'Pago').length;
             document.getElementById('dash-pagos-count').innerText = `${pagos}/${jogadores.length}`;
+            
+            // Artilheiro
             if (jogadores.length > 0) {
-                document.getElementById('dash-artilheiro-nome').innerText = jogadores[0].nome;
+                const ordenadosPorGols = [...jogadores].sort((a, b) => (b.gols || 0) - (a.gols || 0));
+                document.getElementById('dash-artilheiro-nome').innerText = ordenadosPorGols[0].nome;
+                document.getElementById('dash-artilheiro-gols').innerText = `${ordenadosPorGols[0].gols || 0} gols marcados`;
+            }
+
+            // Aniversariantes do Dia
+            verificarAniversariantes(jogadores);
+        }
+
+        function verificarAniversariantes(jogadores) {
+            const hoje = new Date();
+            const diaMesHoje = `${String(hoje.getDate()).padStart(2, '0')}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+            
+            const aniversariantes = jogadores.filter(j => {
+                if (!j.data_nascimento) return false;
+                const partes = j.data_nascimento.split('T')[0].split('-'); // YYYY-MM-DD
+                const diaMesAtleta = `${partes[2]}-${partes[1]}`;
+                return diaMesAtleta === diaMesHoje;
+            });
+
+            const banner = document.getElementById('aniversariante-banner');
+            const texto = document.getElementById('aniversariante-texto');
+            if (aniversariantes.length > 0) {
+                const nomes = aniversariantes.map(a => `<strong>${a.nome}</strong>`).join(', ');
+                texto.innerHTML = `Hoje é aniversário de: ${nomes}! Desejamos muitas felicidades e gols! 🎂⚽`;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
             }
         }
 
@@ -442,8 +516,7 @@
         }
 
         function toggleSelecionarTodos(masterCb) {
-            const checkboxes = document.querySelectorAll('.atleta-checkbox');
-            checkboxes.forEach(cb => { cb.checked = masterCb.checked; });
+            document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked);
         }
 
         async function salvarJogador(e) {
@@ -471,8 +544,11 @@
                     alert('Atleta salvo com sucesso!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
-                } else { alert('Erro ao salvar atleta.'); }
-            } catch (err) { console.error(err); }
+                } else {
+                    const errJson = await res.json();
+                    alert(`Erro ao salvar atleta: ${errJson.erro || 'Verifique os dados.'}`);
+                }
+            } catch (err) { console.error(err); alert('Erro de conexão ao salvar.'); }
         }
 
         function prepararEdicaoJogador(j) {
@@ -685,7 +761,7 @@
 
             const paletaCores = [
                 { nome: 'Time Verde', classe: 'border-emerald-500 text-emerald-400' },
-                { nome: 'Time Amarelo', classe: 'border-amber-500 text-amber-400' },
+                { nome: 'Time Amarelo', kl: 'amber', classe: 'border-amber-500 text-amber-400' },
                 { nome: 'Time Azul', classe: 'border-blue-500 text-blue-400' },
                 { nome: 'Time Vermelho', classe: 'border-rose-500 text-rose-400' }
             ];

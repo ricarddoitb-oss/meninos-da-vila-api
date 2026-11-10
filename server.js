@@ -26,7 +26,6 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
-// Middleware de Autenticação e Admin
 function verificarAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
@@ -43,12 +42,10 @@ function verificarAdmin(req, res, next) {
     }
 }
 
-// --- ROTA DE STATUS ---
 app.get('/api/status', (req, res) => {
     res.json({ status: 'Online', sistema: 'Clube Meninos da Vila' });
 });
 
-// --- ROTA DE LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { email, senha } = req.body;
     try {
@@ -65,7 +62,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- JOGADORES ---
+// JOGADORES
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
@@ -79,7 +76,10 @@ app.post('/api/jogadores', verificarAdmin, async (req, res) => {
         const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
         const r = await pool.query(q, [nome, data_nascimento || null, telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0]);
         res.status(201).json(r.rows[0]);
-    } catch (err) { res.status(500).json({ erro: 'Erro ao cadastrar atleta.' }); }
+    } catch (err) { 
+        console.error('Erro ao cadastrar atleta:', err);
+        res.status(500).json({ erro: 'Erro ao cadastrar atleta.' }); 
+    }
 });
 
 app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
@@ -87,9 +87,12 @@ app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
-        const r = await pool.query(q, [nome, data_nascimento || null, telefone, posicao, nivel, status_mensalidade || 'Pendente', gols, id]);
+        const r = await pool.query(q, [nome, data_nascimento || null, telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0, id]);
         res.json(r.rows[0]);
-    } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); }
+    } catch (err) { 
+        console.error('Erro ao atualizar jogador:', err);
+        res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); 
+    }
 });
 
 app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
@@ -100,7 +103,7 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
 });
 
-// --- MÓDULO FINANCEIRO (LIVRO CAIXA) ---
+// FINANCEIRO
 app.get('/api/financeiro', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM financeiro_lancamentos ORDER BY data_lancamento DESC, id DESC');
@@ -125,7 +128,7 @@ app.delete('/api/financeiro/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir lançamento.' }); }
 });
 
-// --- GESTÃO DE UTILIZADORES (ADMIN) ---
+// USUÁRIOS
 app.get('/api/usuarios', verificarAdmin, async (req, res) => {
     try {
         const r = await pool.query('SELECT id, nome, email, perfil FROM usuarios ORDER BY id ASC');
@@ -163,16 +166,6 @@ app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
         await pool.query('DELETE FROM usuarios WHERE id=$1', [id]);
         res.json({ mensagem: 'Utilizador removido.' });
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir utilizador.' }); }
-});
-
-// --- CONFIGURAÇÕES ---
-app.get('/api/configuracoes', async (req, res) => {
-    try {
-        const r = await pool.query('SELECT * FROM configuracoes_clube');
-        const configs = {};
-        r.rows.forEach(row => { configs[row.chave] = row.valor; });
-        res.json(configs);
-    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar configurações' }); }
 });
 
 const PORT = process.env.PORT || 10000;
