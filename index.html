@@ -20,15 +20,18 @@
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
 
-    <!-- MENU LATERAL COM LOGO OFICIAL -->
+    <!-- MENU LATERAL DINÂMICO -->
     <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex">
         <div>
-            <div class="p-6 border-b border-pitch-700/60 text-center">
+            <div class="p-6 border-b border-pitch-700/60 text-center relative group">
                 <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg bg-pitch-900">
-                    <img src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/main/logo.jpg" alt="Logo Clube Meninos da Vila" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=120&auto=format&fit=crop&q=80'">
+                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/main/logo.jpg" alt="Logo do Clube" class="w-full h-full object-cover">
                 </div>
-                <h1 class="font-bold text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
-                <p class="text-[10px] text-gray-400 mt-0.5">Clube Amador • Est. 2018</p>
+                <h1 id="sidebar-nome-clube" class="font-bold text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
+                <p id="sidebar-subtitulo-clube" class="text-[10px] text-gray-400 mt-0.5">Clube Amador • Est. 2018</p>
+                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-2 right-2 bg-pitch-700 hover:bg-pitch-600 text-amber-400 p-1.5 rounded-full text-xs shadow" title="Editar Dados do Clube">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
             </div>
             <nav class="p-4 space-y-1">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -66,7 +69,7 @@
 
         <div class="p-8 flex-1 overflow-y-auto">
 
-            <!-- ABA DASHBOARD ENRIQUECIDA -->
+            <!-- ABA DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
                 <!-- Alerta de Aniversariante -->
                 <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/30 to-pitch-800 border border-amber-500/50 p-6 rounded-2xl shadow-xl flex items-center space-x-4">
@@ -180,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- ABA FINANCEIRO (COM FILTRO POR MÊS) -->
+            <!-- ABA FINANCEIRO -->
             <div id="tab-financeiro" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
@@ -246,6 +249,32 @@
 
         </div>
     </main>
+
+    <!-- MODAL DE CONFIGURAÇÃO DO CLUBE / LOGO -->
+    <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-lg font-bold text-amber-400 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>Editar Identidade do Clube</h3>
+            <form onsubmit="salvarConfigClube(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-gray-300">Nome do Clube</label>
+                    <input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Subtítulo / Descrição</label>
+                    <input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">URL da Logo (Imagem)</label>
+                    <input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1" placeholder="https://exemplo.com/logo.jpg">
+                    <p class="text-[10px] text-gray-400 mt-1">Insira o link direto da imagem hospedada ou do GitHub.</p>
+                </div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL DE JOGADOR -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
@@ -414,7 +443,6 @@
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
             }
             
-            // Definir mês atual no filtro financeiro
             const dataAtual = new Date();
             const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('filtro-mes').value = anoMes;
@@ -454,11 +482,53 @@
                 const res = await fetch(`${API_URL}/api/configuracoes`);
                 configsGlobal = await res.json();
                 
+                // Dados do Clube na Sidebar
+                if (configsGlobal.nome_clube) document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
+                if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerText = configsGlobal.subtitulo_clube;
+                if (configsGlobal.logo_url) {
+                    const imgEl = document.getElementById('sidebar-logo');
+                    imgEl.src = configsGlobal.logo_url;
+                    imgEl.onerror = function() {
+                        this.src = 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=120&auto=format&fit=crop&q=80';
+                    };
+                }
+
+                // Dados da Partida
                 document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
                 document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
                 document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
             } catch (err) { console.error('Erro configs:', err); }
+        }
+
+        function abrirModalConfigClube() {
+            document.getElementById('cfg-nome-clube').value = configsGlobal.nome_clube || 'MENINOS DA VILA';
+            document.getElementById('cfg-subtitulo-clube').value = configsGlobal.subtitulo_clube || 'Clube Amador • Est. 2018';
+            document.getElementById('cfg-logo-url').value = configsGlobal.logo_url || '';
+            openModal('modal-config-clube');
+        }
+
+        async function salvarConfigClube(e) {
+            e.preventDefault();
+            const payload = {
+                ...configsGlobal,
+                nome_clube: document.getElementById('cfg-nome-clube').value,
+                subtitulo_clube: document.getElementById('cfg-subtitulo-clube').value,
+                logo_url: document.getElementById('cfg-logo-url').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Identidade do clube atualizada com sucesso!');
+                    closeModal('modal-config-clube');
+                    carregarConfiguracoes();
+                } else { alert('Erro ao atualizar.'); }
+            } catch (err) { console.error(err); }
         }
 
         function abrirModalPartida() {
@@ -472,6 +542,7 @@
         async function salvarPartidaConfig(e) {
             e.preventDefault();
             const payload = {
+                ...configsGlobal,
                 partida_data: document.getElementById('cfg-data').value,
                 partida_local: document.getElementById('cfg-local').value,
                 partida_horario: document.getElementById('cfg-horario').value,
@@ -659,7 +730,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO (COM FILTRAGEM POR MÊS)
+        // FINANCEIRO
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
@@ -671,7 +742,7 @@
                 const res = await fetch(`${API_URL}/api/financeiro`);
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
-                    const mesFiltro = document.getElementById('filtro-mes').value; // YYYY-MM
+                    const mesFiltro = document.getElementById('filtro-mes').value;
                     let totalEntradas = 0;
                     let totalSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
@@ -679,7 +750,7 @@
 
                     dados.forEach(l => {
                         const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
-                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return; // Filtra pelo mês selecionado
+                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
 
                         const val = parseFloat(l.valor) || 0;
                         if (l.tipo === 'Entrada') totalEntradas += val;
