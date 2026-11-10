@@ -62,7 +62,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// JOGADORES
+// JOGADORES (CRUD Robusto com tratamento de tipos)
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
@@ -74,7 +74,15 @@ app.post('/api/jogadores', verificarAdmin, async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
         const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
-        const r = await pool.query(q, [nome, data_nascimento || null, telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0]);
+        const r = await pool.query(q, [
+            nome, 
+            data_nascimento && data_nascimento.trim() !== '' ? data_nascimento : null, 
+            telefone || '', 
+            posicao, 
+            parseInt(nivel) || 3, 
+            status_mensalidade || 'Pendente', 
+            parseInt(gols) || 0
+        ]);
         res.status(201).json(r.rows[0]);
     } catch (err) { 
         console.error('Erro ao cadastrar atleta:', err);
@@ -87,7 +95,16 @@ app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
-        const r = await pool.query(q, [nome, data_nascimento || null, telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0, id]);
+        const r = await pool.query(q, [
+            nome, 
+            data_nascimento && data_nascimento.trim() !== '' ? data_nascimento : null, 
+            telefone || '', 
+            posicao, 
+            parseInt(nivel) || 3, 
+            status_mensalidade || 'Pendente', 
+            parseInt(gols) || 0, 
+            id
+        ]);
         res.json(r.rows[0]);
     } catch (err) { 
         console.error('Erro ao atualizar jogador:', err);
@@ -126,6 +143,33 @@ app.delete('/api/financeiro/:id', verificarAdmin, async (req, res) => {
         await pool.query('DELETE FROM financeiro_lancamentos WHERE id=$1', [id]);
         res.json({ mensagem: 'Lançamento removido.' });
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir lançamento.' }); }
+});
+
+// CONFIGURAÇÕES DA PARTIDA E CLUBE
+app.get('/api/configuracoes', async (req, res) => {
+    try {
+        const r = await pool.query('SELECT * FROM configuracoes_clube');
+        const configs = {};
+        r.rows.forEach(row => { configs[row.chave] = row.valor; });
+        res.json(configs);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar configurações' }); }
+});
+
+app.post('/api/configuracoes', verificarAdmin, async (req, res) => {
+    const configs = req.body; // Objeto chave-valor
+    try {
+        for (const [chave, valor] of Object.entries(configs)) {
+            await pool.query(
+                `INSERT INTO configuracoes_clube (chave, valor) VALUES ($1, $2) 
+                 ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor`,
+                [chave, valor]
+            );
+        }
+        res.json({ mensagem: 'Configurações atualizadas com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao salvar configs:', err);
+        res.status(500).json({ erro: 'Erro ao salvar configurações.' });
+    }
 });
 
 // USUÁRIOS

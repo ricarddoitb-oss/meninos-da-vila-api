@@ -102,15 +102,20 @@
                     </div>
                 </div>
 
-                <!-- Painel de Próxima Partida & Resumo -->
+                <!-- Painel de Próxima Partida Editável -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base text-emerald-400 mb-4"><i class="fa-solid fa-futbol mr-2"></i>Informações da Próxima Partida</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-futbol mr-2"></i>Próxima Partida</h3>
+                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-700 hover:bg-pitch-600 px-3 py-1.5 rounded-lg text-xs text-amber-400 font-bold">
+                                <i class="fa-solid fa-pen mr-1"></i>Editar Partida
+                            </button>
+                        </div>
                         <div class="space-y-3 text-sm text-gray-300">
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Local:</span> <strong class="text-white">Campo Principal - CMV</strong></p>
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Horário Habitual:</span> <strong class="text-white">19:00</strong></p>
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Custo do Aluguel:</span> <strong class="text-amber-400">R$ 100,00</strong></p>
-                            <p class="flex justify-between"><span>Mensalidades:</span> <strong class="text-emerald-400">Goleiro R$ 20 | Jogador R$ 40</strong></p>
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Data:</span> <strong id="lbl-partida-data" class="text-white">-</strong></p>
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Local:</span> <strong id="lbl-partida-local" class="text-white">-</strong></p>
+                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Horário:</span> <strong id="lbl-partida-horario" class="text-white">-</strong></p>
+                            <p class="flex justify-between"><span>Custo do Aluguel:</span> <strong id="lbl-partida-custo" class="text-amber-400">-</strong></p>
                         </div>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
@@ -175,7 +180,7 @@
                 </div>
             </div>
 
-            <!-- ABA FINANCEIRO -->
+            <!-- ABA FINANCEIRO (COM FILTRO POR MÊS) -->
             <div id="tab-financeiro" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
@@ -183,21 +188,23 @@
                         <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
-                        <p class="text-xs text-gray-400">Total de Entradas</p>
+                        <p class="text-xs text-gray-400">Total de Entradas (Mês)</p>
                         <h3 id="fin-entradas" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
-                        <p class="text-xs text-gray-400">Total de Saídas</p>
+                        <p class="text-xs text-gray-400">Total de Saídas (Mês)</p>
                         <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
                     </div>
                 </div>
 
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl mb-6 flex justify-between items-center admin-only">
-                    <div>
-                        <h3 class="font-bold text-base text-emerald-400">Lançamento de Mensalidades & Caixa</h3>
-                        <p class="text-xs text-gray-400">Mensalidade padrão: Goleiro (R$ 20) | Jogador (R$ 40).</p>
+                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
+                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
+                        </div>
                     </div>
-                    <button onclick="openModal('modal-lancamento')" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl text-sm font-bold text-white shadow-lg">
+                    <button onclick="openModal('modal-lancamento')" class="admin-only w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg">
                         <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
                     </button>
                 </div>
@@ -289,6 +296,35 @@
         </div>
     </div>
 
+    <!-- MODAL DE EDIÇÃO DA PARTIDA -->
+    <div id="modal-partida" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-lg font-bold text-emerald-400 mb-4">Editar Próxima Partida</h3>
+            <form onsubmit="salvarPartidaConfig(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-gray-300">Data da Partida</label>
+                    <input type="date" id="cfg-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Local</label>
+                    <input type="text" id="cfg-local" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Horário</label>
+                    <input type="text" id="cfg-horario" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Custo do Aluguel (R$)</label>
+                    <input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('modal-partida')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL DE LANÇAMENTO FINANCEIRO -->
     <div id="modal-lancamento" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
@@ -365,6 +401,7 @@
     <script>
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
         let listaAtletasGlobal = [];
+        let configsGlobal = {};
 
         const token = localStorage.getItem('token');
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -376,10 +413,17 @@
             if (usuarioLogado.perfil !== 'admin') {
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
             }
+            
+            // Definir mês atual no filtro financeiro
+            const dataAtual = new Date();
+            const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('filtro-mes').value = anoMes;
+            document.getElementById('fin-data').valueAsDate = dataAtual;
+
+            carregarConfiguracoes();
             carregarJogadores();
             carregarFinanceiro();
             carregarUsuariosSistema();
-            document.getElementById('fin-data').valueAsDate = new Date();
         });
 
         function logout() {
@@ -404,6 +448,49 @@
 
         function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+
+        async function carregarConfiguracoes() {
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`);
+                configsGlobal = await res.json();
+                
+                document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
+                document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
+                document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
+                document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
+            } catch (err) { console.error('Erro configs:', err); }
+        }
+
+        function abrirModalPartida() {
+            document.getElementById('cfg-data').value = configsGlobal.partida_data || '';
+            document.getElementById('cfg-local').value = configsGlobal.partida_local || 'Campo Principal - CMV';
+            document.getElementById('cfg-horario').value = configsGlobal.partida_horario || '19:00';
+            document.getElementById('cfg-custo').value = configsGlobal.partida_custo || '100.00';
+            openModal('modal-partida');
+        }
+
+        async function salvarPartidaConfig(e) {
+            e.preventDefault();
+            const payload = {
+                partida_data: document.getElementById('cfg-data').value,
+                partida_local: document.getElementById('cfg-local').value,
+                partida_horario: document.getElementById('cfg-horario').value,
+                partida_custo: document.getElementById('cfg-custo').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Dados da partida atualizados com sucesso!');
+                    closeModal('modal-partida');
+                    carregarConfiguracoes();
+                } else { alert('Erro ao atualizar.'); }
+            } catch (err) { console.error(err); }
+        }
 
         function abrirModalNovoJogador() {
             document.getElementById('form-novo-jogador').reset();
@@ -430,14 +517,12 @@
             const pagos = jogadores.filter(j => j.status_mensalidade === 'Pago').length;
             document.getElementById('dash-pagos-count').innerText = `${pagos}/${jogadores.length}`;
             
-            // Artilheiro
             if (jogadores.length > 0) {
                 const ordenadosPorGols = [...jogadores].sort((a, b) => (b.gols || 0) - (a.gols || 0));
                 document.getElementById('dash-artilheiro-nome').innerText = ordenadosPorGols[0].nome;
                 document.getElementById('dash-artilheiro-gols').innerText = `${ordenadosPorGols[0].gols || 0} gols marcados`;
             }
 
-            // Aniversariantes do Dia
             verificarAniversariantes(jogadores);
         }
 
@@ -447,7 +532,7 @@
             
             const aniversariantes = jogadores.filter(j => {
                 if (!j.data_nascimento) return false;
-                const partes = j.data_nascimento.split('T')[0].split('-'); // YYYY-MM-DD
+                const partes = j.data_nascimento.split('T')[0].split('-');
                 const diaMesAtleta = `${partes[2]}-${partes[1]}`;
                 return diaMesAtleta === diaMesHoje;
             });
@@ -574,7 +659,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO
+        // FINANCEIRO (COM FILTRAGEM POR MÊS)
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
@@ -586,17 +671,21 @@
                 const res = await fetch(`${API_URL}/api/financeiro`);
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
+                    const mesFiltro = document.getElementById('filtro-mes').value; // YYYY-MM
                     let totalEntradas = 0;
                     let totalSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
                     tbody.innerHTML = '';
 
                     dados.forEach(l => {
+                        const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
+                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return; // Filtra pelo mês selecionado
+
                         const val = parseFloat(l.valor) || 0;
                         if (l.tipo === 'Entrada') totalEntradas += val;
                         else totalSaidas += val;
 
-                        const dataFmt = l.data_lancamento ? new Date(l.data_lancamento).toLocaleDateString('pt-BR') : '-';
+                        const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                         const isAdmin = usuarioLogado.perfil === 'admin';
 
                         tbody.innerHTML += `
@@ -761,7 +850,7 @@
 
             const paletaCores = [
                 { nome: 'Time Verde', classe: 'border-emerald-500 text-emerald-400' },
-                { nome: 'Time Amarelo', kl: 'amber', classe: 'border-amber-500 text-amber-400' },
+                { nome: 'Time Amarelo', classe: 'border-amber-500 text-amber-400' },
                 { nome: 'Time Azul', classe: 'border-blue-500 text-blue-400' },
                 { nome: 'Time Vermelho', classe: 'border-rose-500 text-rose-400' }
             ];
