@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Clube Meninos da Vila</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b130e] text-white flex items-center justify-center min-h-screen p-4">
+
+  <div class="w-full max-w-md bg-[#122017] border border-[#1b3023] p-8 rounded-2xl shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl mb-3 border border-emerald-500/20">
+        ⚽
+      </div>
+      <h1 class="text-2xl font-bold uppercase tracking-wider">Meninos da Vila</h1>
+      <p class="text-xs text-gray-400 mt-1">Acesse sua conta para gerenciar o clube</p>
+    </div>
+
+    <!-- Formulário de Login -->
+    <form id="form-login" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 mb-1">E-mail</label>
+        <input type="email" id="login-email" required placeholder="admin@meninosdavila.com" class="w-full bg-[#0b130e] border border-[#1b3023] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 mb-1">Senha</label>
+        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full bg-[#0b130e] border border-[#1b3023] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <button type="submit" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-[#0b130e] font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-900/40">
+        Entrar no Sistema
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = 'https://meninos-da-vila-api.onrender.com';
+
+    // Lógica de Autenticação e redirecionamento
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const senha = document.getElementById('login-senha').value;
+
+        try {
+            const res = await fetch(`${API_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Salva o token JWT e dados do perfil no navegador
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('usuario', JSON.stringify(data.usuario));
+                window.location.href = 'index.html';
+            } else {
+                alert(data.erro || 'Falha ao realizar login.');
+            }
+        } catch (err) {
+            alert('Erro ao comunicar com o servidor.');
+        }
+    });
+  </script>
+</body>
+</html>
