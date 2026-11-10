@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clube Meninos da Vila - Gerenciador de Futebol</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter & Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pitch: {
+              900: '#0b130e',
+              800: '#122017',
+              700: '#1b3023',
+              accent: '#10b981',
+              bright: '#22c55e',
+            },
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            },
+            dark: {
+              bg: '#0f172a',
+              card: '#1e293b',
+              border: '#334155',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Montserrat', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0b130e;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+    .font-display {
+      font-family: 'Montserrat', sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #122017;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1b3023;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= SIDEBAR / NAVEGAÇÃO ================= -->
+  <aside class="w-full md:w-64 bg-pitch-800 border-r border-pitch-700/60 flex-shrink-0 flex flex-col justify-between">
+    <div>
+      <!-- Header do Clube -->
+      <div class="p-5 flex items-center justify-between border-b border-pitch-700/50">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-amber-400 p-0.5 shadow-lg flex items-center justify-center">
+            <div class="w-full h-full bg-pitch-900 rounded-full flex items-center justify-center">
+              <span class="text-lg">⚽</span>
+            </div>
+          </div>
+          <div>
+            <h1 class="font-display font-black text-sm tracking-wider text-white uppercase">Meninos da Vila</h1>
+            <p class="text-xs text-emerald-400 font-medium">Clube Amador • Est. 2018</p>
+          </div>
+        </div>
+        <button id="mobile-menu-btn" class="md:hidden text-gray-400 hover:text-white p-2">
+          <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Links de Navegação -->
+      <nav id="sidebar-nav" class="hidden md:block p-4 space-y-1.5">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-gray-300 hover:bg-pitch-700/50 hover:text-white transition-all duration-200">
+          <i class="fa-solid fa-users w-5 text-center"></i>
+          <span>Elenco & Atletas</span>
+        </button>
+
+        <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-gray-300 hover:bg-pitch-700/50 hover:text-white transition-all duration-200">
+          <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
+          <span>Presença & Sorteio</span>
+        </button>
+
+        <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-gray-300 hover:bg-pitch-700/50 hover:text-white transition-all duration-200">
+          <i class="fa-solid fa-wallet w-5 text-center"></i>
+          <span>Financeiro / Caixa</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Próximo Jogo Card Miniatura -->
+    <div class="p-4 m-4 rounded-xl bg-pitch-900/80 border border-pitch-700/50 text-xs hidden md:block">
+      <div class="flex items-center justify-between text-gray-400 mb-2">
+        <span class="uppercase tracking-wider font-semibold text-[10px] text-amber-400">Próxima Pelada</span>
+        <span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[10px]">Sábado</span>
+      </div>
+      <p class="font-bold text-white text-sm">Arena Meninos da Vila</p>
+      <p class="text-gray-400">Sábado • 16:00h</p>
+      <div class="mt-3 pt-2 border-t border-pitch-700/40 flex justify-between items-center text-gray-300">
+        <span>Confirmados:</span>
+        <span class="font-bold text-emerald-400" id="confirmed-mini-count">0/18</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= CONTEÚDO PRINCIPAL ================= -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+    <!-- Topbar Superior -->
+    <header class="h-16 bg-pitch-800/60 border-b border-pitch-700/50 px-6 flex items-center justify-between sticky top-0 backdrop-blur-md z-10">
+      <div class="flex items-center space-x-4">
+        <h2 id="page-title" class="font-display font-bold text-lg text-white">Dashboard Geral</h2>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button onclick="openModal('modal-novo-jogador')" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-pitch-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition shadow-md shadow-emerald-900/30">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Novo Jogador</span>
+        </button>
+
+        <div class="h-8 w-px bg-pitch-700/60"></div>
+
+        <div class="flex items-center space-x-2">
+          <div class="w-9 h-9 rounded-full bg-emerald-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400 font-bold text-sm">
+            MV
+          </div>
+          <span class="hidden sm:inline text-xs font-semibold text-gray-300">Diretoria</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ÁREA DE CONTEÚDO DINÂMICO (ABAS) -->
+    <div class="p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
+
+      <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 flex items-center justify-between shadow-lg relative overflow-hidden group">
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Elenco Total</p>
+              <h3 class="text-3xl font-black text-white mt-1" id="dash-total-jogadores">0</h3>
+              <p class="text-xs text-emerald-400 mt-2 flex items-center">
+                <i class="fa-solid fa-circle text-[8px] mr-1.5"></i> Atletas Cadastrados
+              </p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/20">
+              <i class="fa-solid fa-shirt"></i>
+            </div>
+          </div>
+
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 flex items-center justify-between shadow-lg relative overflow-hidden group">
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Mensalidades em Dia</p>
+              <h3 class="text-3xl font-black text-emerald-400 mt-1" id="dash-pagos-count">0</h3>
+              <p class="text-xs text-gray-400 mt-2" id="dash-adimplencia-pct">0% de adimplência</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/20">
+              <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+          </div>
+
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 flex items-center justify-between shadow-lg relative overflow-hidden group">
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Saldo do Caixa</p>
+              <h3 class="text-3xl font-black text-amber-400 mt-1" id="dash-caixa-total">R$ 0,00</h3>
+              <p class="text-xs text-emerald-400 mt-2">Valores em caixa</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-400/10 text-amber-400 flex items-center justify-center text-xl border border-amber-400/20">
+              <i class="fa-solid fa-vault"></i>
+            </div>
+          </div>
+
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 flex items-center justify-between shadow-lg relative overflow-hidden group">
+            <div>
+              <p class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-crown text-amber-400"></i> Artilheiro do Clube
+              </p>
+              <h3 class="text-lg font-bold text-white mt-1" id="dash-artilheiro-nome">A carregar...</h3>
+              <p class="text-xs text-gray-300 mt-1"><span class="text-emerald-400 font-bold" id="dash-artilheiro-gols">0 gols</span> na temporada</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 font-bold text-xl">
+              ⚽
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-pitch-800 border border-pitch-700/60 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-display font-bold text-white text-base flex items-center gap-2">
+                  <i class="fa-solid fa-calendar-check text-emerald-400"></i> Detalhes da Próxima Pelada
+                </h3>
+                <span class="bg-amber-400/10 text-amber-400 border border-amber-400/30 text-xs px-3 py-1 rounded-full font-semibold">
+                  Sábado • 16:00
+                </span>
+              </div>
+
+              <div class="bg-pitch-900/90 border border-pitch-700/80 rounded-xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div class="p-2 border-r sm:border-pitch-700/60">
+                  <p class="text-xs text-gray-400">Local</p>
+                  <p class="font-bold text-white text-sm">Arena Meninos da Vila</p>
+                </div>
+                <div class="p-2 border-r sm:border-pitch-700/60">
+                  <p class="text-xs text-gray-400">Status da Pelada</p>
+                  <p class="font-bold text-amber-400 text-sm">Confirmada</p>
+                </div>
+                <div class="p-2">
+                  <p class="text-xs text-gray-400">Confirmados</p>
+                  <p class="font-bold text-emerald-400 text-sm" id="dash-confirmados-count">0 Jogadores</p>
+                </div>
+              </div>
+
+              <h4 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">Top Artilheiros</h4>
+              <div class="space-y-3" id="top-artilheiros-list">
+                <!-- Inserido dinamicamente via JS -->
+              </div>
+            </div>
+
+            <button onclick="switchTab('presenca')" class="mt-6 w-full py-2.5 bg-pitch-700/60 hover:bg-pitch-700 text-emerald-400 font-semibold text-xs rounded-xl border border-pitch-600/50 transition text-center">
+              Ir para Controle de Presença →
+            </button>
+          </div>
+
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-display font-bold text-white text-base flex items-center gap-2">
+                  <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Cobranças Pendentes
+                </h3>
+              </div>
+              <p class="text-xs text-gray-400 mb-4">Atletas com mensalidade pendente:</p>
+              <div class="space-y-3 max-h-64 overflow-y-auto pr-1" id="dash-pendentes-list">
+                <!-- Inserido dinamicamente via JS -->
+              </div>
+            </div>
+
+            <button onclick="switchTab('financeiro')" class="mt-6 w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-semibold text-xs rounded-xl border border-amber-500/30 transition text-center flex items-center justify-center gap-2">
+              <i class="fa-solid fa-wallet text-sm"></i>
+              <span>Ver Painel Financeiro</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SEÇÃO 2: ELENCO DE JOGADORES ================= -->
+      <section id="tab-elenco" class="tab-content hidden space-y-6">
+        <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="relative w-full sm:w-72">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-sm"></i>
+            <input type="text" id="search-jogador" onkeyup="filterJogadores()" placeholder="Buscar por nome ou apelido..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="flex items-center space-x-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            <select id="filter-posicao" onchange="filterJogadores()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-emerald-500">
+              <option value="todos">Todas as Posições</option>
+              <option value="Goleiro">Goleiro</option>
+              <option value="Zagueiro">Zagueiro</option>
+              <option value="Lateral">Lateral</option>
+              <option value="Meio-campista">Meio-campista</option>
+              <option value="Atacante">Atacante</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="jogadores-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <!-- Renderizado Dinamicamente -->
+        </div>
+      </section>
+
+      <!-- ================= SEÇÃO 3: PRESENÇA & SORTEIO ================= -->
+      <section id="tab-presenca" class="tab-content hidden space-y-6">
+        <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-500/20 text-emerald-300 font-bold text-xs px-2.5 py-1 rounded-md">Próxima Pelada</span>
+              <span class="text-xs text-gray-400">Sábado • 16h</span>
+            </div>
+            <h3 class="font-display font-extrabold text-white text-xl mt-1">Convocação & Divisão de Times</h3>
+            <p class="text-xs text-gray-400 mt-1">Marque os atletas presentes e clique em Sortear para equilibrar os times.</p>
+          </div>
+
+          <button onclick="sortearTimes()" class="w-full md:w-auto bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-pitch-900 font-black px-6 py-3 rounded-xl text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-900/30">
+            <i class="fa-solid fa-dice text-base"></i>
+            <span>SORTEAR & EQUILIBRAR TIMES</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col h-[600px]">
+            <div class="flex justify-between items-center pb-4 mb-3 border-b border-pitch-700/50">
+              <h4 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-emerald-400"></i> Lista de Confirmação
+              </h4>
+              <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full" id="presenca-counter">
+                0 Confirmados
+              </span>
+            </div>
+            <div class="flex-1 overflow-y-auto pr-1 space-y-2.5" id="presenca-lista">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 space-y-6">
+            <div id="times-empty-state" class="bg-pitch-800 border border-dashed border-pitch-700 rounded-2xl p-12 text-center h-[600px] flex flex-col items-center justify-center">
+              <div class="w-16 h-16 rounded-full bg-pitch-700/50 text-amber-400 flex items-center justify-center text-2xl mb-4">
+                <i class="fa-solid fa-shirt"></i>
+              </div>
+              <h4 class="font-display font-bold text-white text-lg">Nenhum time sorteado ainda</h4>
+              <p class="text-gray-400 text-xs max-w-sm mt-2">Marque a presença dos atletas e clique em "Sortear & Equilibrar Times".</p>
+            </div>
+
+            <div id="times-result-container" class="hidden space-y-6">
+              <div class="bg-pitch-800 border border-emerald-500/40 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-emerald-500 text-pitch-900 font-black text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                  Colete Verde (Time A)
+                </div>
+                <h4 class="font-display font-extrabold text-emerald-400 text-lg flex items-center gap-2 mb-4">
+                  <i class="fa-solid fa-shield-halved"></i> Time Verde
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="team-a-list"></div>
+              </div>
+
+              <div class="bg-pitch-800 border border-amber-500/40 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-amber-400 text-pitch-900 font-black text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                  Colete Amarelo (Time B)
+                </div>
+                <h4 class="font-display font-extrabold text-amber-400 text-lg flex items-center gap-2 mb-4">
+                  <i class="fa-solid fa-shield-halved"></i> Time Amarelo
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="team-b-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SEÇÃO 4: FINANCEIRO ================= -->
+      <section id="tab-financeiro" class="tab-content hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5">
+            <p class="text-xs text-gray-400 font-semibold uppercase">Total de Atletas</p>
+            <h3 class="text-2xl font-black text-emerald-400 mt-1" id="fin-total-atletas">0</h3>
+          </div>
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5">
+            <p class="text-xs text-gray-400 font-semibold uppercase">Mensalidades Pagas</p>
+            <h3 class="text-2xl font-black text-emerald-400 mt-1" id="fin-pagos-count">0</h3>
+          </div>
+          <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5">
+            <p class="text-xs text-gray-400 font-semibold uppercase">Mensalidades Pendentes</p>
+            <h3 class="text-2xl font-black text-amber-400 mt-1" id="fin-pendentes-count">0</h3>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= MODAL: NOVO JOGADOR ================= -->
+  <div id="modal-novo-jogador" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-pitch-800 border border-pitch-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-pitch-700/60 flex justify-between items-center">
+        <h3 class="font-display font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-emerald-400"></i> Cadastrar Novo Atleta
+        </h3>
+        <button onclick="closeModal('modal-novo-jogador')" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Nome Completo</label>
+          <input type="text" id="input-nome" required placeholder="Ex: Gabriel Barbosa" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Apelido</label>
+            <input type="text" id="input-apelido" placeholder="Ex: Gabigol" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Telefone / WhatsApp</label>
+            <input type="text" id="input-telefone" placeholder="(93) 99999-9999" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Posição Principal</label>
+          <select id="input-posicao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            <option value="Goleiro">Goleiro</option>
+            <option value="Zagueiro">Zagueiro</option>
+            <option value="Lateral">Lateral</option>
+            <option value="Meio-campista" selected>Meio-campista</option>
+            <option value="Atacante">Atacante</option>
+          </select>
+        </div>
+
+        <div class="pt-3 flex space-x-3">
+          <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 py-2.5 bg-pitch-700 hover:bg-pitch-600 text-gray-300 font-bold rounded-xl text-xs transition">Cancelar</button>
+          <button type="submit" class="w-1/2 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-pitch-900 font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-900/30">Salvar Atleta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
