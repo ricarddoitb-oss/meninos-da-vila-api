@@ -62,7 +62,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// JOGADORES (CRUD Robusto com tratamento de tipos)
+// JOGADORES (Com Automação de Mensalidade no Livro Caixa)
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
@@ -83,7 +83,19 @@ app.post('/api/jogadores', verificarAdmin, async (req, res) => {
             status_mensalidade || 'Pendente', 
             parseInt(gols) || 0
         ]);
-        res.status(201).json(r.rows[0]);
+
+        const novoJogador = r.rows[0];
+
+        // Se cadastrar direto como Pago, lança no caixa automaticamente
+        if (status_mensalidade === 'Pago') {
+            const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
+            await pool.query(
+                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                [`Mensalidade - ${nome}`, valorMensalidade]
+            );
+        }
+
+        res.status(201).json(novoJogador);
     } catch (err) { 
         console.error('Erro ao cadastrar atleta:', err);
         res.status(500).json({ erro: 'Erro ao cadastrar atleta.' }); 
@@ -94,6 +106,10 @@ app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
+        // Busca o status anterior para verificar mudança para "Pago"
+        const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
+
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
@@ -105,7 +121,19 @@ app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
             parseInt(gols) || 0, 
             id
         ]);
-        res.json(r.rows[0]);
+
+        const jogadorAtualizado = r.rows[0];
+
+        // Se mudou de Pendente/Outro para 'Pago', lança automaticamente no Livro Caixa
+        if (statusAnterior !== 'Pago' && status_mensalidade === 'Pago') {
+            const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
+            await pool.query(
+                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                [`Mensalidade - ${nome}`, valorMensalidade]
+            );
+        }
+
+        res.json(jogadorAtualizado);
     } catch (err) { 
         console.error('Erro ao atualizar jogador:', err);
         res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); 
@@ -156,7 +184,7 @@ app.get('/api/configuracoes', async (req, res) => {
 });
 
 app.post('/api/configuracoes', verificarAdmin, async (req, res) => {
-    const configs = req.body; // Objeto chave-valor
+    const configs = req.body;
     try {
         for (const [chave, valor] of Object.entries(configs)) {
             await pool.query(
