@@ -7,7 +7,6 @@ require('dotenv').config();
 
 const app = express();
 
-// Configuração do CORS para aceitar requisições de qualquer origem (GitHub Pages)
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -18,7 +17,6 @@ app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave_secreta_meninos_da_vila';
 
-// Conexão segura com o PostgreSQL (usando a porta do Pooler 6543)
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -28,6 +26,20 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
+// Middleware de Autenticação e Admin
+function verificarAdmin(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.usuario = decoded;
+        next();
+    } catch (err) {
+        return res.status(403).json({ erro: 'Token inválido ou expirado.' });
+    }
+}
+
 // --- ROTA DE STATUS ---
 app.get('/api/status', (req, res) => {
     res.json({ status: 'Online', sistema: 'Clube Meninos da Vila' });
@@ -36,81 +48,89 @@ app.get('/api/status', (req, res) => {
 // --- ROTA DE LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { email, senha } = req.body;
-
     try {
         const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-        if (resultado.rows.length === 0) {
-            return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
-        }
-
+        if (resultado.rows.length === 0) return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
         const usuario = resultado.rows[0];
         const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        
-        if (!senhaValida) {
-            return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
-        }
+        if (!senhaValida) return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
 
-        const token = jwt.sign(
-            { id: usuario.id, nome: usuario.nome, perfil: usuario.perfil },
-            JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
-        res.json({
-            mensagem: 'Login realizado com sucesso!',
-            token,
-            usuario: { nome: usuario.nome, email: usuario.email, perfil: usuario.perfil }
-        });
+        const token = jwt.sign({ id: usuario.id, nome: usuario.nome, perfil: usuario.perfil }, JWT_SECRET, { expiresIn: '8h' });
+        res.json({ mensagem: 'Login realizado com sucesso!', token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil } });
     } catch (err) {
         console.error('Erro no login:', err);
         res.status(500).json({ erro: 'Erro interno ao realizar login.' });
     }
 });
 
-// --- ROTA DE JOGADORES (GET) ---
+// --- GESTÃO DE JOGADORES ---
 app.get('/api/jogadores', async (req, res) => {
     try {
-        const resultado = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
-        res.json(resultado.rows);
-    } catch (err) {
-        console.error('Erro ao buscar jogadores:', err);
-        res.status(500).json({ erro: 'Erro ao buscar jogadores' });
-    }
+        const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
 });
 
-// --- ROTA DE JOGADORES (POST - Com proteção básica) ---
-app.post('/api/jogadores', async (req, res) => {
-    const { nome, apelido, telefone, posicao, nivel } = req.body;
-    if (!nome || !posicao) return res.status(400).json({ erro: 'Nome e posição são obrigatórios.' });
-
+app.post('/api/jogadores', verificarAdmin, async (req, res) => {
+    const { nome, apelido, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
     try {
-        const query = `
-            INSERT INTO jogadores (nome, apelido, telefone, posicao, nivel, gols, status_mensalidade, ativo)
-            VALUES ($1, $2, $3, $4, $5, 0, 'Pendente', TRUE)
-            RETURNING *;
-        `;
-        const valores = [nome, apelido || '', telefone || '', posicao, nivel || 3];
-        const novoJogador = await pool.query(query, valores);
-        res.status(201).json(novoJogador.rows[0]);
-    } catch (err) {
-        console.error('Erro ao cadastrar atleta:', err);
-        res.status(500).json({ erro: 'Erro ao cadastrar atleta.' });
-    }
+        const q = `INSERT INTO jogadores (nome, apelido, telefone, posicao, nivel, status_mensalidade, gols) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+        const r = await pool.query(q, [nome, apelido || '', telefone || '', posicao, nivel || 3, status_mensalidade || 'Pendente', gols || 0]);
+        res.status(201).json(r.rows[0]);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao cadastrar atleta.' }); }
 });
 
-// --- CONFIGURAÇÕES DO CLUBE (GET) ---
+app.put('/api/jogadores/:id', verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { nome, apelido, telefone, posicao, nivel, status_mensalidade, gols } = req.body;
+    try {
+        const q = `UPDATE jogadores SET nome=$1, apelido=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7 WHERE id=$8 RETURNING *;`;
+        const r = await pool.query(q, [nome, apelido, telefone, posicao, nivel, status_mensalidade, gols, id]);
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar jogador.' }); }
+});
+
+app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM jogadores WHERE id=$1', [id]);
+        res.json({ mensagem: 'Removido com sucesso.' });
+    } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
+});
+
+// --- CONFIGURAÇÕES ---
 app.get('/api/configuracoes', async (req, res) => {
     try {
-        const resultado = await pool.query('SELECT * FROM configuracoes_clube');
+        const r = await pool.query('SELECT * FROM configuracoes_clube');
         const configs = {};
-        resultado.rows.forEach(row => {
-            configs[row.chave] = row.valor;
-        });
+        r.rows.forEach(row => { configs[row.chave] = row.valor; });
         res.json(configs);
-    } catch (err) {
-        console.error('Erro ao buscar configurações:', err);
-        res.status(500).json({ erro: 'Erro ao buscar configurações' });
-    }
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar configurações' }); }
+});
+
+// --- GESTÃO DE UTILIZADORES ---
+app.get('/api/usuarios', verificarAdmin, async (req, res) => {
+    try {
+        const r = await pool.query('SELECT id, nome, email, perfil FROM usuarios ORDER BY id ASC');
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao listar utilizadores.' }); }
+});
+
+app.post('/api/usuarios', verificarAdmin, async (req, res) => {
+    const { nome, email, senha, perfil } = req.body;
+    try {
+        const hashed = await bcrypt.hash(senha, 10);
+        const r = await pool.query('INSERT INTO usuarios (nome, email, senha, perfil) VALUES ($1, $2, $3, $4) RETURNING id, nome, email, perfil;', [nome, email, hashed, perfil || 'usuario']);
+        res.status(201).json(r.rows[0]);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao criar utilizador.' }); }
+});
+
+app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM usuarios WHERE id=$1', [id]);
+        res.json({ mensagem: 'Utilizador removido.' });
+    } catch (err) { res.status(500).json({ erro: 'Erro ao excluir utilizador.' }); }
 });
 
 const PORT = process.env.PORT || 10000;
