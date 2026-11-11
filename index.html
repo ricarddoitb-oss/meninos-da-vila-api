@@ -705,6 +705,8 @@
 
                 document.getElementById('sorteio-lbl-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('sorteio-lbl-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
+                
+                verificarTravaRodadaAtual();
             } catch (err) { console.error('Erro configs:', err); }
         }
 

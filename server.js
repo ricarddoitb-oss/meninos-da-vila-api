@@ -49,6 +49,26 @@ function verificarAdmin(req, res, next) {
     });
 }
 
+// Função Auxiliar de Login Compartilhada
+async function processarLogin(req, res) {
+    const { email, senha } = req.body;
+    try {
+        const r = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (r.rows.length === 0) return res.status(401).json({ erro: 'Credenciais inválidas.' });
+        const user = r.rows[0];
+        const senhaValida = await bcrypt.compare(senha, user.senha_hash);
+        if (!senhaValida) return res.status(401).json({ erro: 'Credenciais inválidas.' });
+        const token = jwt.sign({ id: user.id, email: user.email, perfil: user.perfil }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, usuario: { id: user.id, nome: user.nome, email: user.email, perfil: user.perfil } });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro no login.' });
+    }
+}
+
+// Rotas de Login (Atendendo tanto /api/auth/login quanto /api/login)
+app.post('/api/auth/login', processarLogin);
+app.post('/api/login', processarLogin);
+
 // ================= ROTAS DE CONFIGURAÇÕES =================
 app.get('/api/configuracoes', async (req, res) => {
     try {
@@ -165,7 +185,6 @@ app.post('/api/sorteios', verificarGestorOuAdmin, async (req, res) => {
         return res.status(400).json({ erro: 'Dados obrigatórios ausentes.' });
     }
     try {
-        // Validação no backend: Impede salvar mais de um sorteio na mesma data
         const check = await pool.query('SELECT id FROM historico_sorteios WHERE data_partida = $1', [data_partida]);
         if (check.rows.length > 0) {
             return res.status(400).json({ erro: 'Já existe um sorteio confirmado e travado para esta data. Só é permitido um sorteio por rodada.' });
@@ -239,21 +258,6 @@ app.delete('/api/usuarios/:id', verificarAdmin, async (req, res) => {
         res.json({ mensagem: 'Usuário excluído com sucesso.' });
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao excluir usuário.' });
-    }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-    const { email, senha } = req.body;
-    try {
-        const r = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-        if (r.rows.length === 0) return res.status(401).json({ erro: 'Credenciais inválidas.' });
-        const user = r.rows[0];
-        const senhaValida = await bcrypt.compare(senha, user.senha_hash);
-        if (!senhaValida) return res.status(401).json({ erro: 'Credenciais inválidas.' });
-        const token = jwt.sign({ id: user.id, email: user.email, perfil: user.perfil }, JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, usuario: { id: user.id, nome: user.nome, email: user.email, perfil: user.perfil } });
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro no login.' });
     }
 });
 
