@@ -62,21 +62,27 @@ app.get('/api/status', (req, res) => {
     res.json({ status: 'Online', sistema: 'Clube Meninos da Vila' });
 });
 
-app.post('/api/login', async (req, res) => {
+// Função Compartilhada de Login (Atendendo tanto /api/login quanto /api/auth/login)
+async function processarLogin(req, res) {
     const { email, senha } = req.body;
     try {
         const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
         if (resultado.rows.length === 0) return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
         const usuario = resultado.rows[0];
-        const senhaValida = await bcrypt.compare(senha, usuario.senha);
+        
+        const senhaValida = await bcrypt.compare(senha, usuario.senha || usuario.senha_hash);
         if (!senhaValida) return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
 
         const token = jwt.sign({ id: usuario.id, nome: usuario.nome, perfil: usuario.perfil }, JWT_SECRET, { expiresIn: '8h' });
         res.json({ mensagem: 'Login realizado com sucesso!', token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil } });
     } catch (err) {
+        console.error('Erro no login:', err);
         res.status(500).json({ erro: 'Erro interno no login.' });
     }
-});
+}
+
+app.post('/api/login', processarLogin);
+app.post('/api/auth/login', processarLogin);
 
 // JOGADORES
 app.get('/api/jogadores', async (req, res) => {
