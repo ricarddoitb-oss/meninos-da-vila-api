@@ -165,7 +165,7 @@
             </div>
 
             <!-- ABA PRESENÇA & SORTEIO -->
-            <div id="tab-presenca" class="tab-content hidden">
+            <div id="tab-presenca" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
                         <div class="flex justify-between items-center mb-4">
@@ -175,39 +175,71 @@
                                 <span>Selecionar Todos</span>
                             </label>
                         </div>
-                        <p class="text-[11px] text-gray-400 mb-3">Apenas atletas com aptidão <strong>Ativo</strong> participam do sorteio.</p>
+                        <p class="text-[11px] text-gray-400 mb-3">Atletas com status <strong>Ativo</strong> participam do sorteio.</p>
                         <div id="presenca-lista" class="space-y-2 max-h-[350px] overflow-y-auto pr-2 flex-1 mb-4"></div>
                         <button onclick="salvarPresencasERealizarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
                             <i class="fa-solid fa-check-circle mr-1"></i>Confirmar Presença & Sortear
                         </button>
                     </div>
-                    <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-amber-400">Times Sorteados para la Rodada</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="text-xs text-gray-400">Quantidade de Times:</label>
-                                <select id="qtd-times" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                                    <option value="2">2 Times</option>
-                                    <option value="3">3 Times</option>
-                                    <option value="4">4 Times</option>
-                                </select>
+                    <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-base text-amber-400">Times Sorteados para a Rodada</h3>
+                                <div id="status-sorteio-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold">
+                                    <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado & Trava Ativa
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-xs text-gray-400">Estilo de Cores:</label>
-                                <select id="estilo-cores" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                                    <option value="tradicional">Verde, Amarelo, Azul, Vermelho</option>
-                                </select>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="text-xs text-gray-400">Quantidade de Times (Coletes - Preto, Vermelho, Azul, Laranja):</label>
+                                    <select id="qtd-times" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                                        <option value="2">2 Times</option>
+                                        <option value="3">3 Times</option>
+                                        <option value="4">4 Times</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end">
+                                    <button id="btn-refazer-sorteio" onclick="salvarPresencasERealizarSorteio()" class="w-full bg-pitch-700 hover:bg-pitch-600 text-emerald-400 font-bold py-2.5 rounded-xl text-xs border border-pitch-600 transition">
+                                        <i class="fa-solid fa-rotate mr-1"></i> Sortear Novamente
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
                         <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">Selecione os atletas à esquerda e clique em confirmar presença & sortear.</div>
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
+
+                        <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-700/60 hidden">
+                            <button onclick="confirmarETravarSorteio()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-lock text-base"></i>
+                                <span>Confirmar e Travar Resultado do Sorteio (Salvar no Histórico)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTÓRICO / RELATÓRIO DE SORTEIOS -->
+                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
+                    <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Relatório de Sorteios Confirmados</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                    <th class="pb-3">Data da Rodada</th>
+                                    <th class="pb-3">Qtd Times</th>
+                                    <th class="pb-3">Escalação / Coletes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico-sorteios">
+                                <tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado no histórico ainda.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <!-- ABA FINANCEIRO -->
             <div id="tab-financeiro" class="tab-content hidden space-y-6">
-                <!-- Seção para Impressão do Relatório Financeiro -->
                 <div id="financeiro-relatorio-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
@@ -278,7 +310,6 @@
                     </button>
                 </div>
 
-                <!-- CONTEÚDO QUE SERÁ EXPORTADO NO PDF -->
                 <div id="relatorios-conteudo-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl space-y-4">
@@ -579,6 +610,7 @@
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
         let listaAtletasGlobal = [];
         let configsGlobal = {};
+        let ultimoSorteioGerado = null; // Armazena temporariamente o sorteio atual
 
         const token = localStorage.getItem('token');
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -606,6 +638,7 @@
             carregarJogadores();
             carregarFinanceiro();
             carregarUsuariosSistema();
+            carregarHistoricoSorteios();
         });
 
         function logout() {
@@ -1045,8 +1078,6 @@
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
                     const mesFiltro = document.getElementById('filtro-mes').value;
-                    
-                    // 1. Saldo Geral Acumulado (Soma TODAS as entradas e saídas de todos os tempos)
                     let saldoGeralAcumulado = 0;
                     dados.forEach(l => {
                         const val = parseFloat(l.valor) || 0;
@@ -1054,7 +1085,6 @@
                         else saldoGeralAcumulado -= val;
                     });
 
-                    // 2. Entradas e Saídas do Mês Selecionado para o Filtro
                     let mesEntradas = 0;
                     let mesSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
@@ -1064,13 +1094,11 @@
                         const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
                         const val = parseFloat(l.valor) || 0;
 
-                        // Se pertencer ao mês filtrado, soma para os indicadores do mês
                         if (mesFiltro && dataStr.startsWith(mesFiltro)) {
                             if (l.tipo === 'Entrada') mesEntradas += val;
                             else mesSaidas += val;
                         }
 
-                        // Renderiza na tabela apenas se passar pelo filtro de mês
                         if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
 
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
@@ -1090,7 +1118,6 @@
                         `;
                     });
 
-                    // Atualiza os campos na tela mantendo o saldo geral acumulado intacto
                     document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
                     document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
                     document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
@@ -1230,7 +1257,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // SORTEIO
+        // SORTEIO AVANÇADO COM TRAVA DE GOLEIROS E COLETES (PRETO, VERMELHO, AZUL, LARANJA)
         function sortearTimesAvancado() {
             const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
                 nome: cb.dataset.nome,
@@ -1243,16 +1270,39 @@
                 return;
             }
 
-            const embaralhados = selecionados.sort(() => 0.5 - Math.random());
-            const times = Array.from({ length: numTimes }, () => []);
-            embaralhados.forEach((atleta, index) => { times[index % numTimes].push(atleta); });
+            // Separação Inteligente: Goleiros vs Jogadores de Linha
+            const goleiros = selecionados.filter(j => j.posicao && j.posicao.toLowerCase() === 'goleiro');
+            const linha = selecionados.filter(j => !j.posicao || j.posicao.toLowerCase() !== 'goleiro');
 
+            // Embaralha ambos
+            goleiros.sort(() => 0.5 - Math.random());
+            linha.sort(() => 0.5 - Math.random());
+
+            const times = Array.from({ length: numTimes }, () => []);
+
+            // Trava de Goleiros: Distribui um goleiro por time ciclicamente se houver goleiros suficientes
+            goleiros.forEach((g, idx) => {
+                times[idx % numTimes].push(g);
+            });
+
+            // Distribui os jogadores de linha restantes
+            linha.forEach((atleta, index) => {
+                times[index % numTimes].push(atleta);
+            });
+
+            // Coletes solicitados: Preto, Vermelho, Azul, Laranja
             const paletaCores = [
-                { nome: 'Time Verde', classe: 'border-emerald-500 text-emerald-400' },
-                { nome: 'Time Amarelo', classe: 'border-amber-500 text-amber-400' },
-                { nome: 'Time Azul', classe: 'border-blue-500 text-blue-400' },
-                { nome: 'Time Vermelho', classe: 'border-rose-500 text-rose-400' }
+                { nome: 'Time Colete Preto', classe: 'border-gray-500 text-gray-200 bg-black/40' },
+                { nome: 'Time Colete Vermelho', classe: 'border-rose-500 text-rose-400' },
+                { nome: 'Time Colete Azul', classe: 'border-blue-500 text-blue-400' },
+                { nome: 'Time Colete Laranja', classe: 'border-orange-500 text-orange-400' }
             ];
+
+            ultimoSorteioGerado = {
+                data_partida: configsGlobal.partida_data || new Date().toISOString().split('T')[0],
+                num_times: numTimes,
+                dados_times: times.map((t, idx) => ({ nome: paletaCores[idx % paletaCores.length].nome, jogadores: t }))
+            };
 
             const container = document.getElementById('times-result-container');
             document.getElementById('times-empty-state').classList.add('hidden');
@@ -1269,11 +1319,87 @@
 
                 container.innerHTML += `
                     <div class="bg-pitch-800 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
-                        <h4 class="font-bold text-sm ${cor.classe.split(' ')[1]} mb-3">${cor.nome} (${tJogadores.length})</h4>
+                        <h4 class="font-bold text-sm mb-3">${cor.nome} (${tJogadores.length} atletas)</h4>
                         <div class="space-y-1">${htmlMembros}</div>
                     </div>
                 `;
             });
+
+            // Mostra o botão para confirmar e travar o sorteio
+            document.getElementById('container-btn-confirmar').classList.remove('hidden');
+            document.getElementById('status-sorteio-badge').classList.add('hidden');
+        }
+
+        async function confirmarETravarSorteio() {
+            if (!ultimoSorteioGerado) {
+                alert('Nenhum sorteio gerado para confirmar.');
+                return;
+            }
+
+            if (!confirm('Deseja confirmar e travar este resultado do sorteio? Ele será salvo permanentemente no histórico de rodadas.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/sorteios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(ultimoSorteioGerado)
+                });
+
+                if (res.ok) {
+                    alert('Sorteio confirmado, travado e salvo no histórico com sucesso!');
+                    document.getElementById('container-btn-confirmar').classList.add('hidden');
+                    document.getElementById('status-sorteio-badge').classList.remove('hidden');
+                    carregarHistoricoSorteios();
+                } else {
+                    alert('Erro ao salvar sorteio.');
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+                alert('Erro de conexão ao salvar sorteio.');
+            }
+        }
+
+        async function carregarHistoricoSorteios() {
+            const tbody = document.getElementById('tabela-historico-sorteios');
+            if (!tbody) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/sorteios`);
+                if (res.ok) {
+                    const historico = await res.json();
+                    if (historico.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado no histórico ainda.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    historico.forEach(s => {
+                        const dataFmt = s.data_partida ? new Date(s.data_partida + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                        
+                        let timesHtml = '';
+                        if (Array.isArray(s.dados_times)) {
+                            timesHtml = s.dados_times.map(t => `
+                                <div class="mb-2 p-2 bg-pitch-900 rounded border border-pitch-700/60">
+                                    <strong class="text-amber-400 text-xs">${t.nome}:</strong> 
+                                    <span class="text-xs text-gray-300">${t.jogadores.map(j => j.nome).join(', ')}</span>
+                                </div>
+                            `).join('');
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40 align-top">
+                                <td class="py-3 font-medium text-white">${dataFmt}</td>
+                                <td class="py-3 text-gray-300">${s.num_times} Times</td>
+                                <td class="py-3">${timesHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) {
+                console.error('Erro ao carregar histórico de sorteios:', err);
+            }
         }
     </script>
 </body>

@@ -224,6 +224,34 @@ app.delete('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
+// HISTÓRICO E SALVAMENTO DE SORTEIOS
+app.post('/api/sorteios', verificarGestorOuAdmin, async (req, res) => {
+    const { data_partida, num_times, dados_times } = req.body;
+    
+    if (!data_partida || !dados_times) {
+        return res.status(400).json({ erro: 'Dados da partida e escalação dos times são obrigatórios.' });
+    }
+
+    try {
+        const q = `INSERT INTO historico_sorteios (data_partida, num_times, dados_times) VALUES ($1, $2, $3) RETURNING *;`;
+        const r = await pool.query(q, [data_partida, num_times, JSON.stringify(dados_times)]);
+        res.status(201).json({ mensagem: 'Sorteio confirmado e salvo no histórico com sucesso!', registro: r.rows[0] });
+    } catch (err) {
+        console.error('Erro ao salvar sorteio:', err);
+        res.status(500).json({ erro: 'Erro ao salvar histórico do sorteio.' });
+    }
+});
+
+app.get('/api/sorteios', async (req, res) => {
+    try {
+        const r = await pool.query('SELECT * FROM historico_sorteios ORDER BY data_partida DESC, id DESC LIMIT 20');
+        res.json(r.rows);
+    } catch (err) {
+        console.error('Erro ao buscar histórico de sorteios:', err);
+        res.status(500).json({ erro: 'Erro ao buscar histórico.' });
+    }
+});
+
 // FINANCEIRO
 app.get('/api/financeiro', async (req, res) => {
     try {
