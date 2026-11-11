@@ -27,16 +27,16 @@
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
 
-    <!-- MENU LATERAL COM LOGO OFICIAL -->
+    <!-- MENU LATERAL -->
     <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex">
         <div>
             <div class="p-6 border-b border-pitch-700/60 text-center relative group">
                 <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg bg-pitch-900">
-                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/main/logo.jpg" alt="Logo do Clube" class="w-full h-full object-cover">
+                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" alt="Logo do Clube" class="w-full h-full object-cover">
                 </div>
                 <h1 id="sidebar-nome-clube" class="font-bold text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
-                <p id="sidebar-subtitulo-clube" class="text-[10px] text-gray-400 mt-0.5">Clube Amador • Est. 2018</p>
-                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-2 right-2 bg-pitch-700 hover:bg-pitch-600 text-amber-400 p-1.5 rounded-full text-xs shadow" title="Editar Dados do Clube">
+                <p id="sidebar-subtitulo-clube" class="text-xs text-emerald-400 font-semibold mt-1"><i class="fa-brands fa-instagram mr-1"></i>@cmvitb</p>
+                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-2 right-2 bg-pitch-700 hover:bg-pitch-600 text-amber-400 p-1.5 rounded-full text-xs shadow hidden" title="Editar Dados do Clube">
                     <i class="fa-solid fa-pen"></i>
                 </button>
             </div>
@@ -53,7 +53,7 @@
                 <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
                     <i class="fa-solid fa-wallet w-5"></i><span>Financeiro / Caixa</span>
                 </button>
-                <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40 hidden">
                     <i class="fa-solid fa-user-shield w-5"></i><span>Usuários & Acessos</span>
                 </button>
             </nav>
@@ -69,7 +69,7 @@
     <main class="flex-1 flex flex-col min-h-screen">
         <header class="bg-pitch-800/50 border-b border-pitch-700/60 px-8 py-5 flex justify-between items-center">
             <h2 id="page-title" class="text-xl font-bold text-white">Dashboard Geral</h2>
-            <button onclick="abrirModalNovoJogador()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg">
+            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg hidden">
                 <i class="fa-solid fa-user-plus mr-2"></i>Novo Jogador
             </button>
         </header>
@@ -115,7 +115,7 @@
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-futbol mr-2"></i>Próxima Partida</h3>
-                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-700 hover:bg-pitch-600 px-3 py-1.5 rounded-lg text-xs text-amber-400 font-bold">
+                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-700 hover:bg-pitch-600 px-3 py-1.5 rounded-lg text-xs text-amber-400 font-bold hidden">
                                 <i class="fa-solid fa-pen mr-1"></i>Editar Partida
                             </button>
                         </div>
@@ -212,7 +212,7 @@
                             <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
                         </div>
                     </div>
-                    <button onclick="openModal('modal-lancamento')" class="admin-only w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg">
+                    <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg hidden">
                         <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
                     </button>
                 </div>
@@ -255,12 +255,12 @@
         </div>
     </main>
 
-    <!-- MODAL DE RECIBO DE PAGAMENTO -->
+    <!-- MODAL DE RECIBO -->
     <div id="modal-recibo" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white text-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
             <div class="text-center border-b pb-4 mb-4">
                 <h2 id="recibo-clube-nome" class="font-extrabold text-lg text-emerald-800 uppercase">CLUBE MENINOS DA VILA</h2>
-                <p id="recibo-clube-sub" class="text-xs text-gray-500">Comprovante Oficial de Pagamento</p>
+                <p class="text-xs text-gray-500">Comprovativo Oficial de Tesouraria</p>
             </div>
             
             <div class="flex justify-between items-center mb-6 bg-gray-100 p-3 rounded-xl">
@@ -277,13 +277,13 @@
             <div class="space-y-3 text-sm mb-6">
                 <p>Recebemos de: <strong id="recibo-descricao" class="text-gray-800">-</strong></p>
                 <p>A quantia correspondente a: <strong id="recibo-valor" class="text-emerald-700 text-lg font-bold">R$ 0,00</strong></p>
-                <p class="text-xs text-gray-500 italic">Referente à contribuição de mensalidade.</p>
+                <p class="text-xs text-gray-500 italic">Referente à contribuição de mensalidade / taxa desportiva do clube.</p>
             </div>
 
             <div class="pt-8 border-t text-center mt-8">
                 <div class="w-48 mx-auto border-b border-gray-400 mb-1"></div>
                 <p class="text-xs text-gray-600 font-bold">Tesouraria / Diretoria</p>
-                <p class="text-[10px] text-gray-400">Clube Meninos da Vila</p>
+                <p class="text-[10px] text-gray-400">Clube Meninos da Vila • @cmvitb</p>
             </div>
 
             <div class="flex space-x-3 pt-6 mt-6 border-t print:hidden">
@@ -293,7 +293,7 @@
         </div>
     </div>
 
-    <!-- MENU DE CONFIGURAÇÃO DO CLUBE / LOGO -->
+    <!-- MODAL DE CONFIGURAÇÃO (APENAS ADMIN) -->
     <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-amber-400 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>Editar Identidade do Clube</h3>
@@ -303,12 +303,12 @@
                     <input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">Subtítulo / Descrição</label>
+                    <label class="text-xs text-gray-300">Instagram (@)</label>
                     <input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">URL da Logo (Imagem)</label>
-                    <input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1" placeholder="https://exemplo.com/logo.jpg">
+                    <label class="text-xs text-gray-300">URL da Logo (PNG)</label>
+                    <input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
@@ -318,23 +318,35 @@
         </div>
     </div>
 
-    <!-- MODAL DE JOGADOR -->
+    <!-- MODAL DE JOGADOR (COM CAMPOS OBRIGATÓRIOS E FUNÇÃO) -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
             <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3">
                 <input type="hidden" id="input-jogador-id">
                 <div>
-                    <label class="text-xs text-gray-300">Nome Completo</label>
+                    <label class="text-xs text-gray-300">Nome Completo *</label>
                     <input type="text" id="input-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">Data de Nascimento</label>
-                    <input type="date" id="input-nascimento" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    <label class="text-xs text-gray-300">Data de Nascimento *</label>
+                    <input type="date" id="input-nascimento" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-300">Telefone / WhatsApp</label>
-                    <input type="text" id="input-telefone" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    <label class="text-xs text-gray-300">Telefone / WhatsApp *</label>
+                    <input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Função no Grupo</label>
+                    <select id="input-funcao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <option value="Atleta">Atleta / Membro</option>
+                        <option value="Diretor">Diretor</option>
+                        <option value="Vice Diretor">Vice Diretor</option>
+                        <option value="Secretário">Secretário</option>
+                        <option value="Tesoureiro">Tesoureiro</option>
+                        <option value="Coordenador de Patrimônio">Coordenador de Patrimônio</option>
+                        <option value="Mídia">Mídia</option>
+                    </select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -457,6 +469,7 @@
                     <label class="text-xs text-gray-300">Nível de Permissão</label>
                     <select id="user-perfil" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                         <option value="usuario">Usuário Comum</option>
+                        <option value="gestor">Gestor / Tesoureiro</option>
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
@@ -481,10 +494,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (usuarioLogado.perfil !== 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            const perfil = usuarioLogado.perfil;
+
+            if (perfil === 'admin') {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             }
-            
+
+            if (perfil === 'admin' || perfil === 'gestor') {
+                document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
+            }
+
             const dataAtual = new Date();
             const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('filtro-mes').value = anoMes;
@@ -528,12 +547,14 @@
                     document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
                     document.getElementById('recibo-clube-nome').innerText = configsGlobal.nome_clube;
                 }
-                if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerText = configsGlobal.subtitulo_clube;
+                if (configsGlobal.subtitulo_clube) {
+                    document.getElementById('sidebar-subtitulo-clube').innerHTML = `<i class="fa-brands fa-instagram mr-1"></i>${configsGlobal.subtitulo_clube}`;
+                }
                 if (configsGlobal.logo_url) {
                     const imgEl = document.getElementById('sidebar-logo');
                     imgEl.src = configsGlobal.logo_url;
                     imgEl.onerror = function() {
-                        this.src = 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=120&auto=format&fit=crop&q=80';
+                        this.src = 'https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png';
                     };
                 }
 
@@ -546,7 +567,7 @@
 
         function abrirModalConfigClube() {
             document.getElementById('cfg-nome-clube').value = configsGlobal.nome_clube || 'MENINOS DA VILA';
-            document.getElementById('cfg-subtitulo-clube').value = configsGlobal.subtitulo_clube || 'Clube Amador • Est. 2018';
+            document.getElementById('cfg-subtitulo-clube').value = configsGlobal.subtitulo_clube || '@cmvitb';
             document.getElementById('cfg-logo-url').value = configsGlobal.logo_url || '';
             openModal('modal-config-clube');
         }
@@ -570,7 +591,7 @@
                     alert('Identidade atualizada com sucesso!');
                     closeModal('modal-config-clube');
                     carregarConfiguracoes();
-                } else { alert('Erro ao atualizar.'); }
+                } else { alert('Erro ao atualizar. Apenas administradores.'); }
             } catch (err) { console.error(err); }
         }
 
@@ -665,7 +686,9 @@
         function renderElenco(jogadores) {
             const grid = document.getElementById('jogadores-grid');
             if (!grid) return;
+            const podeGerenciar = usuarioLogado.perfil === 'admin' || usuarioLogado.perfil === 'gestor';
             const isAdmin = usuarioLogado.perfil === 'admin';
+
             grid.innerHTML = '';
             jogadores.forEach(j => {
                 let idadeStr = '-';
@@ -676,24 +699,32 @@
                     idadeStr = `${Math.abs(idadeDate.getUTCFullYear() - 1970)} anos`;
                 }
 
+                let botoesAcao = '';
+                if (podeGerenciar) {
+                    botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:underline">Editar</button>`;
+                }
+                if (isAdmin) {
+                    botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:underline ml-2">Excluir</button>`;
+                }
+
+                const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
+
                 grid.innerHTML += `
                     <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
                         <div>
-                            <div class="flex justify-between items-start">
-                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">${j.posicao}</span>
+                            <div class="flex justify-between items-start flex-wrap gap-1">
+                                <div>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">${j.posicao}</span>
+                                    ${funcaoBadge}
+                                </div>
                                 <span class="text-xs px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
                             </div>
                             <h4 class="font-bold text-white text-base mt-2">${j.nome}</h4>
-                            <p class="text-xs text-gray-400">Idade: ${idadeStr}</p>
+                            <p class="text-xs text-gray-400">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
                             <span>⚽ Gols: <strong>${j.gols || 0}</strong></span>
-                            ${isAdmin ? `
-                                <div class="space-x-2">
-                                    <button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:underline">Editar</button>
-                                    <button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:underline">Excluir</button>
-                                </div>
-                            ` : `<span>📞 ${j.telefone || '-'}</span>`}
+                            <div>${botoesAcao}</div>
                         </div>
                     </div>
                 `;
@@ -723,8 +754,9 @@
             const id = document.getElementById('input-jogador-id').value;
             const dados = {
                 nome: document.getElementById('input-nome').value,
-                data_nascimento: document.getElementById('input-nascimento').value || null,
+                data_nascimento: document.getElementById('input-nascimento').value,
                 telefone: document.getElementById('input-telefone').value,
+                funcao_grupo: document.getElementById('input-funcao').value,
                 posicao: document.getElementById('input-posicao').value,
                 status_mensalidade: document.getElementById('input-mensalidade').value,
                 gols: parseInt(document.getElementById('input-gols').value || 0)
@@ -755,6 +787,7 @@
             document.getElementById('input-nome').value = j.nome;
             document.getElementById('input-nascimento').value = j.data_nascimento ? j.data_nascimento.split('T')[0] : '';
             document.getElementById('input-telefone').value = j.telefone || '';
+            document.getElementById('input-funcao').value = j.funcao_grupo || 'Atleta';
             document.getElementById('input-posicao').value = j.posicao;
             document.getElementById('input-mensalidade').value = j.status_mensalidade || 'Pendente';
             document.getElementById('input-gols').value = j.gols || 0;
@@ -763,17 +796,18 @@
         }
 
         async function excluirJogador(id) {
-            if (!confirm('Deseja excluir este atleta?')) return;
+            if (!confirm('Deseja excluir este atleta? (Apenas Admin)')) return;
             try {
                 const res = await fetch(`${API_URL}/api/jogadores/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) carregarJogadores();
+                else alert('Acesso negado. Apenas administradores podem excluir.');
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO & GERADOR DE RECIBOS
+        // FINANCEIRO & RECIBOS
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
@@ -810,7 +844,7 @@
                                 <td class="py-3 font-bold ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
                                 <td class="py-3 text-right space-x-2">
                                     ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:underline text-xs"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
-                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs">Excluir</button>` : ''}
+                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs ml-2">Excluir</button>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -860,13 +894,14 @@
         }
 
         async function excluirLancamento(id) {
-            if (!confirm('Excluir este lançamento?')) return;
+            if (!confirm('Excluir este lançamento? (Apenas Admin)')) return;
             try {
                 const res = await fetch(`${API_URL}/api/financeiro/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) carregarFinanceiro();
+                else alert('Acesso negado. Apenas administradores.');
             } catch (err) { console.error(err); }
         }
 
@@ -993,7 +1028,7 @@
 
                 container.innerHTML += `
                     <div class="bg-pitch-800 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
-                        <h4 class="font-bold text-sm ${cor.classe.str ? '' : cor.classe.split(' ')[1]} mb-3">${cor.nome} (${tJogadores.length})</h4>
+                        <h4 class="font-bold text-sm ${cor.classe.split(' ')[1]} mb-3">${cor.nome} (${tJogadores.length})</h4>
                         <div class="space-y-1">${htmlMembros}</div>
                     </div>
                 `;
