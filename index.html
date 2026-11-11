@@ -53,6 +53,9 @@
                 <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
                     <i class="fa-solid fa-wallet w-5"></i><span>Financeiro / Caixa</span>
                 </button>
+                <button onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                    <i class="fa-solid fa-file-lines w-5"></i><span>Relatórios</span>
+                </button>
                 <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40 hidden">
                     <i class="fa-solid fa-user-shield w-5"></i><span>Usuários & Acessos</span>
                 </button>
@@ -88,26 +91,31 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Elenco Total</p>
                         <h3 id="dash-total-jogadores" class="text-3xl font-extrabold text-white mt-2">0</h3>
-                        <span class="text-xs text-emerald-400 mt-2 inline-block"><i class="fa-solid fa-arrow-up mr-1"></i>Ativos no plantel</span>
+                        <span class="text-xs text-emerald-400 mt-2 inline-block">Ativos no plantel</span>
                     </div>
-                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
+                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-rose-500 transition">
+                        <p class="text-xs text-gray-400 uppercase font-bold">Atletas Afastados</p>
+                        <h3 id="dash-afastados-count" class="text-3xl font-extrabold text-rose-400 mt-2">0</h3>
+                        <span class="text-xs text-rose-400/80 mt-2 inline-block">Suspenso / DM / Outros</span>
+                    </div>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Mensalidades em Dia</p>
                         <h3 id="dash-pagos-count" class="text-3xl font-extrabold text-emerald-400 mt-2">0/0</h3>
                         <span class="text-xs text-gray-400 mt-2 inline-block">Controle financeiro</span>
                     </div>
-                    <div onclick="switchTab('financeiro')" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
+                    <div onclick="switchTab('financeiro')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-amber-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Saldo do Caixa</p>
                         <h3 id="dash-saldo-val" class="text-3xl font-extrabold text-amber-400 mt-2">R$ 0,00</h3>
                         <span class="text-xs text-amber-400/80 mt-2 inline-block">Livro caixa atualizado</span>
                     </div>
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl shadow-lg">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro do Clube</p>
-                        <h3 id="dash-artilheiro-nome" class="text-xl font-extrabold text-white mt-2">-</h3>
-                        <span id="dash-artilheiro-gols" class="text-xs text-amber-400 mt-2 inline-block">0 gols marcados</span>
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                        <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro</p>
+                        <h3 id="dash-artilheiro-nome" class="text-lg font-extrabold text-white mt-2 truncate">-</h3>
+                        <span id="dash-artilheiro-gols" class="text-xs text-amber-400 mt-2 inline-block">0 gols</span>
                     </div>
                 </div>
 
@@ -129,14 +137,14 @@
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
                         <div>
                             <h3 class="font-bold text-base text-amber-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>Ações Rápidas</h3>
-                            <p class="text-xs text-gray-400 mb-4">Gerencie convocações, sorteie os times da semana ou registre entradas de mensalidades num clique.</p>
+                            <p class="text-xs text-gray-400 mb-4">Gerencie convocações, sorteie os times da semana ou consulte relatórios gerenciais.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <button onclick="switchTab('presenca')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-emerald-400 text-left transition">
                                 <i class="fa-solid fa-shuffle mb-1 block text-base"></i>Realizar Sorteio
                             </button>
-                            <button onclick="switchTab('financeiro')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-amber-400 text-left transition">
-                                <i class="fa-solid fa-wallet mb-1 block text-base"></i>Livro Caixa
+                            <button onclick="switchTab('relatorios')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-amber-400 text-left transition">
+                                <i class="fa-solid fa-file-lines mb-1 block text-base"></i>Ver Relatórios
                             </button>
                         </div>
                     </div>
@@ -232,6 +240,48 @@
                                 </tr>
                             </thead>
                             <tbody id="tabela-financeiro-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA RELATÓRIOS -->
+            <div id="tab-relatorios" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Resumo Geral e Posições -->
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl space-y-4">
+                        <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
+                        <div id="relatorio-posicoes-lista" class="space-y-2 text-sm">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-base text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">Este relatório consolida o total de membros cadastrados, a distribuição tática por posições em campo e o histórico acumulado de presenças de cada atleta nas rodadas oficiais.</p>
+                        </div>
+                        <div class="pt-4 border-t border-pitch-700 flex justify-between items-center text-sm">
+                            <span class="text-gray-400">Total de Membros Cadastrados:</span>
+                            <strong id="rel-total-membros" class="text-emerald-400 text-lg">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Participações de Todos os Membros -->
+                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
+                    <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Relatório de Participações por Atleta</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                    <th class="pb-3">Atleta</th>
+                                    <th class="pb-3">Função</th>
+                                    <th class="pb-3">Posição</th>
+                                    <th class="pb-3">Status</th>
+                                    <th class="pb-3 text-right">Total de Presenças (Jogos)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-relatorio-presencas"></tbody>
                         </table>
                     </div>
                 </div>
@@ -656,19 +706,25 @@
                     renderDashboard(dados);
                     renderElenco(dados);
                     renderPresenca(dados);
+                    renderRelatorios(dados);
                 }
             } catch (err) { console.error('Erro ao buscar atletas:', err); }
         }
 
         function renderDashboard(jogadores) {
             document.getElementById('dash-total-jogadores').innerText = jogadores.length;
+            
+            // Calcula atletas afastados (status diferente de 'Ativo')
+            const afastados = jogadores.filter(j => j.status_aptidao && j.status_aptidao !== 'Ativo').length;
+            document.getElementById('dash-afastados-count').innerText = afastados;
+
             const pagos = jogadores.filter(j => j.status_mensalidade === 'Pago').length;
             document.getElementById('dash-pagos-count').innerText = `${pagos}/${jogadores.length}`;
             
             if (jogadores.length > 0) {
                 const ordenadosPorGols = [...jogadores].sort((a, b) => (b.gols || 0) - (a.gols || 0));
                 document.getElementById('dash-artilheiro-nome').innerText = ordenadosPorGols[0].nome;
-                document.getElementById('dash-artilheiro-gols').innerText = `${ordenadosPorGols[0].gols || 0} gols marcados`;
+                document.getElementById('dash-artilheiro-gols').innerText = `${ordenadosPorGols[0].gols || 0} gols`;
             }
 
             verificarAniversariantes(jogadores);
@@ -775,6 +831,56 @@
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
                         <span class="text-sm font-medium text-white">${j.nome} (${j.posicao})</span>
                     </label>
+                `;
+            });
+        }
+
+        function renderRelatorios(jogadores) {
+            document.getElementById('rel-total-membros').innerText = jogadores.length;
+
+            // Contar por posição
+            const posicoesCount = { Goleiro: 0, Zagueiro: 0, Lateral: 0, Meia: 0, Atacante: 0 };
+            jogadores.forEach(j => {
+                if (posicoesCount[j.posicao] !== undefined) {
+                    posicoesCount[j.posicao]++;
+                } else {
+                    posicoesCount[j.posicao] = (posicoesCount[j.posicao] || 0) + 1;
+                }
+            });
+
+            const listaPos = document.getElementById('relatorio-posicoes-lista');
+            listaPos.innerHTML = '';
+            for (const [pos, qtd] of Object.entries(posicoesCount)) {
+                listaPos.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-pitch-900 rounded-xl border border-pitch-700/40">
+                        <span class="text-gray-300 font-medium">${pos}</span>
+                        <span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs">${qtd} atleta(s)</span>
+                    </div>
+                `;
+            }
+
+            // Tabela de participações de todos os membros
+            const tbodyPres = document.getElementById('tabela-relatorio-presencas');
+            tbodyPres.innerHTML = '';
+            
+            // Ordenar por maior número de participações
+            const ordenados = [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0));
+
+            ordenados.forEach(j => {
+                let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
+                if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
+                else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
+                else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
+                else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
+
+                tbodyPres.innerHTML += `
+                    <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
+                        <td class="py-3 font-medium text-white">${j.nome}</td>
+                        <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
+                        <td class="py-3"><span class="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-400">${j.posicao}</span></td>
+                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] ${aptidaoCor}">${j.status_aptidao || 'Ativo'}</span></td>
+                        <td class="py-3 text-right font-bold text-amber-400">${j.total_participacoes || 0} jogo(s)</td>
+                    </tr>
                 `;
             });
         }
