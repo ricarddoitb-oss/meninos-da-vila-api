@@ -166,16 +166,8 @@
 
             <!-- ABA PRESENÇA & SORTEIO -->
             <div id="tab-presenca" class="tab-content hidden space-y-6">
-                <!-- Alerta se o sorteio da data atual já foi travado -->
-                <div id="alerta-rodada-travada" class="hidden bg-amber-500/20 border border-amber-500 text-amber-300 p-4 rounded-2xl text-sm flex items-center space-x-3">
-                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                    <div>
-                        <strong>Rodada já finalizada e travada!</strong> O sorteio para a data desta partida já foi confirmado. Novos sorteios estarão disponíveis apenas ao alterar a data da próxima partida para um novo dia.
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div id="container-marcacao-presenca" class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-base text-emerald-400">Marcar Presença</h3>
                             <label class="flex items-center space-x-2 text-xs text-gray-300 cursor-pointer">
@@ -185,7 +177,7 @@
                         </div>
                         <p class="text-[11px] text-gray-400 mb-3">Atletas com status <strong>Ativo</strong> participam do sorteio.</p>
                         <div id="presenca-lista" class="space-y-2 max-h-[350px] overflow-y-auto pr-2 flex-1 mb-4"></div>
-                        <button id="btn-gerar-sorteio" onclick="salvarPresencasERealizarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
+                        <button onclick="salvarPresencasERealizarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
                             <i class="fa-solid fa-shuffle mr-1"></i>Gerar Sorteio (Prévia)
                         </button>
                     </div>
@@ -197,6 +189,7 @@
                                     <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado & Presenças Computadas
                                 </div>
                             </div>
+                            <!-- Exibição da Data e Local do Jogo no Sorteio -->
                             <div id="detalhes-partida-sorteio" class="bg-pitch-900 border border-pitch-700/60 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
                                 <span>📅 Data: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
                                 <span>📍 Local: <strong id="sorteio-lbl-local" class="text-white">-</strong></span>
@@ -623,7 +616,6 @@
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
         let listaAtletasGlobal = [];
         let configsGlobal = {};
-        let historicoSorteiosGlobal = [];
         let ultimoSorteioGerado = null;
 
         const token = localStorage.getItem('token');
@@ -632,7 +624,7 @@
             window.location.href = 'login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const perfil = usuarioLogado.perfil;
 
             if (perfil === 'admin') {
@@ -648,11 +640,11 @@
             document.getElementById('filtro-mes').value = anoMes;
             document.getElementById('fin-data').valueAsDate = dataAtual;
 
-            await carregarConfiguracoes();
+            carregarConfiguracoes();
             carregarJogadores();
             carregarFinanceiro();
             carregarUsuariosSistema();
-            await carregarHistoricoSorteios();
+            carregarHistoricoSorteios();
         });
 
         function logout() {
@@ -703,10 +695,9 @@
                 document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
                 document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
 
+                // Atualiza os campos de data e local na aba de sorteio
                 document.getElementById('sorteio-lbl-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('sorteio-lbl-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
-                
-                verificarTravaRodadaAtual();
             } catch (err) { console.error('Erro configs:', err); }
         }
 
@@ -767,8 +758,7 @@
                 if (res.ok) {
                     alert('Dados da partida atualizados com sucesso!');
                     closeModal('modal-partida');
-                    await carregarConfiguracoes();
-                    verificarTravaRodadaAtual();
+                    carregarConfiguracoes();
                 } else { alert('Erro ao atualizar.'); }
             } catch (err) { console.error(err); }
         }
@@ -969,14 +959,6 @@
         }
 
         function salvarPresencasERealizarSorteio() {
-            const dataPartidaAtual = configsGlobal.partida_data;
-            const jaExiste = historicoSorteiosGlobal.some(s => s.data_partida && s.data_partida.split('T')[0] === dataPartidaAtual);
-
-            if (jaExiste) {
-                alert('O sorteio para esta data já foi confirmado e travado. Para realizar um novo sorteio, edite a data da próxima partida.');
-                return;
-            }
-
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
             if (checkboxes.length === 0) {
                 alert('Selecione pelo menos um atleta para o sorteio.');
@@ -1264,16 +1246,8 @@
             } catch (err) { console.error(err); }
         }
 
-        // SORTEIO AVANÇADO COM TRAVA DE DATA ÚNICA
+        // SORTEIO AVANÇADO COM DATA, LOCAL E TRAVA DE GOLEIROS
         function sortearTimesAvancado() {
-            const dataPartidaAtual = configsGlobal.partida_data;
-            const jaExiste = historicoSorteiosGlobal.some(s => s.data_partida && s.data_partida.split('T')[0] === dataPartidaAtual);
-
-            if (jaExiste) {
-                alert('O sorteio para esta data já foi confirmado e travado. Só é permitido um sorteio por rodada.');
-                return;
-            }
-
             const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
                 id: parseInt(cb.value),
                 nome: cb.dataset.nome,
@@ -1309,7 +1283,7 @@
                 { nome: 'Time Colete Laranja', classe: 'border-orange-500 text-orange-400' }
             ];
 
-            const dataPartidaStr = dataPartidaAtual || new Date().toISOString().split('T')[0];
+            const dataPartidaStr = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
             const localPartidaStr = configsGlobal.partida_local || 'Campo Principal - CMV';
 
             ultimoSorteioGerado = {
@@ -1376,10 +1350,9 @@
                     document.getElementById('container-btn-confirmar').classList.add('hidden');
                     document.getElementById('status-sorteio-badge').classList.remove('hidden');
                     carregarJogadores();
-                    await carregarHistoricoSorteios();
+                    carregarHistoricoSorteios();
                 } else {
-                    const err = await resSorteio.json();
-                    alert(`Erro: ${err.erro || 'Não foi possível salvar o sorteio.'}`);
+                    alert('Erro ao confirmar e salvar o sorteio.');
                 }
             } catch (err) {
                 console.error('Erro:', err);
@@ -1394,17 +1367,15 @@
             try {
                 const res = await fetch(`${API_URL}/api/sorteios`);
                 if (res.ok) {
-                    historicoSorteiosGlobal = await res.json();
-                    
-                    verificarTravaRodadaAtual();
-
-                    if (historicoSorteiosGlobal.length === 0) {
+                    const historico = await res.json();
+                    if (historico.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado no histórico ainda.</td></tr>`;
                         return;
                     }
 
                     tbody.innerHTML = '';
-                    historicoSorteiosGlobal.forEach(s => {
+                    historico.forEach(s => {
+                        // Correção do "Invalid Date" usando split e montando a string de data sem problemas de UTC
                         let dataFmt = '-';
                         if (s.data_partida) {
                             const partes = s.data_partida.split('T')[0].split('-');
@@ -1439,22 +1410,6 @@
                 }
             } catch (err) {
                 console.error('Erro ao carregar histórico de sorteios:', err);
-            }
-        }
-
-        function verificarTravaRodadaAtual() {
-            const dataPartidaAtual = configsGlobal.partida_data;
-            const alerta = document.getElementById('alerta-rodada-travada');
-            const containerPresenca = document.getElementById('container-marcacao-presenca');
-
-            const jaTravado = historicoSorteiosGlobal.some(s => s.data_partida && s.data_partida.split('T')[0] === dataPartidaAtual);
-
-            if (jaTravado) {
-                alerta.classList.remove('hidden');
-                containerPresenca.classList.add('opacity-50', 'pointer-events-none');
-            } else {
-                alerta.classList.add('hidden');
-                containerPresenca.classList.remove('opacity-50', 'pointer-events-none');
             }
         }
     </script>
