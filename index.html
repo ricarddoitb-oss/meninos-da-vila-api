@@ -319,7 +319,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE JOGADOR (COM APTIDÃO E FUNÇÃO) -->
+    <!-- MODAL DE JOGADOR -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
@@ -728,6 +728,10 @@
                 else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
                 else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
 
+                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) 
+                    ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-1" title="Remover presença na rodada">-1 Presença</button>` 
+                    : '';
+
                 grid.innerHTML += `
                     <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
                         <div>
@@ -745,7 +749,7 @@
                             <p class="text-xs text-gray-400">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
-                            <span>⚽ Gols: <strong>${j.gols || 0}</strong> | 📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong></span>
+                            <span>⚽ Gols: <strong>${j.gols || 0}</strong> | 📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
                             <div>${botoesAcao}</div>
                         </div>
                     </div>
@@ -758,7 +762,6 @@
             if (!lista) return;
             lista.innerHTML = '';
             
-            // Filtra apenas atletas ativos para a presença/sorteio
             const ativos = jogadores.filter(j => !j.status_aptidao || j.status_aptidao === 'Ativo');
 
             if(ativos.length === 0) {
@@ -792,7 +795,6 @@
             const dataPartida = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
 
             try {
-                // Registra presenças no backend (incrementando o total na tabela presencas_partidas)
                 const res = await fetch(`${API_URL}/api/presencas`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -800,14 +802,41 @@
                 });
 
                 if (res.ok) {
-                    carregarJogadores(); // Atualiza a contagem na tela
-                    sortearTimesAvancado(); // Executa o sorteio com os selecionados
+                    carregarJogadores();
+                    sortearTimesAvancado();
                 } else {
                     alert('Erro ao registrar presenças.');
                 }
             } catch (err) {
                 console.error(err);
                 alert('Erro de conexão ao registrar presenças.');
+            }
+        }
+
+        async function removerPresencaAtleta(jogadorId, nomeAtleta) {
+            const dataPartida = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
+            
+            if (!confirm(`Deseja remover o registo de presença de "${nomeAtleta}" referente à rodada de ${dataPartida}?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/presencas`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ jogador_id: jogadorId, data_partida: dataPartida })
+                });
+
+                if (res.ok) {
+                    alert(`Presença de ${nomeAtleta} removida com sucesso!`);
+                    carregarJogadores();
+                } else {
+                    const errJson = await res.json();
+                    alert(`Erro: ${errJson.erro || 'Não foi possível remover a presença.'}`);
+                }
+            } catch (err) {
+                console.error('Erro ao remover presença:', err);
+                alert('Erro de conexão ao remover presença.');
             }
         }
 

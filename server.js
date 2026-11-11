@@ -78,7 +78,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// JOGADORES (Com validação obrigatória, função e status de aptidão)
+// JOGADORES
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query(`
@@ -181,23 +181,46 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
 
 // REGISTRO DE PRESENÇAS / PARTICIPAÇÕES POR RODADA
 app.post('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
-    const { data_partida, jogador_ids } = req.body; // jogador_ids = [1, 5, 8, ...]
+    const { data_partida, jogador_ids } = req.body;
     if (!data_partida || !Array.isArray(jogador_ids)) {
         return res.status(400).json({ erro: 'Data da partida e lista de jogadores são obrigatórias.' });
     }
 
     try {
-        // Insere as presenças evitando duplicidade na mesma data
         for (const jId of jogador_ids) {
             await pool.query(
                 `INSERT INTO presencas_partidas (jogador_id, data_partida) VALUES ($1, $2) ON CONFLICT (jogador_id, data_partida) DO NOTHING;`,
                 [jId, data_partida]
             );
         }
-        res.json({ mensagem: 'Presenças registadas com sucesso e participações contabilizadas!' });
+        res.json({ mensagem: 'Presenças registadas com sucesso!' });
     } catch (err) {
         console.error('Erro ao registrar presenças:', err);
         res.status(500).json({ erro: 'Erro ao registrar presenças.' });
+    }
+});
+
+app.delete('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
+    const { jogador_id, data_partida } = req.body;
+    
+    if (!jogador_id || !data_partida) {
+        return res.status(400).json({ erro: 'ID do jogador e data da partida são obrigatórios.' });
+    }
+
+    try {
+        const r = await pool.query(
+            `DELETE FROM presencas_partidas WHERE jogador_id = $1 AND data_partida = $2 RETURNING *;`,
+            [jogador_id, data_partida]
+        );
+
+        if (r.rowCount === 0) {
+            return res.status(404).json({ erro: 'Nenhum registo de presença encontrado para este atleta nesta data.' });
+        }
+
+        res.json({ mensagem: 'Presença removida com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao remover presença:', err);
+        res.status(500).json({ erro: 'Erro ao remover presença do atleta.' });
     }
 });
 
