@@ -23,9 +23,12 @@
             #modal-recibo-conteudo, #modal-recibo-conteudo * { visibility: visible; }
             #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; }
             
-            /* Otimização para impressão da aba Relatórios */
             #relatorios-conteudo-impressao, #relatorios-conteudo-impressao * { visibility: visible; }
             #relatorios-conteudo-impressao { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
+            
+            #financeiro-relatorio-impressao, #financeiro-relatorio-impressao * { visibility: visible; }
+            #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
+
             .print\:hidden { display: none !important; }
         }
     </style>
@@ -113,9 +116,9 @@
                         <span class="text-xs text-gray-400 mt-2 inline-block">Controle financeiro</span>
                     </div>
                     <div onclick="switchTab('financeiro')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-amber-500 transition">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Saldo do Caixa</p>
+                        <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral em Caixa</p>
                         <h3 id="dash-saldo-val" class="text-3xl font-extrabold text-amber-400 mt-2">R$ 0,00</h3>
-                        <span class="text-xs text-amber-400/80 mt-2 inline-block">Livro caixa atualizado</span>
+                        <span class="text-xs text-amber-400/80 mt-2 inline-block">Consolidado acumulado</span>
                     </div>
                     <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
                         <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro</p>
@@ -179,7 +182,7 @@
                         </button>
                     </div>
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-amber-400">Times Sorteados para a Rodada</h3>
+                        <h3 class="font-bold text-base mb-4 text-amber-400">Times Sorteados para la Rodada</h3>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="text-xs text-gray-400">Quantidade de Times:</label>
@@ -203,56 +206,68 @@
             </div>
 
             <!-- ABA FINANCEIRO -->
-            <div id="tab-financeiro" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
-                        <p class="text-xs text-gray-400">Saldo Atual em Caixa</p>
-                        <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
-                        <p class="text-xs text-gray-400">Total de Entradas (Mês)</p>
-                        <h3 id="fin-entradas" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl">
-                        <p class="text-xs text-gray-400">Total de Saídas (Mês)</p>
-                        <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
-                    </div>
-                </div>
-
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center space-x-3 w-full md:w-auto">
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
-                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
+            <div id="tab-financeiro" class="tab-content hidden space-y-6">
+                <!-- Seção para Impressão do Relatório Financeiro -->
+                <div id="financeiro-relatorio-impressao" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                            <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral Acumulado</p>
+                            <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
+                            <span class="text-[10px] text-gray-400 mt-1 block">Caixa geral acumulado (Prestação de contas)</span>
+                        </div>
+                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                            <p class="text-xs text-gray-400 uppercase font-bold">Entradas (Mês Selecionado)</p>
+                            <h3 id="fin-entradas" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
+                            <span class="text-[10px] text-gray-400 mt-1 block">Receitas do período</span>
+                        </div>
+                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                            <p class="text-xs text-gray-400 uppercase font-bold">Saídas (Mês Selecionado)</p>
+                            <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
+                            <span class="text-[10px] text-gray-400 mt-1 block">Despesas do período</span>
                         </div>
                     </div>
-                    <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg hidden">
-                        <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
-                    </button>
-                </div>
 
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                    <h3 class="font-bold text-base mb-4 text-white">Extrato do Livro Caixa</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead>
-                                <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
-                                    <th class="pb-3">Data</th>
-                                    <th class="pb-3">Descrição</th>
-                                    <th class="pb-3">Tipo</th>
-                                    <th class="pb-3">Valor</th>
-                                    <th class="pb-3 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-financeiro-body"></tbody>
-                        </table>
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <div>
+                                <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
+                                <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <button onclick="window.print()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg flex items-center space-x-2">
+                                <i class="fa-solid fa-print"></i>
+                                <span>Exportar Caixa (PDF)</span>
+                            </button>
+                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg hidden">
+                                <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
+                        <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-book mr-2"></i>Extrato do Livro Caixa</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                        <th class="pb-3">Data</th>
+                                        <th class="pb-3">Descrição</th>
+                                        <th class="pb-3">Tipo</th>
+                                        <th class="pb-3">Valor</th>
+                                        <th class="pb-3 text-right print:hidden">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-financeiro-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- ABA RELATÓRIOS -->
             <div id="tab-relatorios" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl">
+                <div class="flex justify-between items-center bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl print:hidden">
                     <div>
                         <h3 class="font-bold text-base text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Relatórios Consolidados do Clube</h3>
                         <p class="text-xs text-gray-400">Visualize estatísticas de membros, posições e participações em partidas.</p>
@@ -266,12 +281,9 @@
                 <!-- CONTEÚDO QUE SERÁ EXPORTADO NO PDF -->
                 <div id="relatorios-conteudo-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Resumo Geral e Posições -->
                         <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl space-y-4">
                             <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
-                            <div id="relatorio-posicoes-lista" class="space-y-2 text-sm">
-                                <!-- Preenchido via JS -->
-                            </div>
+                            <div id="relatorio-posicoes-lista" class="space-y-2 text-sm"></div>
                         </div>
                         <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
                             <div>
@@ -285,7 +297,6 @@
                         </div>
                     </div>
 
-                    <!-- Tabela de Participações de Todos os Membros -->
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
                         <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Relatório de Participações por Atleta</h3>
                         <div class="overflow-x-auto">
@@ -1034,18 +1045,33 @@
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
                     const mesFiltro = document.getElementById('filtro-mes').value;
-                    let totalEntradas = 0;
-                    let totalSaidas = 0;
+                    
+                    // 1. Saldo Geral Acumulado (Soma TODAS as entradas e saídas de todos os tempos)
+                    let saldoGeralAcumulado = 0;
+                    dados.forEach(l => {
+                        const val = parseFloat(l.valor) || 0;
+                        if (l.tipo === 'Entrada') saldoGeralAcumulado += val;
+                        else saldoGeralAcumulado -= val;
+                    });
+
+                    // 2. Entradas e Saídas do Mês Selecionado para o Filtro
+                    let mesEntradas = 0;
+                    let mesSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
                     tbody.innerHTML = '';
 
                     dados.forEach(l => {
                         const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
-                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
-
                         const val = parseFloat(l.valor) || 0;
-                        if (l.tipo === 'Entrada') totalEntradas += val;
-                        else totalSaidas += val;
+
+                        // Se pertencer ao mês filtrado, soma para os indicadores do mês
+                        if (mesFiltro && dataStr.startsWith(mesFiltro)) {
+                            if (l.tipo === 'Entrada') mesEntradas += val;
+                            else mesSaidas += val;
+                        }
+
+                        // Renderiza na tabela apenas se passar pelo filtro de mês
+                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
 
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                         const isAdmin = usuarioLogado.perfil === 'admin';
@@ -1056,7 +1082,7 @@
                                 <td class="py-3 font-medium text-white">${l.descricao}</td>
                                 <td class="py-3"><span class="px-2 py-0.5 rounded text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${l.tipo}</span></td>
                                 <td class="py-3 font-bold ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
-                                <td class="py-3 text-right space-x-2">
+                                <td class="py-3 text-right space-x-2 print:hidden">
                                     ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:underline text-xs"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
                                     ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs ml-2">Excluir</button>` : ''}
                                 </td>
@@ -1064,12 +1090,13 @@
                         `;
                     });
 
-                    const saldo = totalEntradas - totalSaidas;
-                    document.getElementById('fin-entradas').innerText = `R$ ${totalEntradas.toFixed(2)}`;
-                    document.getElementById('fin-saidas').innerText = `R$ ${totalSaidas.toFixed(2)}`;
-                    document.getElementById('fin-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+                    // Atualiza os campos na tela mantendo o saldo geral acumulado intacto
+                    document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
+                    document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
+                    document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
+                    
                     const dashSaldo = document.getElementById('dash-saldo-val');
-                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldo.toFixed(2)}`;
+                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
                 }
             } catch (err) { console.error('Erro financeiro:', err); }
         }
