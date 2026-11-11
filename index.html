@@ -183,12 +183,18 @@
                     </div>
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
                         <div>
-                            <div class="flex justify-between items-center mb-4">
+                            <div class="flex justify-between items-center mb-3">
                                 <h3 class="font-bold text-base text-amber-400">Times Sorteados para a Rodada</h3>
                                 <div id="status-sorteio-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold">
                                     <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado & Presenças Computadas
                                 </div>
                             </div>
+                            <!-- Exibição da Data e Local do Jogo no Sorteio -->
+                            <div id="detalhes-partida-sorteio" class="bg-pitch-900 border border-pitch-700/60 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
+                                <span>📅 Data: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
+                                <span>📍 Local: <strong id="sorteio-lbl-local" class="text-white">-</strong></span>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="text-xs text-gray-400">Qtd Times (Coletes - Preto, Vermelho, Azul, Laranja):</label>
@@ -225,7 +231,7 @@
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
-                                    <th class="pb-3">Data da Rodada</th>
+                                    <th class="pb-3">Data / Local</th>
                                     <th class="pb-3">Qtd Times</th>
                                     <th class="pb-3">Escalação / Coletes</th>
                                 </tr>
@@ -688,6 +694,10 @@
                 document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
                 document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
                 document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
+
+                // Atualiza os campos de data e local na aba de sorteio
+                document.getElementById('sorteio-lbl-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
+                document.getElementById('sorteio-lbl-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
             } catch (err) { console.error('Erro configs:', err); }
         }
 
@@ -1236,7 +1246,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // SORTEIO AVANÇADO COM TRAVA DE GOLEIROS E COLETES (PRETO, VERMELHO, AZUL, LARANJA)
+        // SORTEIO AVANÇADO COM DATA, LOCAL E TRAVA DE GOLEIROS
         function sortearTimesAvancado() {
             const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
                 id: parseInt(cb.value),
@@ -1273,8 +1283,12 @@
                 { nome: 'Time Colete Laranja', classe: 'border-orange-500 text-orange-400' }
             ];
 
+            const dataPartidaStr = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
+            const localPartidaStr = configsGlobal.partida_local || 'Campo Principal - CMV';
+
             ultimoSorteioGerado = {
-                data_partida: configsGlobal.partida_data || new Date().toISOString().split('T')[0],
+                data_partida: dataPartidaStr,
+                local_partida: localPartidaStr,
                 num_times: numTimes,
                 jogador_ids: selecionados.map(j => j.id),
                 dados_times: times.map((t, idx) => ({ nome: paletaCores[idx % paletaCores.length].nome, jogadores: t }))
@@ -1361,8 +1375,17 @@
 
                     tbody.innerHTML = '';
                     historico.forEach(s => {
-                        const dataFmt = s.data_partida ? new Date(s.data_partida + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                        // Correção do "Invalid Date" usando split e montando a string de data sem problemas de UTC
+                        let dataFmt = '-';
+                        if (s.data_partida) {
+                            const partes = s.data_partida.split('T')[0].split('-');
+                            if (partes.length === 3) {
+                                dataFmt = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                            }
+                        }
                         
+                        const localJogo = s.local_partida || configsGlobal.partida_local || 'Campo Principal - CMV';
+
                         let timesHtml = '';
                         if (Array.isArray(s.dados_times)) {
                             timesHtml = s.dados_times.map(t => `
@@ -1375,7 +1398,10 @@
 
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40 align-top">
-                                <td class="py-3 font-medium text-white">${dataFmt}</td>
+                                <td class="py-3 font-medium text-white">
+                                    <div class="text-emerald-400 font-bold">${dataFmt}</div>
+                                    <div class="text-[11px] text-gray-400 mt-0.5">${localJogo}</div>
+                                </td>
                                 <td class="py-3 text-gray-300">${s.num_times} Times</td>
                                 <td class="py-3">${timesHtml}</td>
                             </tr>
