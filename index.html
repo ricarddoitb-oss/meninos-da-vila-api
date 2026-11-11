@@ -178,7 +178,7 @@
                         <p class="text-[11px] text-gray-400 mb-3">Atletas com status <strong>Ativo</strong> participam do sorteio.</p>
                         <div id="presenca-lista" class="space-y-2 max-h-[350px] overflow-y-auto pr-2 flex-1 mb-4"></div>
                         <button onclick="salvarPresencasERealizarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
-                            <i class="fa-solid fa-check-circle mr-1"></i>Confirmar Presença & Sortear
+                            <i class="fa-solid fa-shuffle mr-1"></i>Gerar Sorteio (Prévia)
                         </button>
                     </div>
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
@@ -186,12 +186,12 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-base text-amber-400">Times Sorteados para a Rodada</h3>
                                 <div id="status-sorteio-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold">
-                                    <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado & Trava Ativa
+                                    <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado & Presenças Computadas
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label class="text-xs text-gray-400">Quantidade de Times (Coletes - Preto, Vermelho, Azul, Laranja):</label>
+                                    <label class="text-xs text-gray-400">Qtd Times (Coletes - Preto, Vermelho, Azul, Laranja):</label>
                                     <select id="qtd-times" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                                         <option value="2">2 Times</option>
                                         <option value="3">3 Times</option>
@@ -206,13 +206,13 @@
                             </div>
                         </div>
 
-                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">Selecione os atletas à esquerda e clique em confirmar presença & sortear.</div>
+                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">Selecione os atletas à esquerda e clique em gerar sorteio.</div>
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
 
                         <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-700/60 hidden">
                             <button onclick="confirmarETravarSorteio()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-lock text-base"></i>
-                                <span>Confirmar e Travar Resultado do Sorteio (Salvar no Histórico)</span>
+                                <span>Confirmar e Travar Resultado (Lançar Presenças & Salvar Histórico)</span>
                             </button>
                         </div>
                     </div>
@@ -610,7 +610,7 @@
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
         let listaAtletasGlobal = [];
         let configsGlobal = {};
-        let ultimoSorteioGerado = null; // Armazena temporariamente o sorteio atual
+        let ultimoSorteioGerado = null;
 
         const token = localStorage.getItem('token');
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -948,34 +948,13 @@
             document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked);
         }
 
-        async function salvarPresencasERealizarSorteio() {
+        function salvarPresencasERealizarSorteio() {
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
-            const jogadorIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
-            if (jogadorIds.length === 0) {
-                alert('Selecione pelo menos um atleta para confirmar presença.');
+            if (checkboxes.length === 0) {
+                alert('Selecione pelo menos um atleta para o sorteio.');
                 return;
             }
-
-            const dataPartida = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
-
-            try {
-                const res = await fetch(`${API_URL}/api/presencas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ data_partida: dataPartida, jogador_ids: jogadorIds })
-                });
-
-                if (res.ok) {
-                    carregarJogadores();
-                    sortearTimesAvancado();
-                } else {
-                    alert('Erro ao registrar presenças.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Erro de conexão ao registrar presenças.');
-            }
+            sortearTimesAvancado();
         }
 
         async function removerPresencaAtleta(jogadorId, nomeAtleta) {
@@ -1260,6 +1239,7 @@
         // SORTEIO AVANÇADO COM TRAVA DE GOLEIROS E COLETES (PRETO, VERMELHO, AZUL, LARANJA)
         function sortearTimesAvancado() {
             const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
+                id: parseInt(cb.value),
                 nome: cb.dataset.nome,
                 posicao: cb.dataset.posicao
             }));
@@ -1270,27 +1250,22 @@
                 return;
             }
 
-            // Separação Inteligente: Goleiros vs Jogadores de Linha
             const goleiros = selecionados.filter(j => j.posicao && j.posicao.toLowerCase() === 'goleiro');
             const linha = selecionados.filter(j => !j.posicao || j.posicao.toLowerCase() !== 'goleiro');
 
-            // Embaralha ambos
             goleiros.sort(() => 0.5 - Math.random());
             linha.sort(() => 0.5 - Math.random());
 
             const times = Array.from({ length: numTimes }, () => []);
 
-            // Trava de Goleiros: Distribui um goleiro por time ciclicamente se houver goleiros suficientes
             goleiros.forEach((g, idx) => {
                 times[idx % numTimes].push(g);
             });
 
-            // Distribui os jogadores de linha restantes
             linha.forEach((atleta, index) => {
                 times[index % numTimes].push(atleta);
             });
 
-            // Coletes solicitados: Preto, Vermelho, Azul, Laranja
             const paletaCores = [
                 { nome: 'Time Colete Preto', classe: 'border-gray-500 text-gray-200 bg-black/40' },
                 { nome: 'Time Colete Vermelho', classe: 'border-rose-500 text-rose-400' },
@@ -1301,6 +1276,7 @@
             ultimoSorteioGerado = {
                 data_partida: configsGlobal.partida_data || new Date().toISOString().split('T')[0],
                 num_times: numTimes,
+                jogador_ids: selecionados.map(j => j.id),
                 dados_times: times.map((t, idx) => ({ nome: paletaCores[idx % paletaCores.length].nome, jogadores: t }))
             };
 
@@ -1325,7 +1301,6 @@
                 `;
             });
 
-            // Mostra o botão para confirmar e travar o sorteio
             document.getElementById('container-btn-confirmar').classList.remove('hidden');
             document.getElementById('status-sorteio-badge').classList.add('hidden');
         }
@@ -1336,28 +1311,38 @@
                 return;
             }
 
-            if (!confirm('Deseja confirmar e travar este resultado do sorteio? Ele será salvo permanentemente no histórico de rodadas.')) {
+            if (!confirm('Deseja confirmar e travar este resultado? Isso registrará a presença oficial de todos os atletas selecionados na rodada e salvará o histórico.')) {
                 return;
             }
 
             try {
-                const res = await fetch(`${API_URL}/api/sorteios`, {
+                const resPresenca = await fetch(`${API_URL}/api/presencas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ 
+                        data_partida: ultimoSorteioGerado.data_partida, 
+                        jogador_ids: ultimoSorteioGerado.jogador_ids 
+                    })
+                });
+
+                const resSorteio = await fetch(`${API_URL}/api/sorteios`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(ultimoSorteioGerado)
                 });
 
-                if (res.ok) {
-                    alert('Sorteio confirmado, travado e salvo no histórico com sucesso!');
+                if (resPresenca.ok && resSorteio.ok) {
+                    alert('Presenças computadas e sorteio travado com sucesso!');
                     document.getElementById('container-btn-confirmar').classList.add('hidden');
                     document.getElementById('status-sorteio-badge').classList.remove('hidden');
+                    carregarJogadores();
                     carregarHistoricoSorteios();
                 } else {
-                    alert('Erro ao salvar sorteio.');
+                    alert('Erro ao confirmar e salvar o sorteio.');
                 }
             } catch (err) {
                 console.error('Erro:', err);
-                alert('Erro de conexão ao salvar sorteio.');
+                alert('Erro de conexão ao salvar.');
             }
         }
 
