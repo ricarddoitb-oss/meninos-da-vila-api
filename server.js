@@ -26,7 +26,6 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
-// Middleware para Admin (Apenas Admin)
 function verificarAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
@@ -43,7 +42,6 @@ function verificarAdmin(req, res, next) {
     }
 }
 
-// Middleware para Gestor ou Admin (Permite cadastrar e editar, mas impede exclusões)
 function verificarGestorOuAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
@@ -80,23 +78,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// JOGADORES (Com validação obrigatória e função no grupo)
+// JOGADORES (Com validação obrigatória, função e status de aptidão)
 app.get('/api/jogadores', async (req, res) => {
     try {
-        const r = await pool.query('SELECT * FROM jogadores ORDER BY id ASC');
+        const r = await pool.query(`
+            SELECT j.*, 
+            (SELECT COUNT(*) FROM presencas_partidas p WHERE p.jogador_id = j.id) as total_participacoes 
+            FROM jogadores j ORDER BY id ASC
+        `);
         res.json(r.rows);
     } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
 });
 
 app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
     }
 
     try {
-        const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`;
+        const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
             data_nascimento, 
@@ -105,7 +107,8 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
             parseInt(nivel) || 3, 
             status_mensalidade || 'Pendente', 
             parseInt(gols) || 0,
-            funcao_grupo || 'Atleta'
+            funcao_grupo || 'Atleta',
+            status_aptidao || 'Ativo'
         ]);
 
         const novoJogador = r.rows[0];
@@ -127,7 +130,7 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
 
 app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
@@ -137,7 +140,7 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
         const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
         const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
 
-        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7, funcao_grupo=$8 WHERE id=$9 RETURNING *;`;
+        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7, funcao_grupo=$8, status_aptidao=$9 WHERE id=$10 RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
             data_nascimento, 
@@ -147,6 +150,7 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
             status_mensalidade || 'Pendente', 
             parseInt(gols) || 0, 
             funcao_grupo || 'Atleta',
+            status_aptidao || 'Ativo',
             id
         ]);
 
@@ -173,6 +177,28 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
         await pool.query('DELETE FROM jogadores WHERE id=$1', [id]);
         res.json({ mensagem: 'Removido com sucesso.' });
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
+});
+
+// REGISTRO DE PRESENÇAS / PARTICIPAÇÕES POR RODADA
+app.post('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
+    const { data_partida, jogador_ids } = req.body; // jogador_ids = [1, 5, 8, ...]
+    if (!data_partida || !Array.isArray(jogador_ids)) {
+        return res.status(400).json({ erro: 'Data da partida e lista de jogadores são obrigatórias.' });
+    }
+
+    try {
+        // Insere as presenças evitando duplicidade na mesma data
+        for (const jId of jogador_ids) {
+            await pool.query(
+                `INSERT INTO presencas_partidas (jogador_id, data_partida) VALUES ($1, $2) ON CONFLICT (jogador_id, data_partida) DO NOTHING;`,
+                [jId, data_partida]
+            );
+        }
+        res.json({ mensagem: 'Presenças registadas com sucesso e participações contabilizadas!' });
+    } catch (err) {
+        console.error('Erro ao registrar presenças:', err);
+        res.status(500).json({ erro: 'Erro ao registrar presenças.' });
+    }
 });
 
 // FINANCEIRO

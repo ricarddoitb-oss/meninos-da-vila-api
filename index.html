@@ -159,10 +159,14 @@
                                 <span>Selecionar Todos</span>
                             </label>
                         </div>
-                        <div id="presenca-lista" class="space-y-2 max-h-[400px] overflow-y-auto pr-2 flex-1"></div>
+                        <p class="text-[11px] text-gray-400 mb-3">Apenas atletas com aptidão <strong>Ativo</strong> participam do sorteio.</p>
+                        <div id="presenca-lista" class="space-y-2 max-h-[350px] overflow-y-auto pr-2 flex-1 mb-4"></div>
+                        <button onclick="salvarPresencasERealizarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
+                            <i class="fa-solid fa-check-circle mr-1"></i>Confirmar Presença & Sortear
+                        </button>
                     </div>
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-amber-400">Configurar Sorteio</h3>
+                        <h3 class="font-bold text-base mb-4 text-amber-400">Times Sorteados para a Rodada</h3>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="text-xs text-gray-400">Quantidade de Times:</label>
@@ -179,10 +183,7 @@
                                 </select>
                             </div>
                         </div>
-                        <button onclick="sortearTimesAvancado()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-3 rounded-xl shadow-lg mb-6">
-                            Sortear Times Personalizados
-                        </button>
-                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">Selecione os atletas à esquerda e clique em sortear.</div>
+                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">Selecione os atletas à esquerda e clique em confirmar presença & sortear.</div>
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
                     </div>
                 </div>
@@ -293,7 +294,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURAÇÃO (APENAS ADMIN) -->
+    <!-- MODAL DE CONFIGURAÇÃO DO CLUBE -->
     <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-amber-400 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>Editar Identidade do Clube</h3>
@@ -318,7 +319,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE JOGADOR (COM CAMPOS OBRIGATÓRIOS E FUNÇÃO) -->
+    <!-- MODAL DE JOGADOR (COM APTIDÃO E FUNÇÃO) -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
@@ -336,17 +337,29 @@
                     <label class="text-xs text-gray-300">Telefone / WhatsApp *</label>
                     <input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                 </div>
-                <div>
-                    <label class="text-xs text-gray-300">Função no Grupo</label>
-                    <select id="input-funcao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                        <option value="Atleta">Atleta / Membro</option>
-                        <option value="Diretor">Diretor</option>
-                        <option value="Vice Diretor">Vice Diretor</option>
-                        <option value="Secretário">Secretário</option>
-                        <option value="Tesoureiro">Tesoureiro</option>
-                        <option value="Coordenador de Patrimônio">Coordenador de Patrimônio</option>
-                        <option value="Mídia">Mídia</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-gray-300">Função no Grupo</label>
+                        <select id="input-funcao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                            <option value="Atleta">Atleta / Membro</option>
+                            <option value="Diretor">Diretor</option>
+                            <option value="Vice Diretor">Vice Diretor</option>
+                            <option value="Secretário">Secretário</option>
+                            <option value="Tesoureiro">Tesoureiro</option>
+                            <option value="Coordenador de Patrimônio">Coordenador de Patrimônio</option>
+                            <option value="Mídia">Mídia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-300">Status de Aptidão</label>
+                        <select id="input-aptidao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                            <option value="Ativo">Ativo (Apto)</option>
+                            <option value="Suspenso">Suspenso</option>
+                            <option value="Bloqueado">Bloqueado</option>
+                            <option value="Disciplinado">Disciplinado</option>
+                            <option value="DM">DM (Lesionado)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -708,22 +721,31 @@
                 }
 
                 const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
+                
+                let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
+                if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
+                else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
+                else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
+                else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
 
                 grid.innerHTML += `
                     <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
                         <div>
-                            <div class="flex justify-between items-start flex-wrap gap-1">
+                            <div class="flex justify-between items-start flex-wrap gap-1 mb-2">
                                 <div>
                                     <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">${j.posicao}</span>
                                     ${funcaoBadge}
                                 </div>
-                                <span class="text-xs px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
+                                <div class="space-x-1">
+                                    <span class="text-[10px] px-2 py-0.5 rounded ${aptidaoCor}">${j.status_aptidao || 'Ativo'}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
+                                </div>
                             </div>
-                            <h4 class="font-bold text-white text-base mt-2">${j.nome}</h4>
+                            <h4 class="font-bold text-white text-base">${j.nome}</h4>
                             <p class="text-xs text-gray-400">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
-                            <span>⚽ Gols: <strong>${j.gols || 0}</strong></span>
+                            <span>⚽ Gols: <strong>${j.gols || 0}</strong> | 📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong></span>
                             <div>${botoesAcao}</div>
                         </div>
                     </div>
@@ -735,7 +757,16 @@
             const lista = document.getElementById('presenca-lista');
             if (!lista) return;
             lista.innerHTML = '';
-            jogadores.forEach((j, index) => {
+            
+            // Filtra apenas atletas ativos para a presença/sorteio
+            const ativos = jogadores.filter(j => !j.status_aptidao || j.status_aptidao === 'Ativo');
+
+            if(ativos.length === 0) {
+                lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta com status Ativo disponível.</p>';
+                return;
+            }
+
+            ativos.forEach((j, index) => {
                 lista.innerHTML += `
                     <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-900/50 border border-pitch-700/40 cursor-pointer mb-2">
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
@@ -749,6 +780,37 @@
             document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked);
         }
 
+        async function salvarPresencasERealizarSorteio() {
+            const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
+            const jogadorIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            if (jogadorIds.length === 0) {
+                alert('Selecione pelo menos um atleta para confirmar presença.');
+                return;
+            }
+
+            const dataPartida = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
+
+            try {
+                // Registra presenças no backend (incrementando o total na tabela presencas_partidas)
+                const res = await fetch(`${API_URL}/api/presencas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ data_partida: dataPartida, jogador_ids: jogadorIds })
+                });
+
+                if (res.ok) {
+                    carregarJogadores(); // Atualiza a contagem na tela
+                    sortearTimesAvancado(); // Executa o sorteio com os selecionados
+                } else {
+                    alert('Erro ao registrar presenças.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão ao registrar presenças.');
+            }
+        }
+
         async function salvarJogador(e) {
             e.preventDefault();
             const id = document.getElementById('input-jogador-id').value;
@@ -757,6 +819,7 @@
                 data_nascimento: document.getElementById('input-nascimento').value,
                 telefone: document.getElementById('input-telefone').value,
                 funcao_grupo: document.getElementById('input-funcao').value,
+                status_aptidao: document.getElementById('input-aptidao').value,
                 posicao: document.getElementById('input-posicao').value,
                 status_mensalidade: document.getElementById('input-mensalidade').value,
                 gols: parseInt(document.getElementById('input-gols').value || 0)
@@ -788,6 +851,7 @@
             document.getElementById('input-nascimento').value = j.data_nascimento ? j.data_nascimento.split('T')[0] : '';
             document.getElementById('input-telefone').value = j.telefone || '';
             document.getElementById('input-funcao').value = j.funcao_grupo || 'Atleta';
+            document.getElementById('input-aptidao').value = j.status_aptidao || 'Ativo';
             document.getElementById('input-posicao').value = j.posicao;
             document.getElementById('input-mensalidade').value = j.status_mensalidade || 'Pendente';
             document.getElementById('input-gols').value = j.gols || 0;
