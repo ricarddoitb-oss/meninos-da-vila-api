@@ -250,11 +250,11 @@
                             <p class="text-xs text-gray-400 mb-6 leading-relaxed">Gerencie presenças instantaneamente, escale os coletes com o algoritmo de sorteio ou consulte relatórios gerenciais em PDF.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <button onclick="switchTab('presenca')" class="bg-pitch-800 hover:bg-pitch-700/80 p-4 rounded-2xl text-xs font-bold text-emerald-400 text-left transition border border-pitch-700/50 shadow-lg group">
+                            <button onclick="switchTab('presenca')" id="shortcut-presenca" class="bg-pitch-800 hover:bg-pitch-700/80 p-4 rounded-2xl text-xs font-bold text-emerald-400 text-left transition border border-pitch-700/50 shadow-lg group">
                                 <i class="fa-solid fa-clipboard-check mb-2 block text-xl group-hover:scale-110 transition"></i>
                                 <span class="block">Lista de Presença</span>
                             </button>
-                            <button onclick="switchTab('sorteio')" class="bg-pitch-800 hover:bg-pitch-700/80 p-4 rounded-2xl text-xs font-bold text-amber-400 text-left transition border border-pitch-700/50 shadow-lg group">
+                            <button onclick="switchTab('sorteio')" id="shortcut-sorteio" class="bg-pitch-800 hover:bg-pitch-700/80 p-4 rounded-2xl text-xs font-bold text-amber-400 text-left transition border border-pitch-700/50 shadow-lg group">
                                 <i class="fa-solid fa-shuffle mb-2 block text-xl group-hover:scale-110 transition"></i>
                                 <span class="block">Sorteio de Times</span>
                             </button>
@@ -840,6 +840,12 @@
             return `${meses[parseInt(mes, 10) - 1]}/${ano}`;
         }
 
+        // Função para formatar o texto deixando apenas as iniciais maiúsculas (Title Case)
+        function toTitleCase(str) {
+            if (!str) return '';
+            return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
         function alterarCompetenciaGlobal(novaComp) {
             if (!novaComp) return;
             competenciaAtual = novaComp;
@@ -864,6 +870,7 @@
                 document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
             }
 
+            // Aplicar restrições por perfil
             if (perfil === 'secretario') {
                 document.getElementById('nav-financeiro')?.remove();
                 document.getElementById('mob-nav-financeiro')?.remove();
@@ -871,6 +878,16 @@
                 document.getElementById('container-input-mensalidade')?.remove();
                 const dashGrid = document.getElementById('dashboard-cards-grid');
                 if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
+            }
+
+            // PERMISSÃO TESOUREIRO: Remover Lista de Presença e Sorteio
+            if (perfil === 'tesoureiro') {
+                document.getElementById('nav-presenca')?.remove();
+                document.getElementById('mob-nav-presenca')?.remove();
+                document.getElementById('nav-sorteio')?.remove();
+                document.getElementById('mob-nav-sorteio')?.remove();
+                document.getElementById('shortcut-presenca')?.remove();
+                document.getElementById('shortcut-sorteio')?.remove();
             }
 
             if (!['admin', 'tesoureiro'].includes(perfil)) {
@@ -901,6 +918,10 @@
         function switchTab(tabId) {
             if (tabId === 'financeiro' && usuarioLogado.perfil === 'secretario') {
                 showToast('Acesso não autorizado ao módulo financeiro.', 'erro');
+                return;
+            }
+            if ((tabId === 'presenca' || tabId === 'sorteio') && usuarioLogado.perfil === 'tesoureiro') {
+                showToast('Acesso não autorizado a este módulo.', 'erro');
                 return;
             }
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -968,10 +989,10 @@
             }
         }
 
-        // Convocação Geral com a Lista Numerada de 1 a 36 Preenchida
+        // Convocação Geral com formatação de iniciais maiúsculas (Title Case)
         function dispararConvocacaoGeralWhatsApp() {
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
-            const nomesSelecionados = Array.from(checkboxes).map(cb => cb.dataset.nome);
+            const nomesSelecionados = Array.from(checkboxes).map(cb => toTitleCase(cb.dataset.nome));
 
             let linhasLista = '';
             for (let i = 1; i <= 36; i++) {
@@ -979,8 +1000,8 @@
                 linhasLista += `${i}. ${nomeAtleta}\n`;
             }
 
-            const texto = `C.M.V. - CLUBE MENINOS DA VILA (Igreja Batista Bela Vista)\n\n` +
-                          `Sábado 16h CABOS E SOLDADOS\n` +
+            const texto = `C.M.V. - Clube Meninos Da Vila (Igreja Batista Bela Vista)\n\n` +
+                          `Sábado 16h Cabos E Soldados\n` +
                           `${linhasLista}`;
 
             const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
@@ -988,6 +1009,12 @@
         }
 
         function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
+            // Secretário não pode enviar cobrança via WhatsApp
+            if (usuarioLogado.perfil === 'secretario' && tipo === 'cobranca') {
+                showToast('O perfil de secretário não possui permissão para envio de cobranças.', 'aviso');
+                return;
+            }
+
             if (!telefone || telefone.trim() === '') {
                 showToast('Atleta sem número de telefone cadastrado!', 'erro');
                 return;
@@ -998,9 +1025,9 @@
             const compLabel = formatarCompetenciaLabel(competenciaAtual);
             let mensagem = '';
             if (tipo === 'cobranca') {
-                mensagem = `Olá ${nomeAtleta}, tudo bem? Passando para lembrar da sua mensalidade referente a *${compLabel}* no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
+                mensagem = `Olá ${toTitleCase(nomeAtleta)}, tudo bem? Passando para lembrar da sua mensalidade referente a *${compLabel}* no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
             } else if (tipo === 'convocacao') {
-                mensagem = `Salve ${nomeAtleta}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Confirme sua presença! Tamo junto!`;
+                mensagem = `Salve ${toTitleCase(nomeAtleta)}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Tamo junto!`;
             }
 
             const url = `https://api.whatsapp.com/send?phone=${foneLimpo}&text=${encodeURIComponent(mensagem)}`;
@@ -1127,7 +1154,7 @@
             const banner = document.getElementById('aniversariante-banner');
             const texto = document.getElementById('aniversariante-texto');
             if (aniversariantes.length > 0) {
-                texto.innerHTML = `Hoje é aniversário de: ${aniversariantes.map(a => `<strong>${a.nome}</strong>`).join(', ')}! 🎂⚽`;
+                texto.innerHTML = `Hoje é aniversário de: ${aniversariantes.map(a => `<strong>${toTitleCase(a.nome)}</strong>`).join(', ')}! 🎂⚽`;
                 banner.classList.remove('hidden');
             } else { banner.classList.add('hidden'); }
         }
@@ -1137,6 +1164,7 @@
             if (!grid) return;
             const podeGerenciar = ['admin', 'gestor', 'tesoureiro', 'secretario'].includes(usuarioLogado.perfil);
             const isAdmin = usuarioLogado.perfil === 'admin';
+            const isSecretario = usuarioLogado.perfil === 'secretario';
 
             if (jogadores.length === 0) {
                 grid.innerHTML = `<div class="col-span-3 text-center py-16 text-gray-400 text-sm bg-pitch-900 border border-pitch-800 rounded-3xl shadow-lg">Nenhum atleta encontrado com os filtros aplicados.</div>`;
@@ -1158,8 +1186,14 @@
                 if (j.telefone) {
                     const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
                     const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
-                    const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400 hover:text-emerald-300' : 'fa-whatsapp text-amber-400 hover:text-amber-300';
-                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '${valorCobranca}')" class="font-bold transition mr-3" title="Enviar WhatsApp"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
+                    
+                    // Se for secretário e o tipo for cobrança, não exibe o botão de WhatsApp de cobrança
+                    const permitirWp = !(isSecretario && tipoWp === 'cobranca');
+
+                    if (permitirWp) {
+                        const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400 hover:text-emerald-300' : 'fa-whatsapp text-amber-400 hover:text-amber-300';
+                        botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '${valorCobranca}')" class="font-bold transition mr-3" title="Enviar WhatsApp"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
+                    }
                 }
 
                 if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
@@ -1198,7 +1232,7 @@
                                 </div>
                             </div>
                             <h4 onclick="abrirPerfilAtleta(${j.id})" class="font-black text-white text-base cursor-pointer hover:text-emerald-400 transition flex items-center justify-between" title="Ver Perfil Completo">
-                                <span>${j.nome}</span>
+                                <span>${toTitleCase(j.nome)}</span>
                                 <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-emerald-400 transition"></i>
                             </h4>
                             <p class="text-xs text-gray-400 mt-1 font-medium">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
@@ -1219,7 +1253,7 @@
                 const dados = await res.json();
                 const j = dados.jogador;
 
-                document.getElementById('perfil-nome').innerText = j.nome;
+                document.getElementById('perfil-nome').innerText = toTitleCase(j.nome);
                 document.getElementById('perfil-detalhes-gerais').innerText = `${j.posicao} • ${j.funcao_grupo || 'Atleta'} • ${j.status_aptidao || 'Ativo'} • 📞 ${j.telefone || '-'}`;
                 document.getElementById('perfil-total-jogos').innerText = dados.presencas.length;
                 
@@ -1267,7 +1301,7 @@
                 lista.innerHTML += `
                     <label class="flex items-center space-x-3 p-3.5 rounded-2xl bg-pitch-950 border border-pitch-800 cursor-pointer mb-2 hover:bg-pitch-800/40 transition">
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
-                        <span class="text-sm font-semibold text-white">${j.nome} <span class="text-gray-400 text-xs">(${j.posicao})</span> ${tipoBadge}</span>
+                        <span class="text-sm font-semibold text-white">${toTitleCase(j.nome)} <span class="text-gray-400 text-xs">(${j.posicao})</span> ${tipoBadge}</span>
                     </label>
                 `;
             });
@@ -1288,7 +1322,7 @@
             [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
                 tbodyPres.innerHTML += `
                     <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                        <td class="py-3.5 font-bold text-white">${j.nome}</td>
+                        <td class="py-3.5 font-bold text-white">${toTitleCase(j.nome)}</td>
                         <td class="py-3.5 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
                         <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
                         <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">${j.status_aptidao || 'Ativo'}</span></td>
@@ -1311,7 +1345,7 @@
                         const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '${valorCobranca}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 ml-auto"><i class="fa-brands fa-whatsapp text-sm"></i><span>Cobrar WhatsApp</span></button>` : '<span class="text-gray-500 text-xs">Sem telefone</span>';
                         tbodyInad.innerHTML += `
                             <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                                <td class="py-3.5 font-bold text-white">${j.nome}</td>
+                                <td class="py-3.5 font-bold text-white">${toTitleCase(j.nome)}</td>
                                 <td class="py-3.5 text-gray-300">${j.telefone || '-'}</td>
                                 <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
                                 <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
@@ -1342,7 +1376,7 @@
 
         async function removerPresencaAtleta(jogadorId, nomeAtleta) {
             const dataPartida = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
-            if (!confirm(`Remover presença de "${nomeAtleta}" em ${dataPartida}?`)) return;
+            if (!confirm(`Remover presença de "${toTitleCase(nomeAtleta)}" em ${dataPartida}?`)) return;
             try {
                 const res = await fetch(`${API_URL}/api/presencas`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ jogador_id: jogadorId, data_partida: dataPartida }) });
                 if (res.ok) { showToast('Presença removida!'); carregarJogadores(); }
@@ -1541,7 +1575,7 @@
                     const usuarios = await res.json();
                     container.innerHTML = usuarios.map(u => `
                         <div class="p-4.5 bg-pitch-950 rounded-2xl border border-pitch-800 flex justify-between items-center shadow">
-                            <div><p class="text-sm font-bold text-white">${u.nome} <span class="text-gray-400 font-normal">(${u.email})</span></p><span class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 mt-1.5 inline-block uppercase font-black">${u.perfil}</span></div>
+                            <div><p class="text-sm font-bold text-white">${toTitleCase(u.nome)} <span class="text-gray-400 font-normal">(${u.email})</span></p><span class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 mt-1.5 inline-block uppercase font-black">${u.perfil}</span></div>
                             <div class="space-x-3">
                                 <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 hover:text-amber-300 text-xs font-bold">Editar</button>
                                 <button onclick="excluirUsuario(${u.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold">Excluir</button>
@@ -1653,7 +1687,7 @@
                 container.innerHTML += `
                     <div class="bg-pitch-950 border ${cor.classe} rounded-2xl p-4 mb-4">
                         <h4 class="font-black text-xs uppercase tracking-wider mb-3">${cor.nome} (${tJogadores.length} atletas)</h4>
-                        <div class="space-y-1.5">${tJogadores.map(j => `<div class="p-2.5 bg-pitch-900 rounded-xl border border-pitch-800 text-xs text-white flex justify-between font-medium"><span>${j.nome}</span><span class="text-gray-400">${j.posicao}</span></div>`).join('')}</div>
+                        <div class="space-y-1.5">${tJogadores.map(j => `<div class="p-2.5 bg-pitch-900 rounded-xl border border-pitch-800 text-xs text-white flex justify-between font-medium"><span>${toTitleCase(j.nome)}</span><span class="text-gray-400">${j.posicao}</span></div>`).join('')}</div>
                     </div>
                 `;
             });
@@ -1689,7 +1723,7 @@
                     tbody.innerHTML = '';
                     historicoSorteiosGlobal.forEach(s => {
                         let dataFmt = s.data_partida ? s.data_partida.split('T')[0].split('-').reverse().join('/') : '-';
-                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-2 p-3 bg-pitch-950 rounded-2xl border border-pitch-800"><strong class="text-amber-400 text-xs">${t.nome}:</strong> <span class="text-xs text-gray-300 font-medium">${t.jogadores.map(j => j.nome).join(', ')}</span></div>`).join('') : '';
+                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-2 p-3 bg-pitch-950 rounded-2xl border border-pitch-800"><strong class="text-amber-400 text-xs">${t.nome}:</strong> <span class="text-xs text-gray-300 font-medium">${t.jogadores.map(j => toTitleCase(j.nome)).join(', ')}</span></div>`).join('') : '';
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-800 hover:bg-pitch-800/30 align-top">
                                 <td class="py-3.5 font-bold text-white"><div class="text-emerald-400 font-extrabold">${dataFmt}</div></td>
