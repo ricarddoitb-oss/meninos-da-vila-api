@@ -238,7 +238,8 @@
                         </button>
                     </div>
 
-                    <div class="bg-pitch-900/90 border border-pitch-800/80 p-6 md:p-8 rounded-3xl shadow-xl flex flex-col justify-between">
+                    <!-- CARD DE ATALHOS OPERACIONAIS (Ocultado para Tesoureiro) -->
+                    <div id="card-atalhos-operacionais" class="bg-pitch-900/90 border border-pitch-800/80 p-6 md:p-8 rounded-3xl shadow-xl flex flex-col justify-between">
                         <div>
                             <div class="flex items-center space-x-3 mb-4">
                                 <div class="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold"><i class="fa-solid fa-bolt"></i></div>
@@ -802,7 +803,7 @@
         let competenciaAtual = new Date().toISOString().slice(0, 7);
 
         const token = localStorage.getItem('token');
-        const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
+        let usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
         if (!token && !window.location.pathname.endsWith('login.html')) {
             window.location.href = 'login.html';
         }
@@ -880,14 +881,13 @@
                 if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
             }
 
-            // PERMISSÃO TESOUREIRO: Remover Lista de Presença e Sorteio
+            // PERMISSÃO TESOUREIRO: Remover Lista de Presença, Sorteio e Atalhos Operacionais
             if (perfil === 'tesoureiro') {
                 document.getElementById('nav-presenca')?.remove();
                 document.getElementById('mob-nav-presenca')?.remove();
                 document.getElementById('nav-sorteio')?.remove();
                 document.getElementById('mob-nav-sorteio')?.remove();
-                document.getElementById('shortcut-presenca')?.remove();
-                document.getElementById('shortcut-sorteio')?.remove();
+                document.getElementById('card-atalhos-operacionais')?.remove();
             }
 
             if (!['admin', 'tesoureiro'].includes(perfil)) {
@@ -1009,7 +1009,6 @@
         }
 
         function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
-            // Secretário não pode enviar cobrança via WhatsApp
             if (usuarioLogado.perfil === 'secretario' && tipo === 'cobranca') {
                 showToast('O perfil de secretário não possui permissão para envio de cobranças.', 'aviso');
                 return;
@@ -1186,8 +1185,6 @@
                 if (j.telefone) {
                     const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
                     const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
-                    
-                    // Se for secretário e o tipo for cobrança, não exibe o botão de WhatsApp de cobrança
                     const permitirWp = !(isSecretario && tipoWp === 'cobranca');
 
                     if (permitirWp) {
@@ -1616,7 +1613,20 @@
             const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
             try {
                 const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
-                if (res.ok) { showToast('Usuário salvo!'); closeModal('modal-usuario'); carregarUsuariosSistema(); }
+                if (res.ok) {
+                    const usuarioAtualizado = await res.json();
+                    showToast('Usuário salvo!'); 
+                    closeModal('modal-usuario'); 
+                    carregarUsuariosSistema(); 
+                    carregarJogadores();
+
+                    // Se o usuário editado for o próprio usuário atualmente logado, atualiza a sessão imediatamente
+                    if (usuarioAtualizado.id === usuarioLogado.id) {
+                        usuarioLogado.perfil = usuarioAtualizado.perfil;
+                        localStorage.setItem('usuario', JSON.stringify(usuarioLogado));
+                        window.location.reload();
+                    }
+                }
                 else { showToast('Erro ao salvar.', 'erro'); }
             } catch (err) { console.error(err); }
             finally { setBotaoCarregando(btn, false, 'Salvar'); }
