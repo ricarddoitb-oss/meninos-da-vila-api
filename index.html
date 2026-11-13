@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        pitch: { 900: '#122017', 800: '#1a2e21', 700: '#2d4d38', gold: '#f59e0b' }
+                        pitch: { 950: '#09100c', 900: '#111d15', 800: '#18291e', 700: '#233d2c', accent: '#10b981', gold: '#f59e0b' }
                     }
                 }
             }
@@ -31,146 +31,198 @@
             body:not(.imprimindo-recibo) #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; }
             table { width: 100% !important; border-collapse: collapse !important; }
             th, td { padding: 4px 6px !important; border-bottom: 1px solid #ddd !important; color: black !important; }
-            .bg-pitch-800, .bg-pitch-900 { background: transparent !important; border-color: #ccc !important; box-shadow: none !important; }
+            .bg-pitch-800, .bg-pitch-900, .bg-pitch-950 { background: transparent !important; border-color: #ccc !important; box-shadow: none !important; }
             .text-white, .text-gray-300, .text-gray-400 { color: #111 !important; }
             .print\:hidden { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-pitch-900 text-white min-h-screen flex">
+<body class="bg-pitch-950 text-white min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 selection:bg-emerald-500 selection:text-gray-950">
 
     <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col space-y-3 pointer-events-none print:hidden"></div>
 
-    <!-- MENU LATERAL -->
-    <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex print:hidden">
+    <!-- SIDEBAR DESKTOP -->
+    <aside class="w-72 bg-pitch-900 border-r border-pitch-800 flex-col justify-between hidden md:flex print:hidden sticky top-0 h-screen shadow-2xl">
         <div>
-            <div class="p-6 border-b border-pitch-700/60 text-center relative group">
-                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg bg-pitch-900">
-                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" alt="Logo do Clube" class="w-full h-full object-cover">
+            <div class="p-6 border-b border-pitch-800 text-center relative">
+                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-amber-400 shadow-xl bg-pitch-950 ring-4 ring-emerald-500/10">
+                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
-                <h1 id="sidebar-nome-clube" class="font-bold text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
+                <h1 id="sidebar-nome-clube" class="font-black text-sm text-amber-400 tracking-wider">MENINOS DA VILA</h1>
                 <p id="sidebar-subtitulo-clube" class="text-xs text-emerald-400 font-semibold mt-1"><i class="fa-brands fa-instagram mr-1"></i>@cmvitb</p>
-                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-2 right-2 bg-pitch-700 hover:bg-pitch-600 text-amber-400 p-1.5 rounded-full text-xs shadow hidden" title="Editar Dados do Clube">
+                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-3 right-3 bg-pitch-800 hover:bg-pitch-700 text-amber-400 p-2 rounded-xl text-xs shadow hidden transition" title="Editar Clube">
                     <i class="fa-solid fa-pen"></i>
                 </button>
             </div>
-            <nav class="p-4 space-y-1">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <nav class="p-4 space-y-1.5">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm transition">
                     <i class="fa-solid fa-chart-pie w-5"></i><span>Dashboard</span>
                 </button>
-                <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-800 hover:text-white transition">
                     <i class="fa-solid fa-users w-5"></i><span>Elenco & Atletas</span>
                 </button>
-                <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-800 hover:text-white transition">
                     <i class="fa-solid fa-shuffle w-5"></i><span>Presença & Sorteio</span>
                 </button>
-                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-800 hover:text-white transition">
                     <i class="fa-solid fa-wallet w-5"></i><span>Financeiro / Caixa</span>
                 </button>
-                <button onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40">
+                <button onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-800 hover:text-white transition">
                     <i class="fa-solid fa-file-lines w-5"></i><span>Relatórios</span>
                 </button>
-                <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-700/40 hidden">
+                <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-pitch-800 hover:text-white transition hidden">
                     <i class="fa-solid fa-user-shield w-5"></i><span>Usuários & Acessos</span>
                 </button>
             </nav>
         </div>
-        <div class="p-4 border-t border-pitch-700/60">
-            <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-rose-500/10 text-rose-400 hover:bg-rose-500/20">
+        <div class="p-4 border-t border-pitch-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-sm font-semibold bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition">
                 <i class="fa-solid fa-right-from-bracket"></i><span>Sair da Conta</span>
             </button>
         </div>
     </aside>
 
+    <!-- MOBILE TOP BAR -->
+    <header class="md:hidden bg-pitch-900 border-b border-pitch-800 px-5 py-4 flex justify-between items-center sticky top-0 z-40 shadow-lg print:hidden">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border border-amber-400 bg-pitch-950">
+                <img id="mobile-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h1 class="font-black text-xs text-amber-400">MENINOS DA VILA</h1>
+                <p class="text-[10px] text-emerald-400">Painel Oficial</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador-mob" class="manager-access bg-emerald-600 text-white p-2 rounded-xl text-xs hidden shadow"><i class="fa-solid fa-user-plus"></i></button>
+            <button onclick="logout()" class="bg-pitch-800 text-rose-400 p-2 rounded-xl text-xs"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+    </header>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-md border-t border-pitch-800 flex justify-around p-3 z-50 print:hidden shadow-2xl">
+        <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center text-emerald-400 text-[10px] font-bold">
+            <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i><span>Início</span>
+        </button>
+        <button onclick="switchTab('elenco')" id="mob-nav-elenco" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium">
+            <i class="fa-solid fa-users text-lg mb-0.5"></i><span>Elenco</span>
+        </button>
+        <button onclick="switchTab('presenca')" id="mob-nav-presenca" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium">
+            <i class="fa-solid fa-shuffle text-lg mb-0.5"></i><span>Sorteio</span>
+        </button>
+        <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium">
+            <i class="fa-solid fa-wallet text-lg mb-0.5"></i><span>Caixa</span>
+        </button>
+        <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium">
+            <i class="fa-solid fa-file-lines text-lg mb-0.5"></i><span>Relatórios</span>
+        </button>
+    </nav>
+
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="flex-1 flex flex-col min-h-screen">
-        <header class="bg-pitch-800/50 border-b border-pitch-700/60 px-8 py-5 flex justify-between items-center print:hidden">
-            <h2 id="page-title" class="text-xl font-bold text-white">Dashboard Geral</h2>
-            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg hidden">
-                <i class="fa-solid fa-user-plus mr-2"></i>Novo Jogador
+        <header class="hidden md:flex bg-pitch-900/40 backdrop-blur-md border-b border-pitch-800 px-8 py-5 justify-between items-center print:hidden">
+            <h2 id="page-title" class="text-xl font-bold text-white tracking-wide">Dashboard Geral</h2>
+            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-900/30 transition flex items-center space-x-2 hidden">
+                <i class="fa-solid fa-user-plus"></i><span>Novo Atleta</span>
             </button>
         </header>
 
-        <div class="p-8 flex-1 overflow-y-auto">
+        <div class="p-4 md:p-8 flex-1 overflow-y-auto max-w-7xl mx-auto w-full">
 
-            <!-- ABA DASHBOARD (Grid ajustada para 4 colunas sem Gols) -->
+            <!-- ABA DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
-                <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/30 to-pitch-800 border border-amber-500/50 p-6 rounded-2xl shadow-xl flex items-center space-x-4">
-                    <div class="bg-amber-500 text-gray-950 p-4 rounded-xl text-2xl font-bold shadow-lg">
+                <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/20 via-pitch-800 to-pitch-900 border border-amber-500/40 p-5 md:p-6 rounded-2xl shadow-xl flex items-center space-x-4">
+                    <div class="bg-amber-500 text-gray-950 p-4 rounded-xl text-2xl font-black shadow-lg animate-bounce">
                         <i class="fa-solid fa-cake-candles"></i>
                     </div>
                     <div>
-                        <h3 class="text-amber-400 font-bold text-lg">Parabéns aos Aniversariantes de Hoje! 🎉</h3>
-                        <p id="aniversariante-texto" class="text-sm text-gray-200 mt-1"></p>
+                        <h3 class="text-amber-400 font-bold text-base md:text-lg">Parabéns aos Aniversariantes de Hoje! 🎉</h3>
+                        <p id="aniversariante-texto" class="text-xs md:text-sm text-gray-200 mt-1"></p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Elenco Total</p>
-                        <h3 id="dash-total-jogadores" class="text-3xl font-extrabold text-white mt-2">0</h3>
-                        <span class="text-xs text-emerald-400 mt-2 inline-block">Ativos no plantel</span>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500/50 hover:bg-pitch-800/80 transition group">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Elenco Total</p>
+                            <span class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition"><i class="fa-solid fa-users"></i></span>
+                        </div>
+                        <h3 id="dash-total-jogadores" class="text-3xl font-black text-white mt-3">0</h3>
+                        <span class="text-[11px] text-emerald-400 mt-2 inline-block font-medium">Ativos no plantel</span>
                     </div>
-                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-rose-500 transition">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Atletas Afastados</p>
-                        <h3 id="dash-afastados-count" class="text-3xl font-extrabold text-rose-400 mt-2">0</h3>
-                        <span class="text-xs text-rose-400/80 mt-2 inline-block">Clique para filtrar</span>
+                    
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-rose-500/50 hover:bg-pitch-800/80 transition group">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Afastados</p>
+                            <span class="p-2 rounded-xl bg-rose-500/10 text-rose-400 group-hover:scale-110 transition"><i class="fa-solid fa-user-slash"></i></span>
+                        </div>
+                        <h3 id="dash-afastados-count" class="text-3xl font-black text-rose-400 mt-3">0</h3>
+                        <span class="text-[11px] text-rose-400/80 mt-2 inline-block font-medium">Clique para filtrar</span>
                     </div>
-                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Mensalidades em Dia</p>
-                        <h3 id="dash-pagos-count" class="text-3xl font-extrabold text-emerald-400 mt-2">0/0</h3>
-                        <span class="text-xs text-gray-400 mt-2 inline-block">Controle financeiro</span>
+
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500/50 hover:bg-pitch-800/80 transition group">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Em Dia</p>
+                            <span class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                        </div>
+                        <h3 id="dash-pagos-count" class="text-3xl font-black text-emerald-400 mt-3">0/0</h3>
+                        <span class="text-[11px] text-gray-400 mt-2 inline-block font-medium">Mensalidades pagas</span>
                     </div>
-                    <div onclick="switchTab('financeiro')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-amber-500 transition">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral em Caixa</p>
-                        <h3 id="dash-saldo-val" class="text-3xl font-extrabold text-amber-400 mt-2">R$ 0,00</h3>
-                        <span class="text-xs text-amber-400/80 mt-2 inline-block">Consolidado acumulado</span>
+
+                    <div onclick="switchTab('financeiro')" class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-amber-500/50 hover:bg-pitch-800/80 transition group">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Saldo em Caixa</p>
+                            <span class="p-2 rounded-xl bg-amber-500/10 text-amber-400 group-hover:scale-110 transition"><i class="fa-solid fa-wallet"></i></span>
+                        </div>
+                        <h3 id="dash-saldo-val" class="text-2xl md:text-3xl font-black text-amber-400 mt-3 truncate">R$ 0,00</h3>
+                        <span class="text-[11px] text-amber-400/80 mt-2 inline-block font-medium">Consolidado geral</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-futbol mr-2"></i>Próxima Partida</h3>
-                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-700 hover:bg-pitch-600 px-3 py-1.5 rounded-lg text-xs text-amber-400 font-bold hidden">
-                                <i class="fa-solid fa-pen mr-1"></i>Editar Partida
+                    <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg">
+                        <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                            <h3 class="font-bold text-sm md:text-base text-emerald-400"><i class="fa-solid fa-futbol mr-2"></i>Próxima Partida</h3>
+                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-bold hidden transition">
+                                <i class="fa-solid fa-pen mr-1"></i>Editar
                             </button>
                         </div>
-                        <div class="space-y-3 text-sm text-gray-300">
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Data:</span> <strong id="lbl-partida-data" class="text-white">-</strong></p>
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Local:</span> <strong id="lbl-partida-local" class="text-white">-</strong></p>
-                            <p class="flex justify-between border-b border-pitch-700 pb-2"><span>Horário:</span> <strong id="lbl-partida-horario" class="text-white">-</strong></p>
-                            <p class="flex justify-between"><span>Custo do Aluguel:</span> <strong id="lbl-partida-custo" class="text-amber-400">-</strong></p>
+                        <div class="space-y-3 text-xs md:text-sm text-gray-300">
+                            <p class="flex justify-between border-b border-pitch-800/60 pb-2"><span>Data:</span> <strong id="lbl-partida-data" class="text-white">-</strong></p>
+                            <p class="flex justify-between border-b border-pitch-800/60 pb-2"><span>Local:</span> <strong id="lbl-partida-local" class="text-white">-</strong></p>
+                            <p class="flex justify-between border-b border-pitch-800/60 pb-2"><span>Horário:</span> <strong id="lbl-partida-horario" class="text-white">-</strong></p>
+                            <p class="flex justify-between"><span>Custo Aluguel:</span> <strong id="lbl-partida-custo" class="text-amber-400">-</strong></p>
                         </div>
                     </div>
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+
+                    <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
                         <div>
-                            <h3 class="font-bold text-base text-amber-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>Ações Rápidas</h3>
+                            <h3 class="font-bold text-sm md:text-base text-amber-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>Ações Rápidas</h3>
                             <p class="text-xs text-gray-400 mb-4">Gerencie convocações, sorteie os times da semana ou consulte relatórios gerenciais.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="switchTab('presenca')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-emerald-400 text-left transition">
-                                <i class="fa-solid fa-shuffle mb-1 block text-base"></i>Presença & Sorteio
+                            <button onclick="switchTab('presenca')" class="bg-pitch-800 hover:bg-pitch-700 p-4 rounded-xl text-xs font-bold text-emerald-400 text-left transition border border-pitch-700/50">
+                                <i class="fa-solid fa-shuffle mb-2 block text-lg"></i>Presença & Sorteio
                             </button>
-                            <button onclick="switchTab('relatorios')" class="bg-pitch-700 hover:bg-pitch-600 p-3 rounded-xl text-xs font-bold text-amber-400 text-left transition">
-                                <i class="fa-solid fa-file-lines mb-1 block text-base"></i>Ver Relatórios
+                            <button onclick="switchTab('relatorios')" class="bg-pitch-800 hover:bg-pitch-700 p-4 rounded-xl text-xs font-bold text-amber-400 text-left transition border border-pitch-700/50">
+                                <i class="fa-solid fa-file-lines mb-2 block text-lg"></i>Ver Relatórios
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA ELENCO COM FILTROS -->
+            <!-- ABA ELENCO -->
             <div id="tab-elenco" class="tab-content hidden space-y-5">
-                <div class="bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-2xl shadow-lg grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Buscar Atleta:</label>
-                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Nome do jogador..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="text-[11px] text-gray-400 block mb-1 font-semibold">Buscar Atleta:</label>
+                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Nome..." class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
                     </div>
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Posição:</label>
-                        <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
-                            <option value="">Todas as Posições</option>
+                        <label class="text-[11px] text-gray-400 block mb-1 font-semibold">Posição:</label>
+                        <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">Todas</option>
                             <option value="Goleiro">Goleiro</option>
                             <option value="Zagueiro">Zagueiro</option>
                             <option value="Lateral">Lateral</option>
@@ -179,19 +231,19 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Mensalidade:</label>
-                        <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
-                            <option value="">Todos os Status</option>
+                        <label class="text-[11px] text-gray-400 block mb-1 font-semibold">Mensalidade:</label>
+                        <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">Todos</option>
                             <option value="Pago">Em Dia (Pago)</option>
                             <option value="Pendente">Pendente</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-[11px] text-gray-400 block mb-1">Aptidão:</label>
-                        <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="text-[11px] text-gray-400 block mb-1 font-semibold">Aptidão:</label>
+                        <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
                             <option value="">Todos</option>
                             <option value="Ativo">Ativos (Aptos)</option>
-                            <option value="Afastados">Afastados (DM / Suspenso / etc)</option>
+                            <option value="Afastados">Afastados (DM / Suspenso)</option>
                         </select>
                     </div>
                 </div>
@@ -201,83 +253,79 @@
 
             <!-- ABA PRESENÇA & SORTEIO -->
             <div id="tab-presenca" class="tab-content hidden space-y-6">
-                <div id="alerta-rodada-travada" class="hidden bg-amber-500/20 border border-amber-500 text-amber-300 p-4 rounded-2xl text-sm flex items-center space-x-3">
+                <div id="alerta-rodada-travada" class="hidden bg-amber-500/10 border border-amber-500/40 text-amber-300 p-4 rounded-2xl text-xs md:text-sm flex items-center space-x-3">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                    <div>
-                        <strong>Sorteio da rodada travado!</strong> O sorteio oficial para esta data já foi confirmado.
-                    </div>
+                    <div><strong>Sorteio travado!</strong> O sorteio oficial para esta data já foi confirmado.</div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
+                    <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-6 rounded-2xl shadow-lg flex flex-col">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-clipboard-check mr-2"></i>1. Lista de Presença</h3>
+                            <h3 class="font-bold text-sm md:text-base text-emerald-400"><i class="fa-solid fa-clipboard-check mr-2"></i>1. Presença</h3>
                             <label class="flex items-center space-x-2 text-xs text-gray-300 cursor-pointer">
                                 <input type="checkbox" id="selecionar-todos" onclick="toggleSelecionarTodos(this)" class="w-4 h-4 accent-emerald-500 rounded">
                                 <span>Todos</span>
                             </label>
                         </div>
                         <div class="mb-3">
-                            <label class="text-[11px] text-gray-400 block mb-1">Data da Presença / Rodada:</label>
-                            <input type="date" id="data-presenca-manual" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2 text-xs text-white">
+                            <label class="text-[11px] text-gray-400 block mb-1">Data da Rodada:</label>
+                            <input type="date" id="data-presenca-manual" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-2.5 text-xs text-white">
                         </div>
-                        <div id="presenca-lista" class="space-y-2 max-h-[340px] overflow-y-auto pr-2 flex-1 mb-4"></div>
-                        <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-2 hidden">
-                            <i class="fa-solid fa-check-double"></i>
-                            <span>Salvar Presenças Selecionadas</span>
+                        <div id="presenca-lista" class="space-y-2 max-h-[320px] overflow-y-auto pr-1 flex-1 mb-4"></div>
+                        <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg hidden transition">
+                            <i class="fa-solid fa-check-double mr-2"></i>Salvar Presenças
                         </button>
                     </div>
 
-                    <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+                    <div class="md:col-span-2 bg-pitch-900 border border-pitch-800 p-5 md:p-6 rounded-2xl shadow-lg flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-3">
-                                <h3 class="font-bold text-base text-amber-400"><i class="fa-solid fa-shuffle mr-2"></i>2. Sorteio de Times (Opcional)</h3>
+                                <h3 class="font-bold text-sm md:text-base text-amber-400"><i class="fa-solid fa-shuffle mr-2"></i>2. Sorteio de Times</h3>
                                 <div id="status-sorteio-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold">
-                                    <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado
+                                    <i class="fa-solid fa-lock mr-1"></i> Confirmado
                                 </div>
                             </div>
-                            <div id="detalhes-partida-sorteio" class="bg-pitch-900 border border-pitch-700/60 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
-                                <span>📅 Data Oficial: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
+                            <div id="detalhes-partida-sorteio" class="bg-pitch-950 border border-pitch-800 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
+                                <span>📅 Data: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
                                 <span>📍 Local: <strong id="sorteio-lbl-local" class="text-white">-</strong></span>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label class="text-xs text-gray-400">Qtd Times (Coletes):</label>
-                                    <select id="qtd-times" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                                    <label class="text-xs text-gray-400">Qtd de Times (Coletes):</label>
+                                    <select id="qtd-times" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-2.5 text-sm text-white mt-1">
                                         <option value="2">2 Times</option>
                                         <option value="3">3 Times</option>
                                         <option value="4">4 Times</option>
                                     </select>
                                 </div>
                                 <div class="flex items-end">
-                                    <button id="btn-gerar-sorteio" onclick="iniciarSorteioIndependente()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold py-2.5 rounded-xl text-xs shadow-lg transition">
+                                    <button id="btn-gerar-sorteio" onclick="iniciarSorteioIndependente()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition">
                                         <i class="fa-solid fa-shuffle mr-1"></i> Sortear com Selecionados
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">
+                        <div id="times-empty-state" class="text-center py-10 text-gray-400 text-xs md:text-sm">
                             Marque os jogadores na lista ao lado e clique em <strong>"Sortear"</strong>.
                         </div>
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
-                        <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-700/60 hidden">
-                            <button id="btn-confirmar-sorteio" onclick="confirmarETravarSorteio(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
-                                <i class="fa-solid fa-lock text-base"></i>
-                                <span>Confirmar e Travar Sorteio no Histórico</span>
+                        <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-800 hidden">
+                            <button id="btn-confirmar-sorteio" onclick="confirmarETravarSorteio(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs md:text-sm shadow-xl transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-lock"></i><span>Confirmar e Travar Sorteio no Histórico</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                    <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Relatório de Sorteios Confirmados</h3>
+                <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg">
+                    <h3 class="font-bold text-sm md:text-base mb-4 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Histórico de Sorteios</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
+                        <table class="w-full text-left text-xs md:text-sm">
                             <thead>
-                                <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
-                                    <th class="pb-3">Data / Local</th>
-                                    <th class="pb-3">Qtd Times</th>
-                                    <th class="pb-3">Escalação / Coletes</th>
+                                <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px]">
+                                    <th class="pb-3">Data</th>
+                                    <th class="pb-3">Times</th>
+                                    <th class="pb-3">Escalação</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-historico-sorteios">
@@ -292,46 +340,46 @@
             <div id="tab-financeiro" class="tab-content hidden space-y-6">
                 <div id="financeiro-relatorio-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
-                            <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral Acumulado</p>
-                            <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg">
+                            <p class="text-xs text-gray-400 uppercase font-bold">Saldo Acumulado</p>
+                            <h3 id="fin-saldo" class="text-2xl font-black text-amber-400 mt-1">R$ 0,00</h3>
                         </div>
-                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg">
                             <p class="text-xs text-gray-400 uppercase font-bold">Entradas (Mês)</p>
-                            <h3 id="fin-entradas" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
+                            <h3 id="fin-entradas" class="text-2xl font-black text-emerald-400 mt-1">R$ 0,00</h3>
                         </div>
-                        <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg">
                             <p class="text-xs text-gray-400 uppercase font-bold">Saídas (Mês)</p>
-                            <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
+                            <h3 id="fin-saidas" class="text-2xl font-black text-rose-400 mt-1">R$ 0,00</h3>
                         </div>
                     </div>
 
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl print:hidden">
-                        <h3 class="font-bold text-sm text-amber-400 mb-3"><i class="fa-solid fa-chart-column mr-2"></i>Comparativo Anual (Entradas vs. Saídas)</h3>
+                    <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg print:hidden">
+                        <h3 class="font-bold text-xs md:text-sm text-amber-400 mb-3"><i class="fa-solid fa-chart-column mr-2"></i>Comparativo Anual (Entradas vs. Saídas)</h3>
                         <div class="h-56 w-full"><canvas id="grafico-financeiro"></canvas></div>
                     </div>
 
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+                    <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
-                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
+                            <label class="text-xs text-gray-400 block mb-1 font-semibold">Filtrar por Mês:</label>
+                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-950 border border-pitch-800 rounded-xl px-3 py-2 text-xs text-white">
                         </div>
-                        <div class="flex items-center space-x-3">
-                            <button onclick="imprimirRelatorioGeral()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg flex items-center space-x-2">
-                                <i class="fa-solid fa-print"></i><span>Exportar Caixa (PDF)</span>
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <button onclick="imprimirRelatorioGeral()" class="flex-1 md:flex-initial bg-amber-600 hover:bg-amber-500 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow transition">
+                                <i class="fa-solid fa-print mr-2"></i>Exportar PDF
                             </button>
-                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg hidden">
+                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow hidden transition">
                                 <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
                             </button>
                         </div>
                     </div>
 
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
+                    <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg">
                         <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-book mr-2"></i>Extrato do Livro Caixa</h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
+                            <table class="w-full text-left text-xs md:text-sm">
                                 <thead>
-                                    <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                    <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px]">
                                         <th class="pb-3">Data</th>
                                         <th class="pb-3">Descrição</th>
                                         <th class="pb-3">Tipo</th>
@@ -348,40 +396,40 @@
 
             <!-- ABA RELATÓRIOS -->
             <div id="tab-relatorios" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl print:hidden">
+                <div class="flex justify-between items-center bg-pitch-900 border border-pitch-800 p-4 rounded-2xl shadow-lg print:hidden">
                     <div>
-                        <h3 class="font-bold text-base text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Relatórios Consolidados do Clube</h3>
-                        <p class="text-xs text-gray-400">Estatísticas gerais dos membros e participações.</p>
+                        <h3 class="font-bold text-sm text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Relatórios Consolidados</h3>
+                        <p class="text-xs text-gray-400">Estatísticas gerais do clube.</p>
                     </div>
-                    <button onclick="imprimirRelatorioGeral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg flex items-center space-x-2">
-                        <i class="fa-solid fa-print"></i><span>Exportar / Salvar PDF</span>
+                    <button onclick="imprimirRelatorioGeral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition">
+                        <i class="fa-solid fa-print mr-2"></i>Salvar PDF
                     </button>
                 </div>
 
                 <div id="relatorios-conteudo-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl space-y-4">
-                            <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
-                            <div id="relatorio-posicoes-lista" class="space-y-2 text-sm"></div>
+                        <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg space-y-4">
+                            <h3 class="font-bold text-sm text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
+                            <div id="relatorio-posicoes-lista" class="space-y-2 text-xs"></div>
                         </div>
-                        <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
+                        <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
                             <div>
-                                <h3 class="font-bold text-base text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
-                                <p class="text-xs text-gray-300 leading-relaxed">Consolidado total de membros e presenças oficiais.</p>
+                                <h3 class="font-bold text-sm text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
+                                <p class="text-xs text-gray-300 leading-relaxed">Consolidado total de membros cadastrados e histórico acumulado de presenças.</p>
                             </div>
-                            <div class="pt-4 border-t border-pitch-700 flex justify-between items-center text-sm">
-                                <span class="text-gray-400">Total de Membros:</span>
-                                <strong id="rel-total-membros" class="text-emerald-400 text-lg">0</strong>
+                            <div class="pt-4 border-t border-pitch-800 flex justify-between items-center text-sm">
+                                <span class="text-gray-400 text-xs">Total de Membros:</span>
+                                <strong id="rel-total-membros" class="text-emerald-400 text-xl">0</strong>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Participações por Atleta</h3>
+                    <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl shadow-lg">
+                        <h3 class="font-bold text-sm md:text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Participações por Atleta</h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
+                            <table class="w-full text-left text-xs md:text-sm">
                                 <thead>
-                                    <tr class="border-b border-pitch-700 text-gray-400 text-xs uppercase">
+                                    <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px]">
                                         <th class="pb-3">Atleta</th>
                                         <th class="pb-3">Função</th>
                                         <th class="pb-3">Posição</th>
@@ -398,13 +446,13 @@
 
             <!-- ABA USUÁRIOS (ADMIN) -->
             <div id="tab-usuarios" class="tab-content hidden">
-                <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl max-w-4xl mx-auto">
-                    <div class="flex justify-between items-center mb-6">
+                <div class="bg-pitch-900 border border-pitch-800 p-6 rounded-2xl max-w-4xl mx-auto shadow-2xl">
+                    <div class="flex justify-between items-center mb-6 border-b border-pitch-800 pb-4">
                         <div>
-                            <h3 class="font-bold text-lg text-emerald-400">Gestão de Usuários & Acessos</h3>
-                            <p class="text-xs text-gray-400">Controle de logins e permissões.</p>
+                            <h3 class="font-bold text-base text-emerald-400">Gestão de Usuários & Acessos</h3>
+                            <p class="text-xs text-gray-400">Controle de logins e permissões do painel.</p>
                         </div>
-                        <button onclick="abrirModalNovoUsuario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg">
+                        <button onclick="abrirModalNovoUsuario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition">
                             <i class="fa-solid fa-user-plus mr-2"></i>Novo Usuário
                         </button>
                     </div>
@@ -416,57 +464,57 @@
     </main>
 
     <!-- MODAL DE PERFIL DO ATLETA -->
-    <div id="modal-perfil-atleta" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeModal('modal-perfil-atleta')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center border-b border-pitch-700 pb-4 mb-4">
-                <h3 id="perfil-nome" class="font-extrabold text-xl text-amber-400">-</h3>
+    <div id="modal-perfil-atleta" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('modal-perfil-atleta')" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center border-b border-pitch-800 pb-4 mb-4">
+                <h3 id="perfil-nome" class="font-black text-xl text-amber-400">-</h3>
                 <p id="perfil-detalhes-gerais" class="text-xs text-gray-400 mt-1">-</p>
             </div>
             
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-pitch-900 p-4 rounded-xl border border-pitch-700/50">
-                    <span class="text-xs text-gray-400 block">Total de Jogos Presentes</span>
-                    <strong id="perfil-total-jogos" class="text-2xl text-emerald-400 font-extrabold">0</strong>
+                <div class="bg-pitch-950 p-4 rounded-2xl border border-pitch-800">
+                    <span class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">Total de Jogos</span>
+                    <strong id="perfil-total-jogos" class="text-2xl text-emerald-400 font-black mt-1 block">0</strong>
                 </div>
-                <div class="bg-pitch-900 p-4 rounded-xl border border-pitch-700/50">
-                    <span class="text-xs text-gray-400 block">Status Mensalidade Atual</span>
-                    <strong id="perfil-status-mensalidade" class="text-sm font-bold">-</strong>
+                <div class="bg-pitch-950 p-4 rounded-2xl border border-pitch-800">
+                    <span class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">Mensalidade Atual</span>
+                    <strong id="perfil-status-mensalidade" class="text-sm font-bold mt-1 block">-</strong>
                 </div>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <h4 class="font-bold text-sm text-emerald-400 mb-2"><i class="fa-solid fa-calendar-days mr-2"></i>Datas em que Esteve Presente</h4>
-                    <div id="perfil-lista-presencas" class="bg-pitch-900 p-3 rounded-xl border border-pitch-700/50 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
-                        Nenhum registro de presença.
+                    <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calendar-days mr-2"></i>Datas em que Esteve Presente</h4>
+                    <div id="perfil-lista-presencas" class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum registro.
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="font-bold text-sm text-amber-400 mb-2"><i class="fa-solid fa-wallet mr-2"></i>Extrato Individual de Mensalidades</h4>
-                    <div id="perfil-lista-financeiro" class="bg-pitch-900 p-3 rounded-xl border border-pitch-700/50 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
-                        Nenhum lançamento financeiro encontrado.
+                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-wallet mr-2"></i>Extrato Individual de Mensalidades</h4>
+                    <div id="perfil-lista-financeiro" class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum lançamento.
                     </div>
                 </div>
             </div>
 
-            <div class="pt-6 mt-6 border-t border-pitch-700 text-right">
-                <button type="button" onclick="closeModal('modal-perfil-atleta')" class="bg-pitch-700 hover:bg-pitch-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold">Fechar</button>
+            <div class="pt-6 mt-6 border-t border-pitch-800 text-right">
+                <button type="button" onclick="closeModal('modal-perfil-atleta')" class="bg-pitch-800 hover:bg-pitch-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition">Fechar</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL DE RECIBO -->
-    <div id="modal-recibo" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white text-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
+    <div id="modal-recibo" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white text-gray-900 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
             <div class="text-center border-b pb-4 mb-4">
-                <h2 id="recibo-clube-nome" class="font-extrabold text-lg text-emerald-800 uppercase">CLUBE MENINOS DA VILA</h2>
+                <h2 id="recibo-clube-nome" class="font-black text-lg text-emerald-800 uppercase tracking-wider">CLUBE MENINOS DA VILA</h2>
                 <p class="text-xs text-gray-500">Comprovativo Oficial de Tesouraria</p>
             </div>
-            <div class="flex justify-between items-center mb-6 bg-gray-100 p-3 rounded-xl">
-                <div><span class="text-xs text-gray-500 block">Recibo Nº:</span><strong id="recibo-id" class="text-sm">#0001</strong></div>
-                <div class="text-right"><span class="text-xs text-gray-500 block">Data do Pagamento:</span><strong id="recibo-data" class="text-sm">-</strong></div>
+            <div class="flex justify-between items-center mb-6 bg-gray-100 p-3 rounded-2xl text-xs">
+                <div><span class="text-gray-500 block">Recibo Nº:</span><strong id="recibo-id" class="text-sm">#0001</strong></div>
+                <div class="text-right"><span class="text-gray-500 block">Data do Pagamento:</span><strong id="recibo-data" class="text-sm">-</strong></div>
             </div>
             <div class="space-y-3 text-sm mb-6">
                 <p>Recebemos de: <strong id="recibo-descricao" class="text-gray-800">-</strong></p>
@@ -478,41 +526,41 @@
                 <p class="text-xs text-gray-600 font-bold">Tesouraria / Diretoria</p>
             </div>
             <div class="flex space-x-3 pt-6 mt-6 border-t print:hidden">
-                <button type="button" onclick="fecharModalRecibo()" class="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2.5 rounded-xl text-sm font-bold">Fechar</button>
-                <button type="button" onclick="imprimirReciboIndividual()" class="w-1/2 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-bold"><i class="fa-solid fa-print mr-2"></i>Imprimir / PDF</button>
+                <button type="button" onclick="fecharModalRecibo()" class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-xl text-xs font-bold transition">Fechar</button>
+                <button type="button" onclick="imprimirReciboIndividual()" class="w-1/2 bg-emerald-700 hover:bg-emerald-600 text-white py-3 rounded-xl text-xs font-bold transition"><i class="fa-solid fa-print mr-2"></i>Imprimir / PDF</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL CONFIG CLUBE -->
-    <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold text-amber-400 mb-4">Editar Identidade do Clube</h3>
-            <form onsubmit="salvarConfigClube(event)" class="space-y-3">
-                <div><label class="text-xs text-gray-300">Nome do Clube</label><input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Instagram (@)</label><input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">URL da Logo (PNG)</label><input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+    <div id="modal-config-clube" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-base font-bold text-amber-400 mb-4">Editar Identidade do Clube</h3>
+            <form onsubmit="salvarConfigClube(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-semibold mb-1 block">Nome do Clube</label><input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Instagram (@)</label><input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">URL da Logo (PNG)</label><input type="url" id="cfg-logo-url" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL JOGADOR (SEM GOLS E COM LATERAL) -->
-    <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
-            <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3">
+    <!-- MODAL JOGADOR -->
+    <div id="modal-novo-jogador" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 id="modal-jogador-titulo" class="text-base font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
+            <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="input-jogador-id">
-                <div><label class="text-xs text-gray-300">Nome Completo *</label><input type="text" id="input-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Data de Nascimento *</label><input type="date" id="input-nascimento" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Telefone / WhatsApp *</label><input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Nome Completo *</label><input type="text" id="input-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Data de Nascimento *</label><input type="date" id="input-nascimento" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Telefone / WhatsApp *</label><input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-xs text-gray-300">Função no Grupo</label>
-                        <select id="input-funcao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <label class="text-gray-300 font-semibold mb-1 block">Função</label>
+                        <select id="input-funcao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Atleta">Atleta / Membro</option>
                             <option value="Diretor">Diretor</option>
                             <option value="Vice Diretor">Vice Diretor</option>
@@ -523,8 +571,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-300">Status de Aptidão</label>
-                        <select id="input-aptidao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <label class="text-gray-300 font-semibold mb-1 block">Aptidão</label>
+                        <select id="input-aptidao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Ativo">Ativo (Apto)</option>
                             <option value="Suspenso">Suspenso</option>
                             <option value="Bloqueado">Bloqueado</option>
@@ -535,8 +583,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-xs text-gray-300">Posição</label>
-                        <select id="input-posicao" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <label class="text-gray-300 font-semibold mb-1 block">Posição</label>
+                        <select id="input-posicao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Goleiro">Goleiro (R$ 20)</option>
                             <option value="Zagueiro">Zagueiro (R$ 40)</option>
                             <option value="Lateral">Lateral (R$ 40)</option>
@@ -545,88 +593,88 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-300">Mensalidade</label>
-                        <select id="input-mensalidade" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <label class="text-gray-300 font-semibold mb-1 block">Mensalidade</label>
+                        <select id="input-mensalidade" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Pendente">Pendente</option>
                             <option value="Pago">Pago</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" id="btn-submit-jogador" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Atleta</button>
+                    <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-jogador" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition">Salvar Atleta</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL PARTIDA -->
-    <div id="modal-partida" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold text-emerald-400 mb-4">Editar Próxima Partida</h3>
-            <form onsubmit="salvarPartidaConfig(event)" class="space-y-3">
-                <div><label class="text-xs text-gray-300">Data da Partida</label><input type="date" id="cfg-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Local</label><input type="text" id="cfg-local" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Horário</label><input type="text" id="cfg-horario" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Custo do Aluguel (R$)</label><input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+    <div id="modal-partida" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-base font-bold text-emerald-400 mb-4">Editar Próxima Partida</h3>
+            <form onsubmit="salvarPartidaConfig(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-semibold mb-1 block">Data</label><input type="date" id="cfg-data" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Local</label><input type="text" id="cfg-local" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Horário</label><input type="text" id="cfg-horario" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Custo (R$)</label><input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="closeModal('modal-partida')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="button" onclick="closeModal('modal-partida')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL LANÇAMENTO -->
-    <div id="modal-lancamento" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold text-emerald-400 mb-4">Novo Lançamento no Caixa</h3>
+    <div id="modal-lancamento" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-base font-bold text-emerald-400 mb-4">Novo Lançamento no Caixa</h3>
             <div class="flex space-x-2 mb-3">
-                <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-emerald-400 font-bold">Goleiro (R$ 20)</button>
-                <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-emerald-400 font-bold">Jogador (R$ 40)</button>
-                <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-rose-400 font-bold">Campo (R$ 100)</button>
+                <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-emerald-400 font-bold border border-pitch-700">Goleiro (R$ 20)</button>
+                <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-emerald-400 font-bold border border-pitch-700">Jogador (R$ 40)</button>
+                <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-rose-400 font-bold border border-pitch-700">Campo (R$ 100)</button>
             </div>
-            <form onsubmit="salvarLancamento(event)" class="space-y-3">
-                <div><label class="text-xs text-gray-300">Descrição</label><input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+            <form onsubmit="salvarLancamento(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-semibold mb-1 block">Descrição</label><input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João..." class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-xs text-gray-300">Tipo</label>
-                        <select id="fin-tipo" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                        <label class="text-gray-300 font-semibold mb-1 block">Tipo</label>
+                        <select id="fin-tipo" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Entrada">Entrada (Receita)</option>
                             <option value="Saida">Saída (Despesa)</option>
                         </select>
                     </div>
-                    <div><label class="text-xs text-gray-300">Valor (R$)</label><input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                    <div><label class="text-gray-300 font-semibold mb-1 block">Valor (R$)</label><input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 </div>
-                <div><label class="text-xs text-gray-300">Data</label><input type="date" id="fin-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Data</label><input type="date" id="fin-data" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" id="btn-submit-lancamento" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-lancamento" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL USUÁRIO -->
-    <div id="modal-usuario" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 id="modal-usuario-titulo" class="text-lg font-bold text-emerald-400 mb-4">Gerenciar Usuário</h3>
-            <form onsubmit="salvarUsuario(event)" class="space-y-3">
+    <div id="modal-usuario" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 id="modal-usuario-titulo" class="text-base font-bold text-emerald-400 mb-4">Gerenciar Usuário</h3>
+            <form onsubmit="salvarUsuario(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="input-usuario-id">
-                <div><label class="text-xs text-gray-300">Nome</label><input type="text" id="user-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">E-mail</label><input type="email" id="user-email" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
-                <div><label class="text-xs text-gray-300">Senha <span class="text-gray-500">(Opcional)</span></label><input type="password" id="user-senha" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Nome</label><input type="text" id="user-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">E-mail</label><input type="email" id="user-email" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-semibold mb-1 block">Senha <span class="text-gray-500">(Opcional)</span></label><input type="password" id="user-senha" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
                 <div>
-                    <label class="text-xs text-gray-300">Nível de Permissão</label>
-                    <select id="user-perfil" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
+                    <label class="text-gray-300 font-semibold mb-1 block">Permissão</label>
+                    <select id="user-perfil" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                         <option value="usuario">Usuário Comum</option>
                         <option value="gestor">Gestor / Tesoureiro</option>
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
                 <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="closeModal('modal-usuario')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" id="btn-submit-usuario" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="button" onclick="closeModal('modal-usuario')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-usuario" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition">Salvar</button>
                 </div>
             </form>
         </div>
@@ -652,7 +700,7 @@
             const toast = document.createElement('div');
             const cores = { sucesso: 'bg-emerald-600 border-emerald-400 text-white', erro: 'bg-rose-600 border-rose-400 text-white', aviso: 'bg-amber-500 border-amber-300 text-gray-950' };
             const icones = { sucesso: 'fa-circle-check', erro: 'fa-circle-exclamation', aviso: 'fa-triangle-exclamation' };
-            toast.className = `pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-xl border shadow-2xl text-xs font-bold transform transition-all duration-300 translate-x-full opacity-0 ${cores[tipo] || cores.sucesso}`;
+            toast.className = `pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-2xl border shadow-2xl text-xs font-bold transform transition-all duration-300 translate-x-full opacity-0 ${cores[tipo] || cores.sucesso}`;
             toast.innerHTML = `<i class="fa-solid ${icones[tipo]} text-base"></i><span>${mensagem}</span>`;
             container.appendChild(toast);
             requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
@@ -696,21 +744,32 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                b.classList.remove('bg-emerald-500/15', 'text-emerald-400', 'border', 'border-emerald-500/30');
                 b.classList.add('text-gray-300');
             });
+            document.querySelectorAll('.mob-nav-btn').forEach(b => {
+                b.classList.remove('text-emerald-400', 'font-bold');
+                b.classList.add('text-gray-400', 'font-medium');
+            });
+
             document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
+            
             const btn = document.getElementById(`nav-${tabId}`);
             if (btn) {
-                btn.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                btn.classList.add('bg-emerald-500/15', 'text-emerald-400', 'border', 'border-emerald-500/30');
                 btn.classList.remove('text-gray-300');
+            }
+
+            const mobBtn = document.getElementById(`mob-nav-${tabId}`);
+            if (mobBtn) {
+                mobBtn.classList.add('text-emerald-400', 'font-bold');
+                mobBtn.classList.remove('text-gray-400', 'font-medium');
             }
         }
 
         function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
-        // FILTRAR AFASTADOS DIRETAMENTE DO DASHBOARD
         function filtrarAfastadosDashboard() {
             switchTab('elenco');
             document.getElementById('filtro-elenco-aptidao').value = 'Afastados';
@@ -737,8 +796,9 @@
                 if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerHTML = `<i class="fa-brands fa-instagram mr-1"></i>${configsGlobal.subtitulo_clube}`;
                 if (configsGlobal.logo_url) {
                     const imgEl = document.getElementById('sidebar-logo');
-                    imgEl.src = configsGlobal.logo_url;
-                    imgEl.onerror = function() { this.src = 'https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png'; };
+                    const mobImg = document.getElementById('mobile-logo');
+                    if(imgEl) imgEl.src = configsGlobal.logo_url;
+                    if(mobImg) mobImg.src = configsGlobal.logo_url;
                 }
                 document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
@@ -855,7 +915,7 @@
             const isAdmin = usuarioLogado.perfil === 'admin';
 
             if (jogadores.length === 0) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-sm">Nenhum atleta encontrado.</div>`;
+                grid.innerHTML = `<div class="col-span-3 text-center py-12 text-gray-400 text-sm bg-pitch-900 border border-pitch-800 rounded-2xl">Nenhum atleta encontrado com os filtros aplicados.</div>`;
                 return;
             }
 
@@ -869,36 +929,39 @@
                 }
 
                 let botoesAcao = '';
-                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:underline">Editar</button>`;
-                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:underline ml-2">Excluir</button>`;
+                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-semibold transition">Editar</button>`;
+                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-semibold ml-3 transition">Excluir</button>`;
 
-                const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
+                const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
                 let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
                 if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
                 else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
                 else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
                 else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
 
-                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-1">-1 Presença</button>` : '';
+                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-2" title="Remover presença">-1 Jogo</button>` : '';
 
                 grid.innerHTML += `
-                    <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-emerald-500/40 transition">
+                    <div class="bg-pitch-900 border border-pitch-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-emerald-500/50 hover:bg-pitch-800/40 transition group">
                         <div>
-                            <div class="flex justify-between items-start flex-wrap gap-1 mb-2">
+                            <div class="flex justify-between items-start flex-wrap gap-1 mb-3">
                                 <div>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">${j.posicao}</span>
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400">${j.posicao}</span>
                                     ${funcaoBadge}
                                 </div>
                                 <div class="space-x-1">
-                                    <span class="text-[10px] px-2 py-0.5 rounded ${aptidaoCor}">${j.status_aptidao || 'Ativo'}</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${aptidaoCor}">${j.status_aptidao || 'Ativo'}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
                                 </div>
                             </div>
-                            <h4 onclick="abrirPerfilAtleta(${j.id})" class="font-bold text-white text-base cursor-pointer hover:text-emerald-400 transition" title="Ver Perfil Completo">${j.nome} <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-400 ml-1"></i></h4>
-                            <p class="text-xs text-gray-400">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
+                            <h4 onclick="abrirPerfilAtleta(${j.id})" class="font-black text-white text-base cursor-pointer hover:text-emerald-400 transition flex items-center justify-between" title="Ver Perfil Completo">
+                                <span>${j.nome}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-emerald-400 transition"></i>
+                            </h4>
+                            <p class="text-xs text-gray-400 mt-1">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
-                            <span>📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
+                        <div class="mt-4 pt-3 border-t border-pitch-800 text-xs text-gray-300 flex justify-between items-center">
+                            <span>📋 Jogos: <strong class="text-amber-400 font-bold">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
                             <div>${botoesAcao}</div>
                         </div>
                     </div>
@@ -906,7 +969,6 @@
             });
         }
 
-        // ABRIR PERFIL DO ATLETA
         async function abrirPerfilAtleta(jogadorId) {
             try {
                 const res = await fetch(`${API_URL}/api/jogadores/${jogadorId}/perfil`);
@@ -922,25 +984,23 @@
                 spanMens.innerText = j.status_mensalidade || 'Pendente';
                 spanMens.className = `text-sm font-bold ${j.status_mensalidade === 'Pago' ? 'text-emerald-400' : 'text-rose-400'}`;
 
-                // Lista de Presenças
                 const listaPres = document.getElementById('perfil-lista-presencas');
                 if (dados.presencas.length === 0) {
-                    listaPres.innerHTML = '<span class="text-gray-500 italic">Nenhum registro de presença encontrado.</span>';
+                    listaPres.innerHTML = '<span class="text-gray-500 italic">Nenhum registro de presença.</span>';
                 } else {
                     listaPres.innerHTML = dados.presencas.map(p => {
                         const dt = new Date(p.data_partida).toLocaleDateString('pt-BR');
-                        return `<div class="flex justify-between py-1 border-b border-pitch-700/30"><span>Partida / Rodada</span><strong class="text-emerald-400">${dt}</strong></div>`;
+                        return `<div class="flex justify-between py-1.5 border-b border-pitch-800/50"><span>Partida / Rodada</span><strong class="text-emerald-400">${dt}</strong></div>`;
                     }).join('');
                 }
 
-                // Extrato Financeiro Individual
                 const listaFin = document.getElementById('perfil-lista-financeiro');
                 if (dados.financeiro.length === 0) {
-                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhum lançamento financeiro registrado.</span>';
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhum lançamento financeiro.</span>';
                 } else {
                     listaFin.innerHTML = dados.financeiro.map(f => {
                         const dt = new Date(f.data_lancamento).toLocaleDateString('pt-BR');
-                        return `<div class="flex justify-between py-1 border-b border-pitch-700/30"><span>${f.descricao} (${dt})</span><strong class="text-emerald-400">R$ ${parseFloat(f.valor).toFixed(2)}</strong></div>`;
+                        return `<div class="flex justify-between py-1.5 border-b border-pitch-800/50"><span>${f.descricao} (${dt})</span><strong class="text-emerald-400">R$ ${parseFloat(f.valor).toFixed(2)}</strong></div>`;
                     }).join('');
                 }
 
@@ -959,9 +1019,9 @@
             if(ativos.length === 0) { lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta ativo disponível.</p>'; return; }
             ativos.forEach((j, index) => {
                 lista.innerHTML += `
-                    <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-900/50 border border-pitch-700/40 cursor-pointer mb-2 hover:bg-pitch-900">
+                    <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-950 border border-pitch-800 cursor-pointer mb-2 hover:bg-pitch-800/50 transition">
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
-                        <span class="text-sm font-medium text-white">${j.nome} (${j.posicao})</span>
+                        <span class="text-sm font-medium text-white">${j.nome} <span class="text-gray-400 text-xs">(${j.posicao})</span></span>
                     </label>
                 `;
             });
@@ -974,17 +1034,17 @@
             const listaPos = document.getElementById('relatorio-posicoes-lista');
             listaPos.innerHTML = '';
             for (const [pos, qtd] of Object.entries(posicoesCount)) {
-                listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-900 rounded-xl border border-pitch-700/40"><span class="text-gray-300 font-medium">${pos}</span><span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs">${qtd} atleta(s)</span></div>`;
+                listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-950 rounded-xl border border-pitch-800"><span class="text-gray-300 font-medium">${pos}</span><span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs">${qtd} atleta(s)</span></div>`;
             }
             const tbodyPres = document.getElementById('tabela-relatorio-presencas');
             tbodyPres.innerHTML = '';
             [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
                 tbodyPres.innerHTML += `
-                    <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
+                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                         <td class="py-3 font-medium text-white">${j.nome}</td>
                         <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
                         <td class="py-3"><span class="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-400">${j.posicao}</span></td>
-                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300">${j.status_aptidao || 'Ativo'}</span></td>
+                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold">${j.status_aptidao || 'Ativo'}</span></td>
                         <td class="py-3 text-right font-bold text-amber-400">${j.total_participacoes || 0} jogo(s)</td>
                     </tr>
                 `;
@@ -1005,7 +1065,7 @@
                 if (res.ok) { showToast('Presenças registradas!'); carregarJogadores(); }
                 else { const err = await res.json(); showToast(err.erro || 'Falha ao salvar.', 'erro'); }
             } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
-            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double"></i><span>Salvar Presenças Selecionadas</span>'); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double mr-2"></i><span>Salvar Presenças</span>'); }
         }
 
         async function removerPresencaAtleta(jogadorId, nomeAtleta) {
@@ -1102,11 +1162,11 @@
                 data: {
                     labels: mesesLabels,
                     datasets: [
-                        { label: 'Entradas (R$)', data: entradasPorMes, backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Saídas (R$)', data: saidasPorMes, backgroundColor: '#f43f5e', borderRadius: 6 }
+                        { label: 'Entradas (R$)', data: entradasPorMes, backgroundColor: '#10b981', borderRadius: 8 },
+                        { label: 'Saídas (R$)', data: saidasPorMes, backgroundColor: '#f43f5e', borderRadius: 8 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { display: false } }, y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11, weight: 'bold' } } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { display: false } }, y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
             });
         }
 
@@ -1136,14 +1196,14 @@
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                         const isAdmin = usuarioLogado.perfil === 'admin';
                         tbody.innerHTML += `
-                            <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
+                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                                 <td class="py-3 text-gray-300">${dataFmt}</td>
                                 <td class="py-3 font-medium text-white">${l.descricao}</td>
-                                <td class="py-3"><span class="px-2 py-0.5 rounded text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${l.tipo}</span></td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-semibold">${l.tipo}</span></td>
                                 <td class="py-3 font-bold ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
                                 <td class="py-3 text-right space-x-2 print:hidden">
-                                    ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:underline text-xs"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
-                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:underline text-xs ml-2">Excluir</button>` : ''}
+                                    ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
+                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-semibold ml-2">Excluir</button>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -1194,11 +1254,11 @@
                 if (res.ok) {
                     const usuarios = await res.json();
                     container.innerHTML = usuarios.map(u => `
-                        <div class="p-4 bg-pitch-900 rounded-xl border border-pitch-700/50 flex justify-between items-center">
-                            <div><p class="text-sm font-bold text-white">${u.nome} (${u.email})</p><span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span></div>
+                        <div class="p-4 bg-pitch-950 rounded-2xl border border-pitch-800 flex justify-between items-center">
+                            <div><p class="text-sm font-bold text-white">${u.nome} (${u.email})</p><span class="text-xs px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span></div>
                             <div class="space-x-3">
-                                <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 text-xs hover:underline">Editar</button>
-                                <button onclick="excluirUsuario(${u.id})" class="text-rose-400 text-xs hover:underline">Excluir</button>
+                                <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 hover:text-amber-300 text-xs font-semibold">Editar</button>
+                                <button onclick="excluirUsuario(${u.id})" class="text-rose-400 hover:text-rose-300 text-xs font-semibold">Excluir</button>
                             </div>
                         </div>
                     `).join('');
@@ -1303,9 +1363,9 @@
             times.forEach((tJogadores, idx) => {
                 const cor = paletaCores[idx % paletaCores.length];
                 container.innerHTML += `
-                    <div class="bg-pitch-800 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
-                        <h4 class="font-bold text-sm mb-3">${cor.nome} (${tJogadores.length} atletas)</h4>
-                        <div class="space-y-1">${tJogadores.map(j => `<div class="p-2 bg-pitch-900 rounded border border-pitch-700 text-xs text-white flex justify-between"><span>${j.nome}</span><span class="text-gray-400">${j.posicao}</span></div>`).join('')}</div>
+                    <div class="bg-pitch-950 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
+                        <h4 class="font-bold text-xs uppercase tracking-wider mb-3">${cor.nome} (${tJogadores.length} atletas)</h4>
+                        <div class="space-y-1">${tJogadores.map(j => `<div class="p-2 bg-pitch-900 rounded-xl border border-pitch-800 text-xs text-white flex justify-between"><span>${j.nome}</span><span class="text-gray-400">${j.posicao}</span></div>`).join('')}</div>
                     </div>
                 `;
             });
@@ -1326,7 +1386,7 @@
                 document.getElementById('status-sorteio-badge').classList.remove('hidden');
                 await carregarHistoricoSorteios();
             } catch (err) { console.error(err); }
-            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock text-base"></i><span>Confirmar e Travar Sorteio no Histórico</span>'); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock"></i><span>Confirmar e Travar Sorteio no Histórico</span>'); }
         }
 
         async function carregarHistoricoSorteios() {
@@ -1341,9 +1401,9 @@
                     tbody.innerHTML = '';
                     historicoSorteiosGlobal.forEach(s => {
                         let dataFmt = s.data_partida ? s.data_partida.split('T')[0].split('-').reverse().join('/') : '-';
-                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-2 p-2 bg-pitch-900 rounded border border-pitch-700/60"><strong class="text-amber-400 text-xs">${t.nome}:</strong> <span class="text-xs text-gray-300">${t.jogadores.map(j => j.nome).join(', ')}</span></div>`).join('') : '';
+                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-2 p-2.5 bg-pitch-950 rounded-xl border border-pitch-800"><strong class="text-amber-400 text-xs">${t.nome}:</strong> <span class="text-xs text-gray-300">${t.jogadores.map(j => j.nome).join(', ')}</span></div>`).join('') : '';
                         tbody.innerHTML += `
-                            <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40 align-top">
+                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30 align-top">
                                 <td class="py-3 font-medium text-white"><div class="text-emerald-400 font-bold">${dataFmt}</div></td>
                                 <td class="py-3 text-gray-300">${s.num_times} Times</td>
                                 <td class="py-3">${timesHtml}</td>
