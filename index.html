@@ -1263,52 +1263,58 @@
         }
 
         async function carregarFinanceiro() {
-            if (usuarioLogado.perfil === 'secretario') return;
-            try {
-                const res = await fetch(`${API_URL}/api/financeiro`);
-                const dados = await res.json();
-                if (Array.isArray(dados)) {
-                    atualizarGraficoFinanceiro(dados);
-                    const mesFiltro = document.getElementById('filtro-mes').value;
-                    let saldoGeralAcumulado = 0;
-                    dados.forEach(l => {
-                        const val = parseFloat(l.valor) || 0;
-                        if (l.tipo === 'Entrada') saldoGeralAcumulado += val; else saldoGeralAcumulado -= val;
-                    });
+    if (usuarioLogado.perfil === 'secretario') return;
+    try {
+        // ADICIONADO O HEADER DE AUTORIZAÇÃO AQUI:
+        const res = await fetch(`${API_URL}/api/financeiro`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Erro ao buscar financeiro');
+        
+        const dados = await res.json();
+        if (Array.isArray(dados)) {
+            atualizarGraficoFinanceiro(dados);
+            const mesFiltro = document.getElementById('filtro-mes').value;
+            let saldoGeralAcumulado = 0;
+            dados.forEach(l => {
+                const val = parseFloat(l.valor) || 0;
+                if (l.tipo === 'Entrada') saldoGeralAcumulado += val; else saldoGeralAcumulado -= val;
+            });
 
-                    let mesEntradas = 0, mesSaidas = 0;
-                    const tbody = document.getElementById('tabela-financeiro-body');
-                    tbody.innerHTML = '';
-                    dados.forEach(l => {
-                        const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
-                        const val = parseFloat(l.valor) || 0;
-                        if (mesFiltro && dataStr.startsWith(mesFiltro)) {
-                            if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
-                        }
-                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
-                        const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                        const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
-                        tbody.innerHTML += `
-                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                                <td class="py-3.5 text-gray-300">${dataFmt}</td>
-                                <td class="py-3.5 font-bold text-white">${l.descricao}</td>
-                                <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${l.tipo}</span></td>
-                                <td class="py-3.5 font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
-                                <td class="py-3.5 text-right space-x-2 print:hidden">
-                                    ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-bold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
-                                    ${podeExcluirFin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
-                    document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
-                    document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
-                    const dashSaldo = document.getElementById('dash-saldo-val');
-                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
+            let mesEntradas = 0, mesSaidas = 0;
+            const tbody = document.getElementById('tabela-financeiro-body');
+            tbody.innerHTML = '';
+            dados.forEach(l => {
+                const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
+                const val = parseFloat(l.valor) || 0;
+                if (mesFiltro && dataStr.startsWith(mesFiltro)) {
+                    if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
                 }
-            } catch (err) { console.error('Erro financeiro:', err); }
+                if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
+                const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
+                tbody.innerHTML += `
+                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                        <td class="py-3.5 text-gray-300">${dataFmt}</td>
+                        <td class="py-3.5 font-bold text-white">${l.descricao}</td>
+                        <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${l.tipo}</span></td>
+                        <td class="py-3.5 font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
+                        <td class="py-3.5 text-right space-x-2 print:hidden">
+                            ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-bold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
+                            ${podeExcluirFin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
+            document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
+            document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
+            const dashSaldo = document.getElementById('dash-saldo-val');
+            if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
         }
+    } catch (err) { console.error('Erro financeiro:', err); }
+}
 
         function gerarRecibo(id, descricao, valor, data) {
             document.getElementById('recibo-id').innerText = `#${String(id).padStart(4, '0')}`;
