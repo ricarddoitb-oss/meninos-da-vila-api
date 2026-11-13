@@ -49,15 +49,6 @@ function verificarAdmin(req, res, next) {
     });
 }
 
-function verificarGestorOuAdmin(req, res, next) {
-    verificarTokenBase(req, res, () => {
-        if (!['admin', 'gestor'].includes(req.usuario.perfil)) {
-            return res.status(403).json({ erro: 'Acesso negado. Requer perfil de gestor ou administrador.' });
-        }
-        next();
-    });
-}
-
 function verificarPerfisPermitidos(perfisPermitidos) {
     return (req, res, next) => {
         verificarTokenBase(req, res, () => {

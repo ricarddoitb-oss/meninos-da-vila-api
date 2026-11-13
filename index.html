@@ -233,7 +233,7 @@
                                     <p class="text-xs text-gray-400">Acesse rapidamente as ferramentas principais</p>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-400 mb-6 leading-relaxed">Gerencie presenças instantaneamente, escale os coletes com o algoritmo de sorteio ou consulte relatórios gerenciais completos em PDF.</p>
+                            <p class="text-xs text-gray-400 mb-6 leading-relaxed">Gerencie presenças instantaneamente, escale os coletes com o algoritmo de sorteio ou consulte relatórios gerenciais em PDF.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <button onclick="switchTab('presenca')" class="bg-pitch-800 hover:bg-pitch-700/80 p-4 rounded-2xl text-xs font-bold text-emerald-400 text-left transition border border-pitch-700/50 shadow-lg group">
@@ -433,51 +433,98 @@
 
             <!-- ABA RELATÓRIOS -->
             <div id="tab-relatorios" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl print:hidden">
+                <!-- SELETORES DE RELATÓRIO (BOTÕES) -->
+                <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
                     <div>
-                        <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Relatórios Consolidados</h3>
-                        <p class="text-xs text-gray-400 mt-0.5">Estatísticas gerais do plantel para exportação e impressão.</p>
+                        <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Central de Relatórios Gerenciais</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Selecione abaixo o relatório que deseja visualizar e exportar.</p>
                     </div>
                     <button onclick="imprimirRelatorioGeral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow-lg transition flex items-center space-x-2">
-                        <i class="fa-solid fa-print"></i><span>Salvar PDF / Imprimir</span>
+                        <i class="fa-solid fa-print"></i><span>Imprimir Relatório Ativo</span>
                     </button>
                 </div>
 
+                <div class="flex flex-wrap gap-2 print:hidden">
+                    <button onclick="mudarRelatorio('posicoes')" id="btn-rel-posicoes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-5 py-3 rounded-2xl text-xs transition border border-emerald-500/40 shadow">
+                        <i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição
+                    </button>
+                    <button onclick="mudarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-5 py-3 rounded-2xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-clipboard-user mr-2"></i>Participações & Presenças
+                    </button>
+                    <button onclick="mudarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-5 py-3 rounded-2xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i>Atletas Inadimplentes (WhatsApp)
+                    </button>
+                </div>
+
+                <!-- BLOCOS DE RELATÓRIOS INDIVIDUAIS -->
                 <div id="relatorios-conteudo-impressao" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl space-y-4">
-                            <h3 class="font-black text-sm text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
-                            <div id="relatorio-posicoes-lista" class="space-y-2.5 text-xs"></div>
-                        </div>
-                        <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-black text-sm text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
-                                <p class="text-xs text-gray-300 leading-relaxed">Consolidado total de membros cadastrados e histórico acumulado de presenças oficiais do clube.</p>
+                    
+                    <!-- 1. RELATÓRIO DE POSIÇÕES -->
+                    <div id="bloco-rel-posicoes" class="rel-bloco space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl space-y-4">
+                                <h3 class="font-black text-sm text-emerald-400"><i class="fa-solid fa-chart-bar mr-2"></i>Membros por Posição</h3>
+                                <div id="relatorio-posicoes-lista" class="space-y-2.5 text-xs"></div>
                             </div>
-                            <div class="pt-4 border-t border-pitch-800 flex justify-between items-center text-sm">
-                                <span class="text-gray-400 text-xs font-bold uppercase">Total de Membros:</span>
-                                <strong id="rel-total-membros" class="text-emerald-400 text-2xl font-black">0</strong>
+                            <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-black text-sm text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
+                                    <p class="text-xs text-gray-300 leading-relaxed">Consolidado total de membros cadastrados nas posições e funções ativas do clube.</p>
+                                </div>
+                                <div class="pt-4 border-t border-pitch-800 flex justify-between items-center text-sm">
+                                    <span class="text-gray-400 text-xs font-bold uppercase">Total de Membros:</span>
+                                    <strong id="rel-total-membros" class="text-emerald-400 text-2xl font-black">0</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl">
-                        <h3 class="font-black text-sm md:text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Participações por Atleta</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs md:text-sm">
-                                <thead>
-                                    <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px] font-bold">
-                                        <th class="pb-3">Atleta</th>
-                                        <th class="pb-3">Função</th>
-                                        <th class="pb-3">Posição</th>
-                                        <th class="pb-3">Status</th>
-                                        <th class="pb-3 text-right">Total Presenças</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-relatorio-presencas"></tbody>
-                            </table>
+                    <!-- 2. RELATÓRIO DE PRESENÇAS -->
+                    <div id="bloco-rel-presencas" class="rel-bloco space-y-6 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl">
+                            <h3 class="font-black text-sm md:text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Participações por Atleta (Histórico Geral)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs md:text-sm">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px] font-bold">
+                                            <th class="pb-3">Atleta</th>
+                                            <th class="pb-3">Função</th>
+                                            <th class="pb-3">Posição</th>
+                                            <th class="pb-3">Status</th>
+                                            <th class="pb-3 text-right">Total Presenças</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-presencas"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- 3. RELATÓRIO DE INADIMPLENTES (COBRANÇA RÁPIDA WHATSAPP) -->
+                    <div id="bloco-rel-inadimplentes" class="rel-bloco space-y-6 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-black text-sm md:text-base text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Atletas com Mensalidade Pendente</h3>
+                                <span id="contador-inadimplentes" class="text-xs px-3 py-1 rounded-xl bg-rose-500/20 text-rose-300 font-bold">0 pendentes</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Clique no botão do WhatsApp para enviar a cobrança diretamente para o número cadastrado do atleta.</p>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs md:text-sm">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[11px] font-bold">
+                                            <th class="pb-3">Atleta</th>
+                                            <th class="pb-3">Telefone</th>
+                                            <th class="pb-3">Posição</th>
+                                            <th class="pb-3">Status</th>
+                                            <th class="pb-3 text-right">Ação / Cobrança</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-inadimplentes"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -538,37 +585,6 @@
 
             <div class="pt-6 mt-6 border-t border-pitch-800 text-right">
                 <button type="button" onclick="closeModal('modal-perfil-atleta')" class="bg-pitch-800 hover:bg-pitch-700 text-white px-6 py-3 rounded-2xl text-xs font-bold transition shadow">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CARTEIRINHA DIGITAL -->
-    <div id="modal-carteirinha" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-gradient-to-br from-pitch-900 via-pitch-950 to-gray-950 border-2 border-amber-400/50 p-6 rounded-3xl max-w-sm w-full shadow-2xl relative text-center space-y-4">
-            <button onclick="fecharCarteirinha()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <div class="flex items-center justify-center space-x-2 border-b border-pitch-800 pb-3">
-                <i class="fa-solid fa-shield-halved text-amber-400 text-xl"></i>
-                <h4 class="font-black text-white text-sm uppercase tracking-wider">Clube Meninos da Vila</h4>
-            </div>
-            <div class="w-24 h-24 mx-auto rounded-2xl bg-pitch-800 border-2 border-amber-400 flex items-center justify-center text-amber-400 text-3xl font-black shadow-lg uppercase" id="cart-avatar">
-                CMV
-            </div>
-            <div>
-                <h3 id="cart-nome" class="font-black text-lg text-white">Nome do Atleta</h3>
-                <p id="cart-posicao" class="text-xs text-amber-400 font-bold uppercase mt-0.5">Posição • Nível 3</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-pitch-800 text-left text-xs">
-                <div class="bg-pitch-800/60 p-2.5 rounded-xl">
-                    <span class="text-gray-400 block text-[10px]">MENSALIDADE</span>
-                    <span id="cart-mensalidade" class="font-black text-emerald-400">PAGO</span>
-                </div>
-                <div class="bg-pitch-800/60 p-2.5 rounded-xl">
-                    <span class="text-gray-400 block text-[10px]">APTIDÃO</span>
-                    <span id="cart-aptidao" class="font-black text-white">ATIVO</span>
-                </div>
-            </div>
-            <div class="pt-2 text-[10px] text-gray-500 font-mono">
-                ID OFICIAL • TEMPORADA 2026
             </div>
         </div>
     </div>
@@ -884,7 +900,21 @@
         function fecharModalRecibo() { document.body.classList.remove('imprimindo-recibo'); closeModal('modal-recibo'); }
         function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
-        // Nova funcionalidade: WhatsApp Direto
+        // Sistema de Relatórios por Seleção (Botões)
+        function mudarRelatorio(tipo) {
+            document.querySelectorAll('.rel-bloco').forEach(b => b.classList.add('hidden'));
+            document.querySelectorAll('.rel-btn').forEach(b => {
+                b.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-5 py-3 rounded-2xl text-xs transition border border-pitch-800 shadow";
+            });
+
+            document.getElementById(`bloco-rel-${tipo}`)?.classList.remove('hidden');
+            const btnAtivo = document.getElementById(`btn-rel-${tipo}`);
+            if (btnAtivo) {
+                btnAtivo.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-5 py-3 rounded-2xl text-xs transition border border-emerald-500/40 shadow";
+            }
+        }
+
+        // WhatsApp de Cobrança / Convocação
         function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
             if (!telefone || telefone.trim() === '') {
                 showToast('Atleta sem número de telefone cadastrado!', 'erro');
@@ -902,26 +932,6 @@
 
             const url = `https://api.whatsapp.com/send?phone=${foneLimpo}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
-        }
-
-        // Nova funcionalidade: Carteirinha Digital
-        function abrirCarteirinha(nome, posicao, nivel, statusMensalidade, statusAptidao, telefone) {
-            document.getElementById('cart-nome').innerText = nome;
-            document.getElementById('cart-posicao').innerText = `${posicao || 'Atleta'} • Nível ${nivel || 3}`;
-            
-            const iniciais = nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-            document.getElementById('cart-avatar').innerText = iniciais || 'CMV';
-
-            const badgeMensalidade = document.getElementById('cart-mensalidade');
-            badgeMensalidade.innerText = statusMensalidade || 'Pendente';
-            badgeMensalidade.className = `font-black ${statusMensalidade === 'Pago' ? 'text-emerald-400' : 'text-rose-400'}`;
-
-            document.getElementById('cart-aptidao').innerText = statusAptidao || 'Ativo';
-            openModal('modal-carteirinha');
-        }
-
-        function fecharCarteirinha() {
-            closeModal('modal-carteirinha');
         }
 
         async function carregarConfiguracoes() {
@@ -1070,17 +1080,14 @@
                 }
 
                 let botoesAcao = '';
-                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-bold transition mr-2.5" title="Editar"><i class="fa-solid fa-pen"></i></button>`;
+                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-bold transition mr-3" title="Editar"><i class="fa-solid fa-pen"></i></button>`;
                 
                 // Botão de WhatsApp Rápido
                 if (j.telefone) {
                     const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
                     const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400 hover:text-emerald-300' : 'fa-whatsapp text-amber-400 hover:text-amber-300';
-                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '40.00')" class="font-bold transition mr-2.5" title="Enviar WhatsApp (${tipoWp === 'cobranca' ? 'Cobrança' : 'Convocação'})"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
+                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '40.00')" class="font-bold transition mr-3" title="Enviar WhatsApp (${tipoWp === 'cobranca' ? 'Cobrança' : 'Convocação'})"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
                 }
-
-                // Botão de Carteirinha Digital
-                botoesAcao += `<button onclick='abrirCarteirinha(${JSON.stringify(j.nome)}, ${JSON.stringify(j.posicao)}, ${j.nivel || 3}, ${JSON.stringify(j.status_mensalidade || 'Pendente')}, ${JSON.stringify(j.status_aptidao || 'Ativo')}, ${JSON.stringify(j.telefone || '')})' class="text-cyan-400 hover:text-cyan-300 font-bold transition mr-2.5" title="Carteirinha Digital"><i class="fa-solid fa-id-card"></i></button>`;
 
                 if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
 
@@ -1202,6 +1209,8 @@
             for (const [pos, qtd] of Object.entries(posicoesCount)) {
                 listaPos.innerHTML += `<div class="flex justify-between items-center p-3.5 bg-pitch-950 rounded-2xl border border-pitch-800"><span class="text-gray-300 font-bold">${pos}</span><span class="px-3.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-400 font-black text-xs">${qtd} atleta(s)</span></div>`;
             }
+
+            // Tabela de presenças
             const tbodyPres = document.getElementById('tabela-relatorio-presencas');
             tbodyPres.innerHTML = '';
             [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
@@ -1215,6 +1224,28 @@
                     </tr>
                 `;
             });
+
+            // Tabela de Inadimplentes (Cobrança WhatsApp)
+            const inadimplentes = jogadores.filter(j => (j.status_mensalidade || 'Pendente') === 'Pendente');
+            document.getElementById('contador-inadimplentes').innerText = `${inadimplentes.length} pendente(s)`;
+            const tbodyInad = document.getElementById('tabela-relatorio-inadimplentes');
+            if (inadimplentes.length === 0) {
+                tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta com mensalidade pendente. Parabéns! 🎉</td></tr>`;
+            } else {
+                tbodyInad.innerHTML = '';
+                inadimplentes.forEach(j => {
+                    const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '40.00')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 ml-auto"><i class="fa-brands fa-whatsapp text-sm"></i><span>Cobrar WhatsApp</span></button>` : '<span class="text-gray-500 text-xs">Sem telefone</span>';
+                    tbodyInad.innerHTML += `
+                        <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                            <td class="py-3.5 font-bold text-white">${j.nome}</td>
+                            <td class="py-3.5 text-gray-300">${j.telefone || '-'}</td>
+                            <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                            <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
+                            <td class="py-3.5 text-right">${btnWp}</td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
         function toggleSelecionarTodos(masterCb) { document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked); }
