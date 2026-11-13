@@ -85,32 +85,46 @@ async function processarLogin(req, res) {
 app.post('/api/login', processarLogin);
 app.post('/api/auth/login', processarLogin);
 
-// ================= JOGADORES =================
+// ================= JOGADORES (COM COMPETÊNCIA MENSAL) =================
 app.get('/api/jogadores', async (req, res) => {
+    const competencia = req.query.competencia || new Date().toISOString().slice(0, 7);
     try {
         const r = await pool.query(`
             SELECT j.*, 
+            COALESCE(mc.status, 'Pendente') as status_mensalidade,
             (SELECT COUNT(*) FROM presencas_partidas p WHERE p.jogador_id = j.id) as total_participacoes 
-            FROM jogadores j ORDER BY id ASC
-        `);
+            FROM jogadores j 
+            LEFT JOIN mensalidades_competencia mc ON mc.jogador_id = j.id AND mc.competencia = $1
+            ORDER BY j.id ASC
+        `, [competencia]);
         res.json(r.rows);
-    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
+    } catch (err) { 
+        console.error('Erro ao buscar jogadores:', err);
+        res.status(500).json({ erro: 'Erro ao buscar jogadores' }); 
+    }
 });
 
 app.get('/api/jogadores/:id/perfil', async (req, res) => {
     const { id } = req.params;
+    const competenciaAtual = new Date().toISOString().slice(0, 7);
     try {
-        const jogadorRes = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        const jogadorRes = await pool.query(`
+            SELECT j.*, COALESCE(mc.status, 'Pendente') as status_mensalidade 
+            FROM jogadores j 
+            LEFT JOIN mensalidades_competencia mc ON mc.jogador_id = j.id AND mc.competencia = $2
+            WHERE j.id = $1
+        `, [id, competenciaAtual]);
+        
         if (jogadorRes.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado' });
         const jogador = jogadorRes.rows[0];
 
         const presencasRes = await pool.query('SELECT data_partida FROM presencas_partidas WHERE jogador_id = $1 ORDER BY data_partida DESC', [id]);
-        const financeiroRes = await pool.query("SELECT * FROM financeiro_lancamentos WHERE descricao ILIKE $1 ORDER BY data_lancamento DESC", [`%Mensalidade - ${jogador.nome}%`]);
+        const competenciasRes = await pool.query('SELECT * FROM mensalidades_competencia WHERE jogador_id = $1 ORDER BY competencia DESC', [id]);
 
         res.json({
             jogador,
             presencas: presencasRes.rows,
-            financeiro: financeiroRes.rows
+            competencias: competenciasRes.rows
         });
     } catch (err) {
         console.error('Erro ao buscar perfil do atleta:', err);
@@ -119,13 +133,14 @@ app.get('/api/jogadores/:id/perfil', async (req, res) => {
 });
 
 app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao, competencia } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
     }
 
     try {
+        const compAlvo = competencia || new Date().toISOString().slice(0, 7);
         const mensalidadeFinal = (req.usuario.perfil === 'secretario') ? 'Pendente' : (status_mensalidade || 'Pendente');
 
         const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8) RETURNING *;`;
@@ -144,12 +159,16 @@ app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesour
 
         if (mensalidadeFinal === 'Pago') {
             const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
-            const mesAtual = new Date().toISOString().slice(0, 7);
-            const descricaoMensalidade = `Mensalidade - ${nome}`;
+            const descricaoMensalidade = `Mensalidade (${compAlvo}) - ${nome}`;
+
+            await pool.query(
+                `INSERT INTO mensalidades_competencia (jogador_id, competencia, status, valor) VALUES ($1, $2, 'Pago', $3) ON CONFLICT (jogador_id, competencia) DO UPDATE SET status = 'Pago', valor = $3`,
+                [novoJogador.id, compAlvo, valorMensalidade]
+            );
 
             const existe = await pool.query(
-                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
-                [descricaoMensalidade, mesAtual]
+                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1`,
+                [descricaoMensalidade]
             );
 
             if (existe.rows.length === 0) {
@@ -169,17 +188,19 @@ app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesour
 
 app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { id } = req.params;
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao, competencia } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
     }
 
     try {
+        const compAlvo = competencia || new Date().toISOString().slice(0, 7);
         const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
         if (atletaAntigo.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado.' });
         
-        const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
+        const compAntigaRes = await pool.query('SELECT status FROM mensalidades_competencia WHERE jogador_id = $1 AND competencia = $2', [id, compAlvo]);
+        const statusAnterior = compAntigaRes.rows[0]?.status || 'Pendente';
         const statusMensalidadeFinal = (req.usuario.perfil === 'secretario') ? statusAnterior : (status_mensalidade || 'Pendente');
 
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, funcao_grupo=$7, status_aptidao=$8 WHERE id=$9 RETURNING *;`;
@@ -196,16 +217,20 @@ app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tes
         ]);
 
         const jogadorAtualizado = r.rows[0];
-        const mesAtual = new Date().toISOString().slice(0, 7);
-        const descricaoMensalidade = `Mensalidade - ${nome}`;
+        const descricaoMensalidade = `Mensalidade (${compAlvo}) - ${nome}`;
 
         if (req.usuario.perfil !== 'secretario') {
             if (statusAnterior !== 'Pago' && statusMensalidadeFinal === 'Pago') {
                 const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
                 
+                await pool.query(
+                    `INSERT INTO mensalidades_competencia (jogador_id, competencia, status, valor) VALUES ($1, $2, 'Pago', $3) ON CONFLICT (jogador_id, competencia) DO UPDATE SET status = 'Pago', valor = $3`,
+                    [id, compAlvo, valorMensalidade]
+                );
+
                 const existe = await pool.query(
-                    `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
-                    [descricaoMensalidade, mesAtual]
+                    `SELECT id FROM financeiro_lancamentos WHERE descricao = $1`,
+                    [descricaoMensalidade]
                 );
 
                 if (existe.rows.length === 0) {
@@ -216,8 +241,12 @@ app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tes
                 }
             } else if (statusAnterior === 'Pago' && statusMensalidadeFinal === 'Pendente') {
                 await pool.query(
-                    `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2 AND tipo = 'Entrada'`,
-                    [descricaoMensalidade, mesAtual]
+                    `DELETE FROM mensalidades_competencia WHERE jogador_id = $1 AND competencia = $2`,
+                    [id, compAlvo]
+                );
+                await pool.query(
+                    `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND tipo = 'Entrada'`,
+                    [descricaoMensalidade]
                 );
             }
         }

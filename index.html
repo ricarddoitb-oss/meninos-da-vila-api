@@ -129,9 +129,15 @@
                 <h2 id="page-title" class="text-xl font-black text-white tracking-wide">Dashboard Pro</h2>
                 <p class="text-xs text-gray-400 mt-0.5">Bem-vindo ao centro de operações do clube.</p>
             </div>
-            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-6 py-3 rounded-2xl text-xs shadow-lg shadow-emerald-900/30 transition transform hover:-translate-y-0.5 flex items-center space-x-2.5 hidden">
-                <i class="fa-solid fa-user-plus text-sm"></i><span>Novo Atleta / Convidado</span>
-            </button>
+            <div class="flex items-center space-x-3">
+                <div class="bg-pitch-900 border border-pitch-800 px-3.5 py-2 rounded-2xl flex items-center space-x-2">
+                    <span class="text-[10px] text-gray-400 uppercase font-extrabold">Competência:</span>
+                    <input type="month" id="seletor-competencia-global" onchange="alterarCompetenciaGlobal(this.value)" class="bg-transparent text-xs font-bold text-amber-400 focus:outline-none cursor-pointer">
+                </div>
+                <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-6 py-3 rounded-2xl text-xs shadow-lg shadow-emerald-900/30 transition transform hover:-translate-y-0.5 flex items-center space-x-2.5 hidden">
+                    <i class="fa-solid fa-user-plus text-sm"></i><span>Novo Atleta / Convidado</span>
+                </button>
+            </div>
         </header>
 
         <div class="p-4 md:p-8 flex-1 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
@@ -170,7 +176,7 @@
 
                     <div onclick="switchTab('elenco')" class="bg-gradient-to-br from-pitch-900 to-pitch-950 border border-pitch-800/80 p-5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 hover:shadow-2xl transition group relative overflow-hidden">
                         <div class="absolute -right-4 -bottom-4 text-pitch-800/40 text-6xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-circle-check"></i></div>
-                        <p class="text-[11px] text-gray-400 uppercase font-extrabold tracking-wider">Em Dia</p>
+                        <p class="text-[11px] text-gray-400 uppercase font-extrabold tracking-wider">Em Dia (<span id="dash-lbl-comp">-</span>)</p>
                         <h3 id="dash-pagos-count" class="text-3xl md:text-4xl font-black text-emerald-400 mt-3">0/0</h3>
                         <div class="flex items-center space-x-1.5 mt-2 text-emerald-400 text-xs font-semibold">
                             <i class="fa-solid fa-shield-halved"></i><span>Mensalidades pagas</span>
@@ -189,39 +195,44 @@
 
                 <!-- SEÇÃO SECUNDÁRIA DO DASHBOARD -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-pitch-900/90 border border-pitch-800/80 p-6 md:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-                        <div class="flex justify-between items-center mb-6 border-b border-pitch-800 pb-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold"><i class="fa-solid fa-futbol"></i></div>
-                                <div>
-                                    <h3 class="font-black text-base text-white">Próxima Partida Oficial</h3>
-                                    <p class="text-xs text-gray-400">Agenda da semana do clube</p>
+                    <div class="bg-pitch-900/90 border border-pitch-800/80 p-6 md:p-8 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-6 border-b border-pitch-800 pb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold"><i class="fa-solid fa-futbol"></i></div>
+                                    <div>
+                                        <h3 class="font-black text-base text-white">Próxima Partida Oficial</h3>
+                                        <p class="text-xs text-gray-400">Agenda da semana do clube</p>
+                                    </div>
+                                </div>
+                                <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3.5 py-2 rounded-xl text-xs text-amber-400 font-bold hidden transition shadow">
+                                    <i class="fa-solid fa-pen mr-1"></i>Editar
+                                </button>
+                            </div>
+                            <div class="space-y-4 text-sm text-gray-300">
+                                <div class="flex justify-between items-center bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
+                                    <span class="text-gray-400 text-xs uppercase font-bold">Data</span>
+                                    <strong id="lbl-partida-data" class="text-white text-sm">-</strong>
+                                </div>
+                                <div class="flex justify-between items-center bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
+                                    <span class="text-gray-400 text-xs uppercase font-bold">Local</span>
+                                    <strong id="lbl-partida-local" class="text-white text-sm truncate max-w-[200px]">-</strong>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-1">Horário</span>
+                                        <strong id="lbl-partida-horario" class="text-white text-sm">-</strong>
+                                    </div>
+                                    <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-1">Custo Aluguel</span>
+                                        <strong id="lbl-partida-custo" class="text-amber-400 text-sm">-</strong>
+                                    </div>
                                 </div>
                             </div>
-                            <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3.5 py-2 rounded-xl text-xs text-amber-400 font-bold hidden transition shadow">
-                                <i class="fa-solid fa-pen mr-1"></i>Editar
-                            </button>
                         </div>
-                        <div class="space-y-4 text-sm text-gray-300">
-                            <div class="flex justify-between items-center bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
-                                <span class="text-gray-400 text-xs uppercase font-bold">Data</span>
-                                <strong id="lbl-partida-data" class="text-white text-sm">-</strong>
-                            </div>
-                            <div class="flex justify-between items-center bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
-                                <span class="text-gray-400 text-xs uppercase font-bold">Local</span>
-                                <strong id="lbl-partida-local" class="text-white text-sm truncate max-w-[200px]">-</strong>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
-                                    <span class="text-gray-400 text-[10px] uppercase font-bold block mb-1">Horário</span>
-                                    <strong id="lbl-partida-horario" class="text-white text-sm">-</strong>
-                                </div>
-                                <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800/60">
-                                    <span class="text-gray-400 text-[10px] uppercase font-bold block mb-1">Custo Aluguel</span>
-                                    <strong id="lbl-partida-custo" class="text-amber-400 text-sm">-</strong>
-                                </div>
-                            </div>
-                        </div>
+                        <button onclick="dispararConvocacaoGeralWhatsApp()" class="mt-5 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-2xl text-xs shadow-lg transition flex items-center justify-center space-x-2">
+                            <i class="fa-brands fa-whatsapp text-base"></i><span>Disparar Convocação Geral no Grupo</span>
+                        </button>
                     </div>
 
                     <div class="bg-pitch-900/90 border border-pitch-800/80 p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col justify-between">
@@ -251,7 +262,11 @@
 
             <!-- ABA ELENCO -->
             <div id="tab-elenco" class="tab-content hidden space-y-6">
-                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-5 rounded-3xl shadow-xl grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-5 rounded-3xl shadow-xl grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                        <label class="text-[11px] text-amber-400 block mb-1.5 font-extrabold uppercase tracking-wider">Mês Competência:</label>
+                        <input type="month" id="filtro-elenco-competencia" onchange="alterarCompetenciaGlobal(this.value)" class="w-full bg-pitch-950 border border-amber-500/40 rounded-2xl px-4 py-3 text-xs text-amber-400 font-bold focus:outline-none">
+                    </div>
                     <div>
                         <label class="text-[11px] text-gray-400 block mb-1.5 font-bold uppercase tracking-wider">Buscar Atleta:</label>
                         <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Nome..." class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 shadow-inner">
@@ -290,6 +305,15 @@
 
             <!-- ABA PRESENÇA & SORTEIO -->
             <div id="tab-presenca" class="tab-content hidden space-y-6">
+                <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
+                    <div class="text-xs text-gray-300">
+                        <strong class="text-amber-400">Convocação Rápida:</strong> Envie o aviso oficial da partida com data, hora e local no grupo do WhatsApp.
+                    </div>
+                    <button onclick="dispararConvocacaoGeralWhatsApp()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow transition flex items-center justify-center space-x-2">
+                        <i class="fa-brands fa-whatsapp text-base"></i><span>Disparar Convocação Geral</span>
+                    </button>
+                </div>
+
                 <div id="alerta-rodada-travada" class="hidden bg-amber-500/10 border border-amber-500/40 text-amber-300 p-4 rounded-2xl text-xs md:text-sm flex items-center space-x-3 shadow-lg">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                     <div><strong>Sorteio travado!</strong> O sorteio oficial para esta data já foi confirmado e registrado no histórico.</div>
@@ -433,7 +457,6 @@
 
             <!-- ABA RELATÓRIOS -->
             <div id="tab-relatorios" class="tab-content hidden space-y-6">
-                <!-- SELETORES DE RELATÓRIO (BOTÕES) -->
                 <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
                     <div>
                         <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Central de Relatórios Gerenciais</h3>
@@ -451,14 +474,13 @@
                     <button onclick="mudarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-5 py-3 rounded-2xl text-xs transition border border-pitch-800 shadow">
                         <i class="fa-solid fa-clipboard-user mr-2"></i>Participações & Presenças
                     </button>
+                    <!-- Relatório de Cobrança / Inadimplentes (Restrito a Admin e Tesoureiro) -->
                     <button onclick="mudarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-5 py-3 rounded-2xl text-xs transition border border-pitch-800 shadow">
                         <i class="fa-solid fa-triangle-exclamation mr-2"></i>Atletas Inadimplentes (WhatsApp)
                     </button>
                 </div>
 
-                <!-- BLOCOS DE RELATÓRIOS INDIVIDUAIS -->
                 <div id="relatorios-conteudo-impressao" class="space-y-6">
-                    
                     <!-- 1. RELATÓRIO DE POSIÇÕES -->
                     <div id="bloco-rel-posicoes" class="rel-bloco space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -500,11 +522,11 @@
                         </div>
                     </div>
 
-                    <!-- 3. RELATÓRIO DE INADIMPLENTES (COBRANÇA RÁPIDA WHATSAPP) -->
+                    <!-- 3. RELATÓRIO DE INADIMPLENTES / COBRANÇA VIA WHATSAPP (RESTRITO ADMIN E TESOUREIRO) -->
                     <div id="bloco-rel-inadimplentes" class="rel-bloco space-y-6 hidden">
                         <div class="bg-pitch-900 border border-pitch-800 p-6 md:p-8 rounded-3xl shadow-xl">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-black text-sm md:text-base text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Atletas com Mensalidade Pendente</h3>
+                                <h3 class="font-black text-sm md:text-base text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Atletas Pendentes (<span id="rel-comp-inadimplentes">-</span>)</h3>
                                 <span id="contador-inadimplentes" class="text-xs px-3 py-1 rounded-xl bg-rose-500/20 text-rose-300 font-bold">0 pendentes</span>
                             </div>
                             <p class="text-xs text-gray-400 mb-4">Clique no botão do WhatsApp para enviar a cobrança diretamente para o número cadastrado do atleta.</p>
@@ -524,7 +546,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -562,7 +583,7 @@
                     <strong id="perfil-total-jogos" class="text-2xl text-emerald-400 font-black mt-1 block">0</strong>
                 </div>
                 <div class="bg-pitch-950 p-4.5 rounded-2xl border border-pitch-800">
-                    <span class="text-[10px] text-gray-400 uppercase font-extrabold tracking-wider block">Mensalidade Atual</span>
+                    <span class="text-[10px] text-gray-400 uppercase font-extrabold tracking-wider block">Competência Atual</span>
                     <strong id="perfil-status-mensalidade" class="text-sm font-bold mt-1 block">-</strong>
                 </div>
             </div>
@@ -576,7 +597,7 @@
                 </div>
 
                 <div>
-                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider mb-2.5"><i class="fa-solid fa-wallet mr-2"></i>Extrato Individual de Mensalidades</h4>
+                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider mb-2.5"><i class="fa-solid fa-wallet mr-2"></i>Histórico de Competências Pagas</h4>
                     <div id="perfil-lista-financeiro" class="bg-pitch-950 p-4 rounded-2xl border border-pitch-800 max-h-40 overflow-y-auto text-xs space-y-1.5 text-gray-300">
                         Nenhum lançamento.
                     </div>
@@ -678,7 +699,7 @@
                         </select>
                     </div>
                     <div id="container-input-mensalidade">
-                        <label class="text-gray-300 font-bold mb-1.5 block uppercase">Mensalidade</label>
+                        <label class="text-gray-300 font-bold mb-1.5 block uppercase">Mensalidade (<span id="modal-lbl-comp">-</span>)</label>
                         <select id="input-mensalidade" class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl p-3.5 text-white">
                             <option value="Pendente">Pendente</option>
                             <option value="Pago">Pago</option>
@@ -776,6 +797,7 @@
         let historicoSorteiosGlobal = [];
         let ultimoSorteioGerado = null;
         let chartFinanceiroInstance = null;
+        let competenciaAtual = new Date().toISOString().slice(0, 7);
 
         const token = localStorage.getItem('token');
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -809,6 +831,30 @@
             }
         }
 
+        function formatarCompetenciaLabel(compStr) {
+            if (!compStr) return '';
+            const [ano, mes] = compStr.split('-');
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${meses[parseInt(mes, 10) - 1]}/${ano}`;
+        }
+
+        function alterarCompetenciaGlobal(novaComp) {
+            if (!novaComp) return;
+            competenciaAtual = novaComp;
+            const elGlobal = document.getElementById('seletor-competencia-global');
+            const elElenco = document.getElementById('filtro-elenco-competencia');
+            if (elGlobal) elGlobal.value = novaComp;
+            if (elElenco) elElenco.value = novaComp;
+            
+            const lblFmt = formatarCompetenciaLabel(novaComp);
+            document.getElementById('dash-lbl-comp').innerText = lblFmt;
+            document.getElementById('modal-lbl-comp').innerText = lblFmt;
+            const elCompInad = document.getElementById('rel-comp-inadimplentes');
+            if (elCompInad) elCompInad.innerText = lblFmt;
+            
+            carregarJogadores();
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const perfil = usuarioLogado.perfil;
             if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
@@ -825,14 +871,22 @@
                 if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
             }
 
+            // RESTRIÇÃO: Relatório de Cobrança / Inadimplentes via WhatsApp apenas para Admin e Tesoureiro
+            if (!['admin', 'tesoureiro'].includes(perfil)) {
+                document.getElementById('btn-rel-inadimplentes')?.remove();
+                document.getElementById('bloco-rel-inadimplentes')?.remove();
+            }
+
             const dataAtual = new Date();
             const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
+            competenciaAtual = anoMes;
+
             document.getElementById('filtro-mes').value = anoMes;
             document.getElementById('fin-data').valueAsDate = dataAtual;
             document.getElementById('data-presenca-manual').value = dataAtual.toISOString().split('T')[0];
 
+            alterarCompetenciaGlobal(anoMes);
             await carregarConfiguracoes();
-            carregarJogadores();
             if (perfil !== 'secretario') {
                 carregarFinanceiro();
             }
@@ -914,7 +968,25 @@
             }
         }
 
-        // WhatsApp de Cobrança / Convocação
+        // Disparo de Convocação Geral via WhatsApp
+        function dispararConvocacaoGeralWhatsApp() {
+            const nomeClube = configsGlobal.nome_clube || 'CLUBE MENINOS DA VILA';
+            const dataPartida = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
+            const localPartida = configsGlobal.partida_local || 'Campo Principal - CMV';
+            const horarioPartida = configsGlobal.partida_horario || '19:00';
+
+            const texto = `⚽ *CONVOCAÇÃO OFICIAL - ${nomeClube.toUpperCase()}* ⚽\n\n` +
+                          `Fala galera! Nossa próxima resenha já está confirmada:\n\n` +
+                          `📅 *Data:* ${dataPartida}\n` +
+                          `⏰ *Horário:* ${horarioPartida}\n` +
+                          `📍 *Local:* ${localPartida}\n\n` +
+                          `Bora confirmar presença e chegar no horário para o sorteio dos coletes! 🔥💪`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        // WhatsApp Individual de Cobrança / Convocação
         function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
             if (!telefone || telefone.trim() === '') {
                 showToast('Atleta sem número de telefone cadastrado!', 'erro');
@@ -923,11 +995,12 @@
             let foneLimpo = telefone.replace(/\D/g, '');
             if (!foneLimpo.startsWith('55')) foneLimpo = '55' + foneLimpo;
 
+            const compLabel = formatarCompetenciaLabel(competenciaAtual);
             let mensagem = '';
             if (tipo === 'cobranca') {
-                mensagem = `Olá ${nomeAtleta}, tudo bem? Passando para lembrar da sua mensalidade/taxa pendente no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
+                mensagem = `Olá ${nomeAtleta}, tudo bem? Passando para lembrar da sua mensalidade referente a *${compLabel}* no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
             } else if (tipo === 'convocacao') {
-                mensagem = `Salve ${nomeAtleta}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Confirme sua presença no sistema! Tamo junto!`;
+                mensagem = `Salve ${nomeAtleta}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Confirme sua presença! Tamo junto!`;
             }
 
             const url = `https://api.whatsapp.com/send?phone=${foneLimpo}&text=${encodeURIComponent(mensagem)}`;
@@ -1006,7 +1079,7 @@
 
         async function carregarJogadores() {
             try {
-                const res = await fetch(`${API_URL}/api/jogadores`);
+                const res = await fetch(`${API_URL}/api/jogadores?competencia=${competenciaAtual}`);
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
                     listaAtletasGlobal = dados;
@@ -1085,8 +1158,9 @@
                 // Botão de WhatsApp Rápido
                 if (j.telefone) {
                     const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
+                    const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
                     const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400 hover:text-emerald-300' : 'fa-whatsapp text-amber-400 hover:text-amber-300';
-                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '40.00')" class="font-bold transition mr-3" title="Enviar WhatsApp (${tipoWp === 'cobranca' ? 'Cobrança' : 'Convocação'})"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
+                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '${valorCobranca}')" class="font-bold transition mr-3" title="Enviar WhatsApp (${tipoWp === 'cobranca' ? 'Cobrança' : 'Convocação'})"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
                 }
 
                 if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
@@ -1167,12 +1241,12 @@
                 const listaFin = document.getElementById('perfil-lista-financeiro');
                 if (usuarioLogado.perfil === 'secretario') {
                     listaFin.innerHTML = '<span class="text-gray-500 italic">Restrito ao perfil Tesoureiro/Gestor.</span>';
-                } else if (dados.financeiro.length === 0) {
-                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhum lançamento financeiro.</span>';
+                } else if (!dados.competencias || dados.competencias.length === 0) {
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhuma competência quitada registrada.</span>';
                 } else {
-                    listaFin.innerHTML = dados.financeiro.map(f => {
-                        const dt = new Date(f.data_lancamento).toLocaleDateString('pt-BR');
-                        return `<div class="flex justify-between py-2 border-b border-pitch-800/50"><span>${f.descricao} (${dt})</span><strong class="text-emerald-400">R$ ${parseFloat(f.valor).toFixed(2)}</strong></div>`;
+                    listaFin.innerHTML = dados.competencias.map(c => {
+                        const compFmt = formatarCompetenciaLabel(c.competencia);
+                        return `<div class="flex justify-between py-2 border-b border-pitch-800/50"><span>Competência ${compFmt}</span><strong class="text-emerald-400">R$ ${parseFloat(c.valor || 0).toFixed(2)} (Pago)</strong></div>`;
                     }).join('');
                 }
 
@@ -1210,7 +1284,6 @@
                 listaPos.innerHTML += `<div class="flex justify-between items-center p-3.5 bg-pitch-950 rounded-2xl border border-pitch-800"><span class="text-gray-300 font-bold">${pos}</span><span class="px-3.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-400 font-black text-xs">${qtd} atleta(s)</span></div>`;
             }
 
-            // Tabela de presenças
             const tbodyPres = document.getElementById('tabela-relatorio-presencas');
             tbodyPres.innerHTML = '';
             [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
@@ -1225,26 +1298,30 @@
                 `;
             });
 
-            // Tabela de Inadimplentes (Cobrança WhatsApp)
-            const inadimplentes = jogadores.filter(j => (j.status_mensalidade || 'Pendente') === 'Pendente');
-            document.getElementById('contador-inadimplentes').innerText = `${inadimplentes.length} pendente(s)`;
-            const tbodyInad = document.getElementById('tabela-relatorio-inadimplentes');
-            if (inadimplentes.length === 0) {
-                tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta com mensalidade pendente. Parabéns! 🎉</td></tr>`;
-            } else {
-                tbodyInad.innerHTML = '';
-                inadimplentes.forEach(j => {
-                    const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '40.00')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 ml-auto"><i class="fa-brands fa-whatsapp text-sm"></i><span>Cobrar WhatsApp</span></button>` : '<span class="text-gray-500 text-xs">Sem telefone</span>';
-                    tbodyInad.innerHTML += `
-                        <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                            <td class="py-3.5 font-bold text-white">${j.nome}</td>
-                            <td class="py-3.5 text-gray-300">${j.telefone || '-'}</td>
-                            <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
-                            <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
-                            <td class="py-3.5 text-right">${btnWp}</td>
-                        </tr>
-                    `;
-                });
+            // Seção de inadimplentes (Apenas renderiza se o bloco existir no DOM - restrito a Admin/Tesoureiro)
+            const blocoInad = document.getElementById('bloco-rel-inadimplentes');
+            if (blocoInad) {
+                const inadimplentes = jogadores.filter(j => (j.status_mensalidade || 'Pendente') === 'Pendente');
+                document.getElementById('contador-inadimplentes').innerText = `${inadimplentes.length} pendente(s)`;
+                const tbodyInad = document.getElementById('tabela-relatorio-inadimplentes');
+                if (inadimplentes.length === 0) {
+                    tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta com mensalidade pendente nesta competência! 🎉</td></tr>`;
+                } else {
+                    tbodyInad.innerHTML = '';
+                    inadimplentes.forEach(j => {
+                        const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
+                        const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '${valorCobranca}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 ml-auto"><i class="fa-brands fa-whatsapp text-sm"></i><span>Cobrar WhatsApp</span></button>` : '<span class="text-gray-500 text-xs">Sem telefone</span>';
+                        tbodyInad.innerHTML += `
+                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                                <td class="py-3.5 font-bold text-white">${j.nome}</td>
+                                <td class="py-3.5 text-gray-300">${j.telefone || '-'}</td>
+                                <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                                <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
+                                <td class="py-3.5 text-right">${btnWp}</td>
+                            </tr>
+                        `;
+                    });
+                }
             }
         }
 
@@ -1287,7 +1364,8 @@
                 telefone: document.getElementById('input-telefone').value,
                 funcao_grupo: document.getElementById('input-funcao').value,
                 status_aptidao: document.getElementById('input-aptidao').value,
-                posicao: document.getElementById('input-posicao').value
+                posicao: document.getElementById('input-posicao').value,
+                competencia: competenciaAtual
             };
 
             const inputMens = document.getElementById('input-mensalidade');
