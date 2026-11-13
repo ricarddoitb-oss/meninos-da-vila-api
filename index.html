@@ -58,7 +58,7 @@
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
-            <nav class="p-4 space-y-1.5">
+            <nav class="p-4 space-y-1.5" id="sidebar-nav-container">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-emerald-500/20 to-transparent text-emerald-400 border border-emerald-500/30 shadow-sm transition group">
                     <i class="fa-solid fa-chart-pie w-5 text-emerald-400 group-hover:scale-110 transition"></i><span>Dashboard Pro</span>
                 </button>
@@ -104,7 +104,7 @@
     </header>
 
     <!-- MOBILE BOTTOM NAVIGATION BAR -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-xl border-t border-pitch-800/80 flex justify-around p-3 z-50 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-xl border-t border-pitch-800/80 flex justify-around p-3 z-50 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" id="mobile-nav-container">
         <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center text-emerald-400 text-[10px] font-bold transition">
             <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i><span>Início</span>
         </button>
@@ -149,7 +149,7 @@
                 </div>
 
                 <!-- CARDS DE ESTATÍSTICAS MODERNOS -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6" id="dashboard-cards-grid">
                     <div onclick="switchTab('elenco')" class="bg-gradient-to-br from-pitch-900 to-pitch-950 border border-pitch-800/80 p-5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 hover:shadow-2xl transition group relative overflow-hidden">
                         <div class="absolute -right-4 -bottom-4 text-pitch-800/40 text-6xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-users"></i></div>
                         <p class="text-[11px] text-gray-400 uppercase font-extrabold tracking-wider">Elenco Total</p>
@@ -177,7 +177,7 @@
                         </div>
                     </div>
 
-                    <div onclick="switchTab('financeiro')" class="bg-gradient-to-br from-pitch-900 to-pitch-950 border border-pitch-800/80 p-5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 hover:shadow-2xl transition group relative overflow-hidden">
+                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-gradient-to-br from-pitch-900 to-pitch-950 border border-pitch-800/80 p-5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 hover:shadow-2xl transition group relative overflow-hidden">
                         <div class="absolute -right-4 -bottom-4 text-pitch-800/40 text-6xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-wallet"></i></div>
                         <p class="text-[11px] text-gray-400 uppercase font-extrabold tracking-wider">Saldo em Caixa</p>
                         <h3 id="dash-saldo-val" class="text-2xl md:text-3xl font-black text-amber-400 mt-3 truncate">R$ 0,00</h3>
@@ -629,7 +629,7 @@
                             <option value="Atacante">Atacante (R$ 40)</option>
                         </select>
                     </div>
-                    <div>
+                    <div id="container-input-mensalidade">
                         <label class="text-gray-300 font-bold mb-1.5 block uppercase">Mensalidade</label>
                         <select id="input-mensalidade" class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl p-3.5 text-white">
                             <option value="Pendente">Pendente</option>
@@ -705,7 +705,9 @@
                     <label class="text-gray-300 font-bold mb-1.5 block uppercase">Permissão</label>
                     <select id="user-perfil" class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl p-3.5 text-white">
                         <option value="usuario">Usuário Comum</option>
-                        <option value="gestor">Gestor / Tesoureiro</option>
+                        <option value="secretario">Secretário</option>
+                        <option value="tesoureiro">Tesoureiro</option>
+                        <option value="gestor">Gestor</option>
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
@@ -761,7 +763,20 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const perfil = usuarioLogado.perfil;
             if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-            if (perfil === 'admin' || perfil === 'gestor') document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
+            if (['admin', 'gestor', 'tesoureiro', 'secretario'].includes(perfil)) {
+                document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
+            }
+
+            // Aplicar restrições específicas por Perfil (Secretário / Tesoureiro)
+            if (perfil === 'secretario') {
+                document.getElementById('nav-financeiro')?.remove();
+                document.getElementById('mob-nav-financeiro')?.remove();
+                document.getElementById('card-saldo-caixa')?.remove();
+                document.getElementById('container-input-mensalidade')?.remove();
+                // Ajustar grid do dashboard para 3 colunas se o saldo sumiu
+                const dashGrid = document.getElementById('dashboard-cards-grid');
+                if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
+            }
 
             const dataAtual = new Date();
             const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
@@ -771,7 +786,9 @@
 
             await carregarConfiguracoes();
             carregarJogadores();
-            carregarFinanceiro();
+            if (perfil !== 'secretario') {
+                carregarFinanceiro();
+            }
             carregarUsuariosSistema();
             await carregarHistoricoSorteios();
             atualizarDataRodada();
@@ -780,6 +797,10 @@
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
         function switchTab(tabId) {
+            if (tabId === 'financeiro' && usuarioLogado.perfil === 'secretario') {
+                showToast('Acesso não autorizado ao módulo financeiro.', 'erro');
+                return;
+            }
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(b => {
                 b.classList.remove('bg-gradient-to-r', 'from-emerald-500/20', 'to-transparent', 'text-emerald-400', 'border', 'border-emerald-500/30');
@@ -960,7 +981,7 @@
         function renderElenco(jogadores) {
             const grid = document.getElementById('jogadores-grid');
             if (!grid) return;
-            const podeGerenciar = usuarioLogado.perfil === 'admin' || usuarioLogado.perfil === 'gestor';
+            const podeGerenciar = ['admin', 'gestor', 'tesoureiro', 'secretario'].includes(usuarioLogado.perfil);
             const isAdmin = usuarioLogado.perfil === 'admin';
 
             if (jogadores.length === 0) {
@@ -979,6 +1000,7 @@
 
                 let botoesAcao = '';
                 if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-bold transition">Editar</button>`;
+                // Secretário NÃO pode excluir jogador
                 if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold ml-3 transition">Excluir</button>`;
 
                 const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
@@ -988,7 +1010,6 @@
                 else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
                 else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
 
-                // Alerta Visual de Mensalidade Vencida / Pendente
                 const statusMens = j.status_mensalidade || 'Pendente';
                 let mensalidadeBadge = '';
                 let cardBordaGlow = 'border-pitch-800';
@@ -1056,7 +1077,9 @@
                 }
 
                 const listaFin = document.getElementById('perfil-lista-financeiro');
-                if (dados.financeiro.length === 0) {
+                if (usuarioLogado.perfil === 'secretario') {
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Restrito ao perfil Tesoureiro/Gestor.</span>';
+                } else if (dados.financeiro.length === 0) {
                     listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhum lançamento financeiro.</span>';
                 } else {
                     listaFin.innerHTML = dados.financeiro.map(f => {
@@ -1117,7 +1140,6 @@
         async function salvarPresencasManualmente(btn) {
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
             if (checkboxes.length === 0) { showToast('Selecione pelo menos um atleta.', 'aviso'); return; }
-            // Utiliza estritamente a data selecionada no campo da rodada
             const dataPresenca = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
             const jogadorIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
@@ -1152,9 +1174,14 @@
                 telefone: document.getElementById('input-telefone').value,
                 funcao_grupo: document.getElementById('input-funcao').value,
                 status_aptidao: document.getElementById('input-aptidao').value,
-                posicao: document.getElementById('input-posicao').value,
-                status_mensalidade: document.getElementById('input-mensalidade').value
+                posicao: document.getElementById('input-posicao').value
             };
+
+            // Se for secretário, não envia/modifica status de mensalidade
+            const inputMens = document.getElementById('input-mensalidade');
+            if (inputMens && usuarioLogado.perfil !== 'secretario') {
+                dados.status_mensalidade = inputMens.value;
+            }
 
             const metodo = id ? 'PUT' : 'POST';
             const url = id ? `${API_URL}/api/jogadores/${id}` : `${API_URL}/api/jogadores`;
@@ -1165,7 +1192,7 @@
                     showToast('Atleta salvo com sucesso!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
-                    carregarFinanceiro();
+                    if (usuarioLogado.perfil !== 'secretario') carregarFinanceiro();
                 } else { const errJson = await res.json(); showToast(errJson.erro || 'Erro ao salvar.', 'erro'); }
             } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
             finally { setBotaoCarregando(btn, false, 'Salvar Atleta'); }
@@ -1179,7 +1206,10 @@
             document.getElementById('input-funcao').value = j.funcao_grupo || 'Atleta';
             document.getElementById('input-aptidao').value = j.status_aptidao || 'Ativo';
             document.getElementById('input-posicao').value = j.posicao;
-            document.getElementById('input-mensalidade').value = j.status_mensalidade || 'Pendente';
+            
+            const inputMens = document.getElementById('input-mensalidade');
+            if (inputMens) inputMens.value = j.status_mensalidade || 'Pendente';
+
             document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta';
             openModal('modal-novo-jogador');
         }
@@ -1233,6 +1263,7 @@
         }
 
         async function carregarFinanceiro() {
+            if (usuarioLogado.perfil === 'secretario') return;
             try {
                 const res = await fetch(`${API_URL}/api/financeiro`);
                 const dados = await res.json();
@@ -1256,7 +1287,7 @@
                         }
                         if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                        const isAdmin = usuarioLogado.perfil === 'admin';
+                        const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                                 <td class="py-3.5 text-gray-300">${dataFmt}</td>
@@ -1265,7 +1296,7 @@
                                 <td class="py-3.5 font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
                                 <td class="py-3.5 text-right space-x-2 print:hidden">
                                     ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-bold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
-                                    ${isAdmin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
+                                    ${podeExcluirFin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -1410,7 +1441,6 @@
                 { nome: 'Time Colete Laranja', classe: 'border-orange-500/80 text-orange-400 bg-orange-950/20 shadow-lg' }
             ];
 
-            // Usa estritamente a data selecionada no campo da rodada
             const dataRodadaSelecionada = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
 
             ultimoSorteioGerado = {
