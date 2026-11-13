@@ -120,10 +120,20 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
 
         if (status_mensalidade === 'Pago') {
             const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
-            await pool.query(
-                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
-                [`Mensalidade - ${nome}`, valorMensalidade]
+            const mesAtual = new Date().toISOString().slice(0, 7); // Formato YYYY-MM
+            const descricaoMensalidade = `Mensalidade - ${nome}`;
+
+            const existe = await pool.query(
+                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
+                [descricaoMensalidade, mesAtual]
             );
+
+            if (existe.rows.length === 0) {
+                await pool.query(
+                    `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                    [descricaoMensalidade, valorMensalidade]
+                );
+            }
         }
 
         res.status(201).json(novoJogador);
@@ -160,12 +170,28 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
         ]);
 
         const jogadorAtualizado = r.rows[0];
+        const mesAtual = new Date().toISOString().slice(0, 7); // Formato YYYY-MM
+        const descricaoMensalidade = `Mensalidade - ${nome}`;
 
         if (statusAnterior !== 'Pago' && status_mensalidade === 'Pago') {
             const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
+            
+            const existe = await pool.query(
+                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
+                [descricaoMensalidade, mesAtual]
+            );
+
+            if (existe.rows.length === 0) {
+                await pool.query(
+                    `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                    [descricaoMensalidade, valorMensalidade]
+                );
+            }
+        } else if (statusAnterior === 'Pago' && status_mensalidade === 'Pendente') {
+            // Remove o lançamento do mês atual para corrigir o saldo quando voltar para pendente
             await pool.query(
-                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
-                [`Mensalidade - ${nome}`, valorMensalidade]
+                `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2 AND tipo = 'Entrada'`,
+                [descricaoMensalidade, mesAtual]
             );
         }
 
