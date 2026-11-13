@@ -130,7 +130,7 @@
                 <p class="text-xs text-gray-400 mt-0.5">Bem-vindo ao centro de operações do clube.</p>
             </div>
             <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-6 py-3 rounded-2xl text-xs shadow-lg shadow-emerald-900/30 transition transform hover:-translate-y-0.5 flex items-center space-x-2.5 hidden">
-                <i class="fa-solid fa-user-plus text-sm"></i><span>Novo Atleta</span>
+                <i class="fa-solid fa-user-plus text-sm"></i><span>Novo Atleta / Convidado</span>
             </button>
         </header>
 
@@ -542,6 +542,37 @@
         </div>
     </div>
 
+    <!-- MODAL CARTEIRINHA DIGITAL -->
+    <div id="modal-carteirinha" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-gradient-to-br from-pitch-900 via-pitch-950 to-gray-950 border-2 border-amber-400/50 p-6 rounded-3xl max-w-sm w-full shadow-2xl relative text-center space-y-4">
+            <button onclick="fecharCarteirinha()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex items-center justify-center space-x-2 border-b border-pitch-800 pb-3">
+                <i class="fa-solid fa-shield-halved text-amber-400 text-xl"></i>
+                <h4 class="font-black text-white text-sm uppercase tracking-wider">Clube Meninos da Vila</h4>
+            </div>
+            <div class="w-24 h-24 mx-auto rounded-2xl bg-pitch-800 border-2 border-amber-400 flex items-center justify-center text-amber-400 text-3xl font-black shadow-lg uppercase" id="cart-avatar">
+                CMV
+            </div>
+            <div>
+                <h3 id="cart-nome" class="font-black text-lg text-white">Nome do Atleta</h3>
+                <p id="cart-posicao" class="text-xs text-amber-400 font-bold uppercase mt-0.5">Posição • Nível 3</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-pitch-800 text-left text-xs">
+                <div class="bg-pitch-800/60 p-2.5 rounded-xl">
+                    <span class="text-gray-400 block text-[10px]">MENSALIDADE</span>
+                    <span id="cart-mensalidade" class="font-black text-emerald-400">PAGO</span>
+                </div>
+                <div class="bg-pitch-800/60 p-2.5 rounded-xl">
+                    <span class="text-gray-400 block text-[10px]">APTIDÃO</span>
+                    <span id="cart-aptidao" class="font-black text-white">ATIVO</span>
+                </div>
+            </div>
+            <div class="pt-2 text-[10px] text-gray-500 font-mono">
+                ID OFICIAL • TEMPORADA 2026
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE RECIBO -->
     <div id="modal-recibo" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white text-gray-900 rounded-3xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
@@ -596,9 +627,10 @@
                 <div><label class="text-gray-300 font-bold mb-1.5 block uppercase">Telefone / WhatsApp *</label><input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl p-3.5 text-white"></div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-gray-300 font-bold mb-1.5 block uppercase">Função</label>
+                        <label class="text-gray-300 font-bold mb-1.5 block uppercase">Função / Categoria</label>
                         <select id="input-funcao" class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl p-3.5 text-white">
-                            <option value="Atleta">Atleta / Membro</option>
+                            <option value="Atleta">Atleta (Mensalista)</option>
+                            <option value="Convidado">Convidado (Diária)</option>
                             <option value="Diretor">Diretor</option>
                             <option value="Vice Diretor">Vice Diretor</option>
                             <option value="Secretário">Secretário</option>
@@ -669,6 +701,7 @@
             <div class="flex space-x-2 mb-4">
                 <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-emerald-400 font-bold border border-pitch-700 shadow">Goleiro (R$ 20)</button>
                 <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-emerald-400 font-bold border border-pitch-700 shadow">Jogador (R$ 40)</button>
+                <button type="button" onclick="preencherValorFin('Diária Convidado', 15, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-amber-400 font-bold border border-pitch-700 shadow">Convidado (R$ 15)</button>
                 <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-800 hover:bg-pitch-700 text-[11px] px-3 py-2 rounded-xl text-rose-400 font-bold border border-pitch-700 shadow">Campo (R$ 100)</button>
             </div>
             <form onsubmit="salvarLancamento(event)" class="space-y-4 text-xs">
@@ -767,13 +800,11 @@
                 document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
             }
 
-            // Aplicar restrições específicas por Perfil (Secretário / Tesoureiro)
             if (perfil === 'secretario') {
                 document.getElementById('nav-financeiro')?.remove();
                 document.getElementById('mob-nav-financeiro')?.remove();
                 document.getElementById('card-saldo-caixa')?.remove();
                 document.getElementById('container-input-mensalidade')?.remove();
-                // Ajustar grid do dashboard para 3 colunas se o saldo sumiu
                 const dashGrid = document.getElementById('dashboard-cards-grid');
                 if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
             }
@@ -853,6 +884,46 @@
         function fecharModalRecibo() { document.body.classList.remove('imprimindo-recibo'); closeModal('modal-recibo'); }
         function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
+        // Nova funcionalidade: WhatsApp Direto
+        function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
+            if (!telefone || telefone.trim() === '') {
+                showToast('Atleta sem número de telefone cadastrado!', 'erro');
+                return;
+            }
+            let foneLimpo = telefone.replace(/\D/g, '');
+            if (!foneLimpo.startsWith('55')) foneLimpo = '55' + foneLimpo;
+
+            let mensagem = '';
+            if (tipo === 'cobranca') {
+                mensagem = `Olá ${nomeAtleta}, tudo bem? Passando para lembrar da sua mensalidade/taxa pendente no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
+            } else if (tipo === 'convocacao') {
+                mensagem = `Salve ${nomeAtleta}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Confirme sua presença no sistema! Tamo junto!`;
+            }
+
+            const url = `https://api.whatsapp.com/send?phone=${foneLimpo}&text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        // Nova funcionalidade: Carteirinha Digital
+        function abrirCarteirinha(nome, posicao, nivel, statusMensalidade, statusAptidao, telefone) {
+            document.getElementById('cart-nome').innerText = nome;
+            document.getElementById('cart-posicao').innerText = `${posicao || 'Atleta'} • Nível ${nivel || 3}`;
+            
+            const iniciais = nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+            document.getElementById('cart-avatar').innerText = iniciais || 'CMV';
+
+            const badgeMensalidade = document.getElementById('cart-mensalidade');
+            badgeMensalidade.innerText = statusMensalidade || 'Pendente';
+            badgeMensalidade.className = `font-black ${statusMensalidade === 'Pago' ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('cart-aptidao').innerText = statusAptidao || 'Ativo';
+            openModal('modal-carteirinha');
+        }
+
+        function fecharCarteirinha() {
+            closeModal('modal-carteirinha');
+        }
+
         async function carregarConfiguracoes() {
             try {
                 const res = await fetch(`${API_URL}/api/configuracoes`);
@@ -919,7 +990,7 @@
         function abrirModalNovoJogador() {
             document.getElementById('form-novo-jogador').reset();
             document.getElementById('input-jogador-id').value = '';
-            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta';
+            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta / Convidado';
             openModal('modal-novo-jogador');
         }
 
@@ -999,11 +1070,21 @@
                 }
 
                 let botoesAcao = '';
-                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-bold transition">Editar</button>`;
-                // Secretário NÃO pode excluir jogador
-                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold ml-3 transition">Excluir</button>`;
+                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 font-bold transition mr-2.5" title="Editar"><i class="fa-solid fa-pen"></i></button>`;
+                
+                // Botão de WhatsApp Rápido
+                if (j.telefone) {
+                    const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
+                    const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400 hover:text-emerald-300' : 'fa-whatsapp text-amber-400 hover:text-amber-300';
+                    botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '40.00')" class="font-bold transition mr-2.5" title="Enviar WhatsApp (${tipoWp === 'cobranca' ? 'Cobrança' : 'Convocação'})"><i class="fa-brands ${iconeWp} text-sm"></i></button>`;
+                }
 
-                const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
+                // Botão de Carteirinha Digital
+                botoesAcao += `<button onclick='abrirCarteirinha(${JSON.stringify(j.nome)}, ${JSON.stringify(j.posicao)}, ${j.nivel || 3}, ${JSON.stringify(j.status_mensalidade || 'Pendente')}, ${JSON.stringify(j.status_aptidao || 'Ativo')}, ${JSON.stringify(j.telefone || '')})' class="text-cyan-400 hover:text-cyan-300 font-bold transition mr-2.5" title="Carteirinha Digital"><i class="fa-solid fa-id-card"></i></button>`;
+
+                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 font-bold transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
+
+                const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg ${j.funcao_grupo === 'Convidado' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-amber-500/20 text-amber-300'} ml-1">${j.funcao_grupo}</span>` : '';
                 let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
                 if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
                 else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
@@ -1017,8 +1098,8 @@
                 if (statusMens === 'Pago') {
                     mensalidadeBadge = `<span class="text-[10px] px-2.5 py-1 rounded-lg font-bold bg-emerald-500/20 text-emerald-300"><i class="fa-solid fa-check mr-1"></i>Em Dia</span>`;
                 } else {
-                    mensalidadeBadge = `<span class="text-[10px] px-2.5 py-1 rounded-lg font-black bg-rose-500/30 text-rose-300 border border-rose-500/60 animate-pulse shadow-md shadow-rose-950"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Pendente / Atrasado</span>`;
-                    cardBordaGlow = 'border-rose-500/50 shadow-lg shadow-rose-950/20';
+                    mensalidadeBadge = `<span class="text-[10px] px-2.5 py-1 rounded-lg font-black bg-rose-500/30 text-rose-300 border border-rose-500/60 shadow-md"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Pendente</span>`;
+                    cardBordaGlow = 'border-rose-500/40 shadow-lg shadow-rose-950/20';
                 }
 
                 const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-2 font-bold" title="Remover presença">-1 Jogo</button>` : '';
@@ -1044,7 +1125,7 @@
                         </div>
                         <div class="mt-5 pt-3.5 border-t border-pitch-800 text-xs text-gray-300 flex justify-between items-center font-medium">
                             <span>📋 Jogos: <strong class="text-amber-400 font-black">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
-                            <div>${botoesAcao}</div>
+                            <div class="flex items-center">${botoesAcao}</div>
                         </div>
                     </div>
                 `;
@@ -1102,10 +1183,11 @@
             const ativos = jogadores.filter(j => !j.status_aptidao || j.status_aptidao === 'Ativo');
             if(ativos.length === 0) { lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta ativo disponível.</p>'; return; }
             ativos.forEach((j, index) => {
+                const tipoBadge = j.funcao_grupo === 'Convidado' ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 ml-1">Convidado</span>` : '';
                 lista.innerHTML += `
                     <label class="flex items-center space-x-3 p-3.5 rounded-2xl bg-pitch-950 border border-pitch-800 cursor-pointer mb-2 hover:bg-pitch-800/40 transition">
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
-                        <span class="text-sm font-semibold text-white">${j.nome} <span class="text-gray-400 text-xs">(${j.posicao})</span></span>
+                        <span class="text-sm font-semibold text-white">${j.nome} <span class="text-gray-400 text-xs">(${j.posicao})</span> ${tipoBadge}</span>
                     </label>
                 `;
             });
@@ -1177,7 +1259,6 @@
                 posicao: document.getElementById('input-posicao').value
             };
 
-            // Se for secretário, não envia/modifica status de mensalidade
             const inputMens = document.getElementById('input-mensalidade');
             if (inputMens && usuarioLogado.perfil !== 'secretario') {
                 dados.status_mensalidade = inputMens.value;
@@ -1210,7 +1291,7 @@
             const inputMens = document.getElementById('input-mensalidade');
             if (inputMens) inputMens.value = j.status_mensalidade || 'Pendente';
 
-            document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta';
+            document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta / Convidado';
             openModal('modal-novo-jogador');
         }
 
@@ -1263,58 +1344,57 @@
         }
 
         async function carregarFinanceiro() {
-    if (usuarioLogado.perfil === 'secretario') return;
-    try {
-        // ADICIONADO O HEADER DE AUTORIZAÇÃO AQUI:
-        const res = await fetch(`${API_URL}/api/financeiro`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (!res.ok) throw new Error('Erro ao buscar financeiro');
-        
-        const dados = await res.json();
-        if (Array.isArray(dados)) {
-            atualizarGraficoFinanceiro(dados);
-            const mesFiltro = document.getElementById('filtro-mes').value;
-            let saldoGeralAcumulado = 0;
-            dados.forEach(l => {
-                const val = parseFloat(l.valor) || 0;
-                if (l.tipo === 'Entrada') saldoGeralAcumulado += val; else saldoGeralAcumulado -= val;
-            });
+            if (usuarioLogado.perfil === 'secretario') return;
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error('Erro ao buscar financeiro');
+                
+                const dados = await res.json();
+                if (Array.isArray(dados)) {
+                    atualizarGraficoFinanceiro(dados);
+                    const mesFiltro = document.getElementById('filtro-mes').value;
+                    let saldoGeralAcumulado = 0;
+                    dados.forEach(l => {
+                        const val = parseFloat(l.valor) || 0;
+                        if (l.tipo === 'Entrada') saldoGeralAcumulado += val; else saldoGeralAcumulado -= val;
+                    });
 
-            let mesEntradas = 0, mesSaidas = 0;
-            const tbody = document.getElementById('tabela-financeiro-body');
-            tbody.innerHTML = '';
-            dados.forEach(l => {
-                const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
-                const val = parseFloat(l.valor) || 0;
-                if (mesFiltro && dataStr.startsWith(mesFiltro)) {
-                    if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
+                    let mesEntradas = 0, mesSaidas = 0;
+                    const tbody = document.getElementById('tabela-financeiro-body');
+                    tbody.innerHTML = '';
+                    dados.forEach(l => {
+                        const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
+                        const val = parseFloat(l.valor) || 0;
+                        if (mesFiltro && dataStr.startsWith(mesFiltro)) {
+                            if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
+                        }
+                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
+                        const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                        const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
+                        tbody.innerHTML += `
+                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                                <td class="py-3.5 text-gray-300">${dataFmt}</td>
+                                <td class="py-3.5 font-bold text-white">${l.descricao}</td>
+                                <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${l.tipo}</span></td>
+                                <td class="py-3.5 font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
+                                <td class="py-3.5 text-right space-x-2 print:hidden">
+                                    ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-bold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
+                                    ${podeExcluirFin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
+                    document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
+                    document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
+                    const dashSaldo = document.getElementById('dash-saldo-val');
+                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
                 }
-                if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
-                const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
-                tbody.innerHTML += `
-                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                        <td class="py-3.5 text-gray-300">${dataFmt}</td>
-                        <td class="py-3.5 font-bold text-white">${l.descricao}</td>
-                        <td class="py-3.5"><span class="px-2.5 py-1 rounded-lg text-xs ${l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${l.tipo}</span></td>
-                        <td class="py-3.5 font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${val.toFixed(2)}</td>
-                        <td class="py-3.5 text-right space-x-2 print:hidden">
-                            ${l.tipo === 'Entrada' ? `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="text-amber-400 hover:text-amber-300 text-xs font-bold"><i class="fa-solid fa-receipt mr-1"></i>Recibo</button>` : ''}
-                            ${podeExcluirFin ? `<button onclick="excluirLancamento(${l.id})" class="text-rose-400 hover:text-rose-300 text-xs font-bold ml-2">Excluir</button>` : ''}
-                        </td>
-                    </tr>
-                `;
-            });
-            document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
-            document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
-            document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
-            const dashSaldo = document.getElementById('dash-saldo-val');
-            if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
+            } catch (err) { console.error('Erro financeiro:', err); }
         }
-    } catch (err) { console.error('Erro financeiro:', err); }
-}
 
         function gerarRecibo(id, descricao, valor, data) {
             document.getElementById('recibo-id').innerText = `#${String(id).padStart(4, '0')}`;

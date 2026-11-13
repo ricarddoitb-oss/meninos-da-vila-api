@@ -58,7 +58,6 @@ function verificarGestorOuAdmin(req, res, next) {
     });
 }
 
-// Middleware genérico para permitir múltiplos perfis autorizados
 function verificarPerfisPermitidos(perfisPermitidos) {
     return (req, res, next) => {
         verificarTokenBase(req, res, () => {
@@ -107,7 +106,6 @@ app.get('/api/jogadores', async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
 });
 
-// PERFIL INDIVIDUAL DO ATLETA
 app.get('/api/jogadores/:id/perfil', async (req, res) => {
     const { id } = req.params;
     try {
@@ -129,7 +127,6 @@ app.get('/api/jogadores/:id/perfil', async (req, res) => {
     }
 });
 
-// Criar Atleta: Permitido para admin, gestor, tesoureiro, secretário
 app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
     
@@ -138,7 +135,6 @@ app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesour
     }
 
     try {
-        // Se o usuário for secretário, ele não define a mensalidade (fica padrão 'Pendente')
         const mensalidadeFinal = (req.usuario.perfil === 'secretario') ? 'Pendente' : (status_mensalidade || 'Pendente');
 
         const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8) RETURNING *;`;
@@ -180,7 +176,6 @@ app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesour
     }
 });
 
-// Atualizar Atleta: Permitido para admin, gestor, tesoureiro, secretário
 app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { id } = req.params;
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
@@ -194,11 +189,7 @@ app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tes
         if (atletaAntigo.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado.' });
         
         const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
-
-        // Se for secretário, mantém o status de mensalidade anterior (não permite alterar dados financeiros)
-        const statusMensalidadeFinal = (req.usuario.perfil === 'secretario') 
-            ? statusAnterior 
-            : (status_mensalidade || 'Pendente');
+        const statusMensalidadeFinal = (req.usuario.perfil === 'secretario') ? statusAnterior : (status_mensalidade || 'Pendente');
 
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, funcao_grupo=$7, status_aptidao=$8 WHERE id=$9 RETURNING *;`;
         const r = await pool.query(q, [
@@ -217,7 +208,6 @@ app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tes
         const mesAtual = new Date().toISOString().slice(0, 7);
         const descricaoMensalidade = `Mensalidade - ${nome}`;
 
-        // Se não for secretário, processa entrada/saída no financeiro caso mude o status da mensalidade
         if (req.usuario.perfil !== 'secretario') {
             if (statusAnterior !== 'Pago' && statusMensalidadeFinal === 'Pago') {
                 const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
@@ -248,7 +238,6 @@ app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tes
     }
 });
 
-// Excluir Atleta: Apenas Admin (como no original)
 app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -334,7 +323,7 @@ app.get('/api/sorteios', async (req, res) => {
     }
 });
 
-// ================= FINANCEIRO (Bloqueado para secretário) =================
+// ================= FINANCEIRO =================
 app.get('/api/financeiro', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro']), async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM financeiro_lancamentos ORDER BY data_lancamento DESC, id DESC');
