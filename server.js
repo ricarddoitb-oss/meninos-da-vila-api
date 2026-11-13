@@ -95,15 +95,37 @@ app.get('/api/jogadores', async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
 });
 
+// PERFIL INDIVIDUAL DO ATLETA (Presenças e Financeiro)
+app.get('/api/jogadores/:id/perfil', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const jogadorRes = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        if (jogadorRes.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado' });
+        const jogador = jogadorRes.rows[0];
+
+        const presencasRes = await pool.query('SELECT data_partida FROM presencas_partidas WHERE jogador_id = $1 ORDER BY data_partida DESC', [id]);
+        const financeiroRes = await pool.query("SELECT * FROM financeiro_lancamentos WHERE descricao ILIKE $1 ORDER BY data_lancamento DESC", [`%Mensalidade - ${jogador.nome}%`]);
+
+        res.json({
+            jogador,
+            presencas: presencasRes.rows,
+            financeiro: financeiroRes.rows
+        });
+    } catch (err) {
+        console.error('Erro ao buscar perfil do atleta:', err);
+        res.status(500).json({ erro: 'Erro ao buscar perfil do atleta.' });
+    }
+});
+
 app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
     }
 
     try {
-        const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;`;
+        const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8) RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
             data_nascimento, 
@@ -111,7 +133,6 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
             posicao || 'Meia', 
             parseInt(nivel) || 3, 
             status_mensalidade || 'Pendente', 
-            parseInt(gols) || 0,
             funcao_grupo || 'Atleta',
             status_aptidao || 'Ativo'
         ]);
@@ -120,7 +141,7 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
 
         if (status_mensalidade === 'Pago') {
             const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
-            const mesAtual = new Date().toISOString().slice(0, 7); // Formato YYYY-MM
+            const mesAtual = new Date().toISOString().slice(0, 7);
             const descricaoMensalidade = `Mensalidade - ${nome}`;
 
             const existe = await pool.query(
@@ -145,7 +166,7 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
 
 app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
     const { id } = req.params;
-    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao } = req.body;
+    const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
         return res.status(400).json({ erro: 'Nome, Data de Nascimento e Telefone são obrigatórios.' });
@@ -155,7 +176,7 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
         const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
         const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
 
-        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, gols=$7, funcao_grupo=$8, status_aptidao=$9 WHERE id=$10 RETURNING *;`;
+        const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, funcao_grupo=$7, status_aptidao=$8 WHERE id=$9 RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
             data_nascimento, 
@@ -163,14 +184,13 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
             posicao, 
             parseInt(nivel) || 3, 
             status_mensalidade || 'Pendente', 
-            parseInt(gols) || 0, 
             funcao_grupo || 'Atleta',
             status_aptidao || 'Ativo',
             id
         ]);
 
         const jogadorAtualizado = r.rows[0];
-        const mesAtual = new Date().toISOString().slice(0, 7); // Formato YYYY-MM
+        const mesAtual = new Date().toISOString().slice(0, 7);
         const descricaoMensalidade = `Mensalidade - ${nome}`;
 
         if (statusAnterior !== 'Pago' && status_mensalidade === 'Pago') {
@@ -188,7 +208,6 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
                 );
             }
         } else if (statusAnterior === 'Pago' && status_mensalidade === 'Pendente') {
-            // Remove o lançamento do mês atual para corrigir o saldo quando voltar para pendente
             await pool.query(
                 `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2 AND tipo = 'Entrada'`,
                 [descricaoMensalidade, mesAtual]
@@ -254,7 +273,7 @@ app.delete('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
-// HISTÓRICO E SALVAMENTO DE SORTEIOS (COM VALIDAÇÃO DE TRAVA POR DATA)
+// SORTEIOS
 app.post('/api/sorteios', verificarGestorOuAdmin, async (req, res) => {
     const { data_partida, num_times, dados_times } = req.body;
     
@@ -265,7 +284,7 @@ app.post('/api/sorteios', verificarGestorOuAdmin, async (req, res) => {
     try {
         const check = await pool.query('SELECT id FROM historico_sorteios WHERE data_partida::date = $1::date', [data_partida]);
         if (check.rows.length > 0) {
-            return res.status(400).json({ erro: 'Esta rodada já possui um sorteio confirmado e travado. Altere a data da próxima partida para realizar um novo sorteio.' });
+            return res.status(400).json({ erro: 'Esta rodada já possui um sorteio confirmado e travado.' });
         }
 
         const q = `INSERT INTO historico_sorteios (data_partida, num_times, dados_times) VALUES ($1, $2, $3) RETURNING *;`;

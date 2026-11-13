@@ -23,23 +23,12 @@
         @media print {
             body { background: white !important; color: black !important; font-size: 11px !important; }
             body * { visibility: hidden; }
-            
-            /* Modo Impressão de Recibo Individual */
-            body.imprimindo-recibo #modal-recibo-conteudo, 
-            body.imprimindo-recibo #modal-recibo-conteudo * { visibility: visible; }
+            body.imprimindo-recibo #modal-recibo-conteudo, body.imprimindo-recibo #modal-recibo-conteudo * { visibility: visible; }
             body.imprimindo-recibo #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: 1px solid #ccc; }
-            
-            /* Modo Impressão de Relatórios Gerais (A4 Otimizado) */
-            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao, 
-            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao * { visibility: visible; }
+            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao, body:not(.imprimindo-recibo) #relatorios-conteudo-impressao * { visibility: visible; }
             body:not(.imprimindo-recibo) #relatorios-conteudo-impressao { position: absolute; left: 0; top: 0; width: 100%; }
-            
-            /* Modo Impressão de Extrato Financeiro (A4 Otimizado) */
-            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao, 
-            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao * { visibility: visible; }
+            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao, body:not(.imprimindo-recibo) #financeiro-relatorio-impressao * { visibility: visible; }
             body:not(.imprimindo-recibo) #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; }
-
-            /* Ajustes de tabela e blocos para caber em 1 página A4 */
             table { width: 100% !important; border-collapse: collapse !important; }
             th, td { padding: 4px 6px !important; border-bottom: 1px solid #ddd !important; color: black !important; }
             .bg-pitch-800, .bg-pitch-900 { background: transparent !important; border-color: #ccc !important; box-shadow: none !important; }
@@ -50,7 +39,6 @@
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
 
-    <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
     <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col space-y-3 pointer-events-none print:hidden"></div>
 
     <!-- MENU LATERAL -->
@@ -105,7 +93,7 @@
 
         <div class="p-8 flex-1 overflow-y-auto">
 
-            <!-- ABA DASHBOARD -->
+            <!-- ABA DASHBOARD (Grid ajustada para 4 colunas sem Gols) -->
             <div id="tab-dashboard" class="tab-content space-y-6">
                 <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/30 to-pitch-800 border border-amber-500/50 p-6 rounded-2xl shadow-xl flex items-center space-x-4">
                     <div class="bg-amber-500 text-gray-950 p-4 rounded-xl text-2xl font-bold shadow-lg">
@@ -117,16 +105,16 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                     <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Elenco Total</p>
                         <h3 id="dash-total-jogadores" class="text-3xl font-extrabold text-white mt-2">0</h3>
                         <span class="text-xs text-emerald-400 mt-2 inline-block">Ativos no plantel</span>
                     </div>
-                    <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-rose-500 transition">
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-rose-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Atletas Afastados</p>
                         <h3 id="dash-afastados-count" class="text-3xl font-extrabold text-rose-400 mt-2">0</h3>
-                        <span class="text-xs text-rose-400/80 mt-2 inline-block">Suspenso / DM / Outros</span>
+                        <span class="text-xs text-rose-400/80 mt-2 inline-block">Clique para filtrar</span>
                     </div>
                     <div onclick="switchTab('elenco')" class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg cursor-pointer hover:border-emerald-500 transition">
                         <p class="text-xs text-gray-400 uppercase font-bold">Mensalidades em Dia</p>
@@ -137,11 +125,6 @@
                         <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral em Caixa</p>
                         <h3 id="dash-saldo-val" class="text-3xl font-extrabold text-amber-400 mt-2">R$ 0,00</h3>
                         <span class="text-xs text-amber-400/80 mt-2 inline-block">Consolidado acumulado</span>
-                    </div>
-                    <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
-                        <p class="text-xs text-gray-400 uppercase font-bold">Artilheiro</p>
-                        <h3 id="dash-artilheiro-nome" class="text-lg font-extrabold text-white mt-2 truncate">-</h3>
-                        <span id="dash-artilheiro-gols" class="text-xs text-amber-400 mt-2 inline-block">0 gols</span>
                     </div>
                 </div>
 
@@ -177,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- ABA ELENCO COM FILTROS AVANÇADOS -->
+            <!-- ABA ELENCO COM FILTROS -->
             <div id="tab-elenco" class="tab-content hidden space-y-5">
                 <div class="bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div>
@@ -208,7 +191,7 @@
                         <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
                             <option value="">Todos</option>
                             <option value="Ativo">Ativos (Aptos)</option>
-                            <option value="Afastados">Afastados (DM / Suspenso)</option>
+                            <option value="Afastados">Afastados (DM / Suspenso / etc)</option>
                         </select>
                     </div>
                 </div>
@@ -216,18 +199,16 @@
                 <div id="jogadores-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
             </div>
 
-            <!-- ABA PRESENÇA & SORTEIO (SEPARADOS) -->
+            <!-- ABA PRESENÇA & SORTEIO -->
             <div id="tab-presenca" class="tab-content hidden space-y-6">
-                
                 <div id="alerta-rodada-travada" class="hidden bg-amber-500/20 border border-amber-500 text-amber-300 p-4 rounded-2xl text-sm flex items-center space-x-3">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                     <div>
-                        <strong>Sorteio da rodada travado!</strong> O sorteio oficial para esta data já foi confirmado. Novos sorteios estarão disponíveis ao alterar a data da próxima partida. <em>(A marcação manual de presença continua disponível à esquerda).</em>
+                        <strong>Sorteio da rodada travado!</strong> O sorteio oficial para esta data já foi confirmado.
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- BLOCO 1: MARCAÇÃO DE PRESENÇA MANUAL -->
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-clipboard-check mr-2"></i>1. Lista de Presença</h3>
@@ -236,22 +217,17 @@
                                 <span>Todos</span>
                             </label>
                         </div>
-                        
                         <div class="mb-3">
                             <label class="text-[11px] text-gray-400 block mb-1">Data da Presença / Rodada:</label>
                             <input type="date" id="data-presenca-manual" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2 text-xs text-white">
                         </div>
-
-                        <p class="text-[11px] text-gray-400 mb-3">Marque os atletas presentes para registrar presença ou sortear os times:</p>
                         <div id="presenca-lista" class="space-y-2 max-h-[340px] overflow-y-auto pr-2 flex-1 mb-4"></div>
-                        
                         <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-2 hidden">
                             <i class="fa-solid fa-check-double"></i>
                             <span>Salvar Presenças Selecionadas</span>
                         </button>
                     </div>
 
-                    <!-- BLOCO 2: SORTEIO DE TIMES (OPÇÃO À PARTE) -->
                     <div class="md:col-span-2 bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-3">
@@ -261,13 +237,12 @@
                                 </div>
                             </div>
                             <div id="detalhes-partida-sorteio" class="bg-pitch-900 border border-pitch-700/60 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
-                                <span>📅 Data Oficial do Sorteio: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
+                                <span>📅 Data Oficial: <strong id="sorteio-lbl-data" class="text-white">-</strong></span>
                                 <span>📍 Local: <strong id="sorteio-lbl-local" class="text-white">-</strong></span>
                             </div>
-
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label class="text-xs text-gray-400">Qtd Times (Coletes - Preto, Vermelho, Azul, Laranja):</label>
+                                    <label class="text-xs text-gray-400">Qtd Times (Coletes):</label>
                                     <select id="qtd-times" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
                                         <option value="2">2 Times</option>
                                         <option value="3">3 Times</option>
@@ -276,27 +251,24 @@
                                 </div>
                                 <div class="flex items-end">
                                     <button id="btn-gerar-sorteio" onclick="iniciarSorteioIndependente()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold py-2.5 rounded-xl text-xs shadow-lg transition">
-                                        <i class="fa-solid fa-shuffle mr-1"></i> Sortear Times com Selecionados
+                                        <i class="fa-solid fa-shuffle mr-1"></i> Sortear com Selecionados
                                     </button>
                                 </div>
                             </div>
                         </div>
-
                         <div id="times-empty-state" class="text-center py-10 text-gray-400 text-sm">
-                            Marque os jogadores na lista ao lado e clique em <strong>"Sortear Times com Selecionados"</strong> caso deseje dividir as equipes.
+                            Marque os jogadores na lista ao lado e clique em <strong>"Sortear"</strong>.
                         </div>
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
-
                         <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-700/60 hidden">
                             <button id="btn-confirmar-sorteio" onclick="confirmarETravarSorteio(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-lock text-base"></i>
-                                <span>Confirmar e Travar Resultado do Sorteio no Histórico</span>
+                                <span>Confirmar e Travar Sorteio no Histórico</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- HISTÓRICO / RELATÓRIO DE SORTEIOS -->
                 <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
                     <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Relatório de Sorteios Confirmados</h3>
                     <div class="overflow-x-auto">
@@ -309,53 +281,44 @@
                                 </tr>
                             </thead>
                             <tbody id="tabela-historico-sorteios">
-                                <tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado no histórico ainda.</td></tr>
+                                <tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado.</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA FINANCEIRO COM GRÁFICO -->
+            <!-- ABA FINANCEIRO -->
             <div id="tab-financeiro" class="tab-content hidden space-y-6">
                 <div id="financeiro-relatorio-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
                             <p class="text-xs text-gray-400 uppercase font-bold">Saldo Geral Acumulado</p>
                             <h3 id="fin-saldo" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
-                            <span class="text-[10px] text-gray-400 mt-1 block">Caixa geral acumulado (Prestação de contas)</span>
                         </div>
                         <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
-                            <p class="text-xs text-gray-400 uppercase font-bold">Entradas (Mês Selecionado)</p>
+                            <p class="text-xs text-gray-400 uppercase font-bold">Entradas (Mês)</p>
                             <h3 id="fin-entradas" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
-                            <span class="text-[10px] text-gray-400 mt-1 block">Receitas do período</span>
                         </div>
                         <div class="bg-pitch-800 border border-pitch-700/60 p-5 rounded-2xl shadow-lg">
-                            <p class="text-xs text-gray-400 uppercase font-bold">Saídas (Mês Selecionado)</p>
+                            <p class="text-xs text-gray-400 uppercase font-bold">Saídas (Mês)</p>
                             <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
-                            <span class="text-[10px] text-gray-400 mt-1 block">Despesas do período</span>
                         </div>
                     </div>
 
-                    <!-- GRÁFICO DE RECEITAS VS DESPESAS -->
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl print:hidden">
                         <h3 class="font-bold text-sm text-amber-400 mb-3"><i class="fa-solid fa-chart-column mr-2"></i>Comparativo Anual (Entradas vs. Saídas)</h3>
-                        <div class="h-56 w-full">
-                            <canvas id="grafico-financeiro"></canvas>
-                        </div>
+                        <div class="h-56 w-full"><canvas id="grafico-financeiro"></canvas></div>
                     </div>
 
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-                        <div class="flex items-center space-x-3 w-full md:w-auto">
-                            <div>
-                                <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
-                                <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
-                            </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Filtrar por Mês:</label>
+                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-sm text-white">
                         </div>
-                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <div class="flex items-center space-x-3">
                             <button onclick="imprimirRelatorioGeral()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg flex items-center space-x-2">
-                                <i class="fa-solid fa-print"></i>
-                                <span>Exportar Caixa (PDF)</span>
+                                <i class="fa-solid fa-print"></i><span>Exportar Caixa (PDF)</span>
                             </button>
                             <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg hidden">
                                 <i class="fa-solid fa-plus mr-2"></i>Novo Lançamento
@@ -388,11 +351,10 @@
                 <div class="flex justify-between items-center bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl print:hidden">
                     <div>
                         <h3 class="font-bold text-base text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Relatórios Consolidados do Clube</h3>
-                        <p class="text-xs text-gray-400">Visualize estatísticas de membros, posições e participações em partidas.</p>
+                        <p class="text-xs text-gray-400">Estatísticas gerais dos membros e participações.</p>
                     </div>
                     <button onclick="imprimirRelatorioGeral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg flex items-center space-x-2">
-                        <i class="fa-solid fa-print"></i>
-                        <span>Exportar / Salvar PDF</span>
+                        <i class="fa-solid fa-print"></i><span>Exportar / Salvar PDF</span>
                     </button>
                 </div>
 
@@ -405,17 +367,17 @@
                         <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl flex flex-col justify-between">
                             <div>
                                 <h3 class="font-bold text-base text-amber-400 mb-3"><i class="fa-solid fa-circle-info mr-2"></i>Resumo do Plantel</h3>
-                                <p class="text-xs text-gray-300 leading-relaxed">Este relatório consolida o total de membros cadastrados, a distribuição tática por posições em campo e o histórico acumulado de presenças de cada atleta nas rodadas oficiais.</p>
+                                <p class="text-xs text-gray-300 leading-relaxed">Consolidado total de membros e presenças oficiais.</p>
                             </div>
                             <div class="pt-4 border-t border-pitch-700 flex justify-between items-center text-sm">
-                                <span class="text-gray-400">Total de Membros Cadastrados:</span>
+                                <span class="text-gray-400">Total de Membros:</span>
                                 <strong id="rel-total-membros" class="text-emerald-400 text-lg">0</strong>
                             </div>
                         </div>
                     </div>
 
                     <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl">
-                        <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Relatório de Participações por Atleta</h3>
+                        <h3 class="font-bold text-base mb-4 text-white"><i class="fa-solid fa-clipboard-user mr-2"></i>Participações por Atleta</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead>
@@ -424,7 +386,7 @@
                                         <th class="pb-3">Função</th>
                                         <th class="pb-3">Posição</th>
                                         <th class="pb-3">Status</th>
-                                        <th class="pb-3 text-right">Total de Presenças (Jogos)</th>
+                                        <th class="pb-3 text-right">Total Presenças</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-relatorio-presencas"></tbody>
@@ -440,7 +402,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="font-bold text-lg text-emerald-400">Gestão de Usuários & Acessos</h3>
-                            <p class="text-xs text-gray-400">Crie contas, defina níveis de permissão e altere senhas.</p>
+                            <p class="text-xs text-gray-400">Controle de logins e permissões.</p>
                         </div>
                         <button onclick="abrirModalNovoUsuario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg">
                             <i class="fa-solid fa-user-plus mr-2"></i>Novo Usuário
@@ -453,6 +415,48 @@
         </div>
     </main>
 
+    <!-- MODAL DE PERFIL DO ATLETA -->
+    <div id="modal-perfil-atleta" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('modal-perfil-atleta')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center border-b border-pitch-700 pb-4 mb-4">
+                <h3 id="perfil-nome" class="font-extrabold text-xl text-amber-400">-</h3>
+                <p id="perfil-detalhes-gerais" class="text-xs text-gray-400 mt-1">-</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-pitch-900 p-4 rounded-xl border border-pitch-700/50">
+                    <span class="text-xs text-gray-400 block">Total de Jogos Presentes</span>
+                    <strong id="perfil-total-jogos" class="text-2xl text-emerald-400 font-extrabold">0</strong>
+                </div>
+                <div class="bg-pitch-900 p-4 rounded-xl border border-pitch-700/50">
+                    <span class="text-xs text-gray-400 block">Status Mensalidade Atual</span>
+                    <strong id="perfil-status-mensalidade" class="text-sm font-bold">-</strong>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-bold text-sm text-emerald-400 mb-2"><i class="fa-solid fa-calendar-days mr-2"></i>Datas em que Esteve Presente</h4>
+                    <div id="perfil-lista-presencas" class="bg-pitch-900 p-3 rounded-xl border border-pitch-700/50 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum registro de presença.
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-sm text-amber-400 mb-2"><i class="fa-solid fa-wallet mr-2"></i>Extrato Individual de Mensalidades</h4>
+                    <div id="perfil-lista-financeiro" class="bg-pitch-900 p-3 rounded-xl border border-pitch-700/50 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum lançamento financeiro encontrado.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 mt-6 border-t border-pitch-700 text-right">
+                <button type="button" onclick="closeModal('modal-perfil-atleta')" class="bg-pitch-700 hover:bg-pitch-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE RECIBO -->
     <div id="modal-recibo" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white text-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl relative" id="modal-recibo-conteudo">
@@ -460,30 +464,19 @@
                 <h2 id="recibo-clube-nome" class="font-extrabold text-lg text-emerald-800 uppercase">CLUBE MENINOS DA VILA</h2>
                 <p class="text-xs text-gray-500">Comprovativo Oficial de Tesouraria</p>
             </div>
-            
             <div class="flex justify-between items-center mb-6 bg-gray-100 p-3 rounded-xl">
-                <div>
-                    <span class="text-xs text-gray-500 block">Recibo Nº:</span>
-                    <strong id="recibo-id" class="text-sm">#0001</strong>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs text-gray-500 block">Data do Pagamento:</span>
-                    <strong id="recibo-data" class="text-sm">-</strong>
-                </div>
+                <div><span class="text-xs text-gray-500 block">Recibo Nº:</span><strong id="recibo-id" class="text-sm">#0001</strong></div>
+                <div class="text-right"><span class="text-xs text-gray-500 block">Data do Pagamento:</span><strong id="recibo-data" class="text-sm">-</strong></div>
             </div>
-
             <div class="space-y-3 text-sm mb-6">
                 <p>Recebemos de: <strong id="recibo-descricao" class="text-gray-800">-</strong></p>
                 <p>A quantia correspondente a: <strong id="recibo-valor" class="text-emerald-700 text-lg font-bold">R$ 0,00</strong></p>
                 <p class="text-xs text-gray-500 italic">Referente à contribuição de mensalidade / taxa desportiva do clube.</p>
             </div>
-
             <div class="pt-8 border-t text-center mt-8">
                 <div class="w-48 mx-auto border-b border-gray-400 mb-1"></div>
                 <p class="text-xs text-gray-600 font-bold">Tesouraria / Diretoria</p>
-                <p class="text-[10px] text-gray-400">Clube Meninos da Vila • @cmvitb</p>
             </div>
-
             <div class="flex space-x-3 pt-6 mt-6 border-t print:hidden">
                 <button type="button" onclick="fecharModalRecibo()" class="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2.5 rounded-xl text-sm font-bold">Fechar</button>
                 <button type="button" onclick="imprimirReciboIndividual()" class="w-1/2 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-bold"><i class="fa-solid fa-print mr-2"></i>Imprimir / PDF</button>
@@ -491,23 +484,14 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURAÇÃO DO CLUBE -->
+    <!-- MODAL CONFIG CLUBE -->
     <div id="modal-config-clube" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold text-amber-400 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>Editar Identidade do Clube</h3>
+            <h3 class="text-lg font-bold text-amber-400 mb-4">Editar Identidade do Clube</h3>
             <form onsubmit="salvarConfigClube(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs text-gray-300">Nome do Clube</label>
-                    <input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Instagram (@)</label>
-                    <input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">URL da Logo (PNG)</label>
-                    <input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Nome do Clube</label><input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Instagram (@)</label><input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">URL da Logo (PNG)</label><input type="url" id="cfg-logo-url" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
                     <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
@@ -516,24 +500,15 @@
         </div>
     </div>
 
-    <!-- MODAL DE JOGADOR -->
+    <!-- MODAL JOGADOR (SEM GOLS E COM LATERAL) -->
     <div id="modal-novo-jogador" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-jogador-titulo" class="text-lg font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
             <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3">
                 <input type="hidden" id="input-jogador-id">
-                <div>
-                    <label class="text-xs text-gray-300">Nome Completo *</label>
-                    <input type="text" id="input-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Data de Nascimento *</label>
-                    <input type="date" id="input-nascimento" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Telefone / WhatsApp *</label>
-                    <input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Nome Completo *</label><input type="text" id="input-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Data de Nascimento *</label><input type="date" id="input-nascimento" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Telefone / WhatsApp *</label><input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-xs text-gray-300">Função no Grupo</label>
@@ -577,10 +552,6 @@
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="text-xs text-gray-300">Gols Marcados</label>
-                    <input type="number" id="input-gols" value="0" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
                     <button type="submit" id="btn-submit-jogador" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Atleta</button>
@@ -589,27 +560,15 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDIÇÃO DA PARTIDA -->
+    <!-- MODAL PARTIDA -->
     <div id="modal-partida" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-emerald-400 mb-4">Editar Próxima Partida</h3>
             <form onsubmit="salvarPartidaConfig(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs text-gray-300">Data da Partida</label>
-                    <input type="date" id="cfg-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Local</label>
-                    <input type="text" id="cfg-local" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Horário</label>
-                    <input type="text" id="cfg-horario" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Custo do Aluguel (R$)</label>
-                    <input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Data da Partida</label><input type="date" id="cfg-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Local</label><input type="text" id="cfg-local" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Horário</label><input type="text" id="cfg-horario" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Custo do Aluguel (R$)</label><input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-partida')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
                     <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
@@ -618,7 +577,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE LANÇAMENTO FINANCEIRO -->
+    <!-- MODAL LANÇAMENTO -->
     <div id="modal-lancamento" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-emerald-400 mb-4">Novo Lançamento no Caixa</h3>
@@ -628,10 +587,7 @@
                 <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-700 hover:bg-pitch-600 text-xs px-3 py-1.5 rounded-lg text-rose-400 font-bold">Campo (R$ 100)</button>
             </div>
             <form onsubmit="salvarLancamento(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs text-gray-300">Descrição</label>
-                    <input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Descrição</label><input type="text" id="fin-desc" required placeholder="Ex: Mensalidade João..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-xs text-gray-300">Tipo</label>
@@ -640,15 +596,9 @@
                             <option value="Saida">Saída (Despesa)</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="text-xs text-gray-300">Valor (R$)</label>
-                        <input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                    </div>
+                    <div><label class="text-xs text-gray-300">Valor (R$)</label><input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 </div>
-                <div>
-                    <label class="text-xs text-gray-300">Data</label>
-                    <input type="date" id="fin-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Data</label><input type="date" id="fin-data" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
                     <button type="submit" id="btn-submit-lancamento" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
@@ -657,24 +607,15 @@
         </div>
     </div>
 
-    <!-- MODAL DE USUÁRIO -->
+    <!-- MODAL USUÁRIO -->
     <div id="modal-usuario" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-pitch-800 border border-pitch-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 id="modal-usuario-titulo" class="text-lg font-bold text-emerald-400 mb-4">Gerenciar Usuário</h3>
             <form onsubmit="salvarUsuario(event)" class="space-y-3">
                 <input type="hidden" id="input-usuario-id">
-                <div>
-                    <label class="text-xs text-gray-300">Nome</label>
-                    <input type="text" id="user-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">E-mail</label>
-                    <input type="email" id="user-email" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">Senha <span class="text-gray-500">(Deixe em branco para não alterar)</span></label>
-                    <input type="password" id="user-senha" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
-                </div>
+                <div><label class="text-xs text-gray-300">Nome</label><input type="text" id="user-nome" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">E-mail</label><input type="email" id="user-email" required class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                <div><label class="text-xs text-gray-300">Senha <span class="text-gray-500">(Opcional)</span></label><input type="password" id="user-senha" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1"></div>
                 <div>
                     <label class="text-xs text-gray-300">Nível de Permissão</label>
                     <select id="user-perfil" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl p-2.5 text-sm text-white mt-1">
@@ -706,34 +647,16 @@
             window.location.href = 'login.html';
         }
 
-        // ==========================================
-        // NOTIFICAÇÕES TOAST & SPINNERS DE BOTÃO
-        // ==========================================
         function showToast(mensagem, tipo = 'sucesso') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
-            const cores = {
-                sucesso: 'bg-emerald-600 border-emerald-400 text-white',
-                erro: 'bg-rose-600 border-rose-400 text-white',
-                aviso: 'bg-amber-500 border-amber-300 text-gray-950'
-            };
-            const icones = {
-                sucesso: 'fa-circle-check',
-                erro: 'fa-circle-exclamation',
-                aviso: 'fa-triangle-exclamation'
-            };
-
+            const cores = { sucesso: 'bg-emerald-600 border-emerald-400 text-white', erro: 'bg-rose-600 border-rose-400 text-white', aviso: 'bg-amber-500 border-amber-300 text-gray-950' };
+            const icones = { sucesso: 'fa-circle-check', erro: 'fa-circle-exclamation', aviso: 'fa-triangle-exclamation' };
             toast.className = `pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-xl border shadow-2xl text-xs font-bold transform transition-all duration-300 translate-x-full opacity-0 ${cores[tipo] || cores.sucesso}`;
             toast.innerHTML = `<i class="fa-solid ${icones[tipo]} text-base"></i><span>${mensagem}</span>`;
-            
             container.appendChild(toast);
             requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
-
-            setTimeout(() => {
-                toast.classList.add('translate-x-full', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
         function setBotaoCarregando(btn, carregando, textoOriginal = '') {
@@ -752,14 +675,8 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const perfil = usuarioLogado.perfil;
-
-            if (perfil === 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-            }
-
-            if (perfil === 'admin' || perfil === 'gestor') {
-                document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
-            }
+            if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            if (perfil === 'admin' || perfil === 'gestor') document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
 
             const dataAtual = new Date();
             const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
@@ -774,11 +691,7 @@
             await carregarHistoricoSorteios();
         });
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('usuario');
-            window.location.href = 'login.html';
-        }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -797,59 +710,43 @@
         function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
-        // ==========================================
-        // CONTROLE DE IMPRESSÃO (RECIBO VS RELATÓRIO)
-        // ==========================================
+        // FILTRAR AFASTADOS DIRETAMENTE DO DASHBOARD
+        function filtrarAfastadosDashboard() {
+            switchTab('elenco');
+            document.getElementById('filtro-elenco-aptidao').value = 'Afastados';
+            aplicarFiltrosElenco();
+        }
+
         function imprimirReciboIndividual() {
             document.body.classList.add('imprimindo-recibo');
             window.print();
-            setTimeout(() => {
-                document.body.classList.remove('imprimindo-recibo');
-            }, 500);
+            setTimeout(() => document.body.classList.remove('imprimindo-recibo'), 500);
         }
 
-        function fecharModalRecibo() {
-            document.body.classList.remove('imprimindo-recibo');
-            closeModal('modal-recibo');
-        }
-
-        function imprimirRelatorioGeral() {
-            document.body.classList.remove('imprimindo-recibo');
-            window.print();
-        }
+        function fecharModalRecibo() { document.body.classList.remove('imprimindo-recibo'); closeModal('modal-recibo'); }
+        function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
         async function carregarConfiguracoes() {
             try {
                 const res = await fetch(`${API_URL}/api/configuracoes`);
                 configsGlobal = await res.json();
-                
                 if (configsGlobal.nome_clube) {
                     document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
                     document.getElementById('recibo-clube-nome').innerText = configsGlobal.nome_clube;
                 }
-                if (configsGlobal.subtitulo_clube) {
-                    document.getElementById('sidebar-subtitulo-clube').innerHTML = `<i class="fa-brands fa-instagram mr-1"></i>${configsGlobal.subtitulo_clube}`;
-                }
+                if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerHTML = `<i class="fa-brands fa-instagram mr-1"></i>${configsGlobal.subtitulo_clube}`;
                 if (configsGlobal.logo_url) {
                     const imgEl = document.getElementById('sidebar-logo');
                     imgEl.src = configsGlobal.logo_url;
-                    imgEl.onerror = function() {
-                        this.src = 'https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png';
-                    };
+                    imgEl.onerror = function() { this.src = 'https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png'; };
                 }
-
                 document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
                 document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
                 document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
-
                 document.getElementById('sorteio-lbl-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
                 document.getElementById('sorteio-lbl-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
-                
-                if (configsGlobal.partida_data) {
-                    document.getElementById('data-presenca-manual').value = configsGlobal.partida_data;
-                }
-
+                if (configsGlobal.partida_data) document.getElementById('data-presenca-manual').value = configsGlobal.partida_data;
                 verificarTravaRodadaAtual();
             } catch (err) { console.error('Erro configs:', err); }
         }
@@ -863,29 +760,12 @@
 
         async function salvarConfigClube(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            setBotaoCarregando(btn, true);
-
-            const payload = {
-                ...configsGlobal,
-                nome_clube: document.getElementById('cfg-nome-clube').value,
-                subtitulo_clube: document.getElementById('cfg-subtitulo-clube').value,
-                logo_url: document.getElementById('cfg-logo-url').value
-            };
-
+            const payload = { ...configsGlobal, nome_clube: document.getElementById('cfg-nome-clube').value, subtitulo_clube: document.getElementById('cfg-subtitulo-clube').value, logo_url: document.getElementById('cfg-logo-url').value };
             try {
-                const res = await fetch(`${API_URL}/api/configuracoes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    showToast('Identidade atualizada com sucesso!');
-                    closeModal('modal-config-clube');
-                    carregarConfiguracoes();
-                } else { showToast('Erro ao atualizar. Apenas administradores.', 'erro'); }
-            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
-            finally { setBotaoCarregando(btn, false, 'Salvar'); }
+                const res = await fetch(`${API_URL}/api/configuracoes`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+                if (res.ok) { showToast('Identidade atualizada!'); closeModal('modal-config-clube'); carregarConfiguracoes(); }
+                else { showToast('Erro ao atualizar.', 'erro'); }
+            } catch (err) { console.error(err); }
         }
 
         function abrirModalPartida() {
@@ -898,31 +778,12 @@
 
         async function salvarPartidaConfig(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            setBotaoCarregando(btn, true);
-
-            const payload = {
-                ...configsGlobal,
-                partida_data: document.getElementById('cfg-data').value,
-                partida_local: document.getElementById('cfg-local').value,
-                partida_horario: document.getElementById('cfg-horario').value,
-                partida_custo: document.getElementById('cfg-custo').value
-            };
-
+            const payload = { ...configsGlobal, partida_data: document.getElementById('cfg-data').value, partida_local: document.getElementById('cfg-local').value, partida_horario: document.getElementById('cfg-horario').value, partida_custo: document.getElementById('cfg-custo').value };
             try {
-                const res = await fetch(`${API_URL}/api/configuracoes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    showToast('Dados da partida atualizados!');
-                    closeModal('modal-partida');
-                    await carregarConfiguracoes();
-                    verificarTravaRodadaAtual();
-                } else { showToast('Erro ao atualizar.', 'erro'); }
-            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
-            finally { setBotaoCarregando(btn, false, 'Salvar'); }
+                const res = await fetch(`${API_URL}/api/configuracoes`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+                if (res.ok) { showToast('Partida atualizada!'); closeModal('modal-partida'); await carregarConfiguracoes(); verificarTravaRodadaAtual(); }
+                else { showToast('Erro ao atualizar.', 'erro'); }
+            } catch (err) { console.error(err); }
         }
 
         function abrirModalNovoJogador() {
@@ -959,48 +820,32 @@
                 const matchApt = !apt || (apt === 'Ativo' ? (!j.status_aptidao || j.status_aptidao === 'Ativo') : (j.status_aptidao && j.status_aptidao !== 'Ativo'));
                 return matchNome && matchPos && matchMens && matchApt;
             });
-
             renderElenco(filtrados);
         }
 
         function renderDashboard(jogadores) {
             document.getElementById('dash-total-jogadores').innerText = jogadores.length;
-            
             const afastados = jogadores.filter(j => j.status_aptidao && j.status_aptidao !== 'Ativo').length;
             document.getElementById('dash-afastados-count').innerText = afastados;
-
             const pagos = jogadores.filter(j => j.status_mensalidade === 'Pago').length;
             document.getElementById('dash-pagos-count').innerText = `${pagos}/${jogadores.length}`;
-            
-            if (jogadores.length > 0) {
-                const ordenadosPorGols = [...jogadores].sort((a, b) => (b.gols || 0) - (a.gols || 0));
-                document.getElementById('dash-artilheiro-nome').innerText = ordenadosPorGols[0].nome;
-                document.getElementById('dash-artilheiro-gols').innerText = `${ordenadosPorGols[0].gols || 0} gols`;
-            }
-
             verificarAniversariantes(jogadores);
         }
 
         function verificarAniversariantes(jogadores) {
             const hoje = new Date();
             const diaMesHoje = `${String(hoje.getDate()).padStart(2, '0')}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
-            
             const aniversariantes = jogadores.filter(j => {
                 if (!j.data_nascimento) return false;
                 const partes = j.data_nascimento.split('T')[0].split('-');
-                const diaMesAtleta = `${partes[2]}-${partes[1]}`;
-                return diaMesAtleta === diaMesHoje;
+                return `${partes[2]}-${partes[1]}` === diaMesHoje;
             });
-
             const banner = document.getElementById('aniversariante-banner');
             const texto = document.getElementById('aniversariante-texto');
             if (aniversariantes.length > 0) {
-                const nomes = aniversariantes.map(a => `<strong>${a.nome}</strong>`).join(', ');
-                texto.innerHTML = `Hoje é aniversário de: ${nomes}! Desejamos muitas felicidades e gols! 🎂⚽`;
+                texto.innerHTML = `Hoje é aniversário de: ${aniversariantes.map(a => `<strong>${a.nome}</strong>`).join(', ')}! 🎂⚽`;
                 banner.classList.remove('hidden');
-            } else {
-                banner.classList.add('hidden');
-            }
+            } else { banner.classList.add('hidden'); }
         }
 
         function renderElenco(jogadores) {
@@ -1010,7 +855,7 @@
             const isAdmin = usuarioLogado.perfil === 'admin';
 
             if (jogadores.length === 0) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-sm">Nenhum atleta encontrado com os filtros aplicados.</div>`;
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-sm">Nenhum atleta encontrado.</div>`;
                 return;
             }
 
@@ -1020,29 +865,21 @@
                 if (j.data_nascimento) {
                     const nascimento = new Date(j.data_nascimento);
                     const diff = Date.now() - nascimento.getTime();
-                    const idadeDate = new Date(diff);
-                    idadeStr = `${Math.abs(idadeDate.getUTCFullYear() - 1970)} anos`;
+                    idadeStr = `${Math.abs(new Date(diff).getUTCFullYear() - 1970)} anos`;
                 }
 
                 let botoesAcao = '';
-                if (podeGerenciar) {
-                    botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:underline">Editar</button>`;
-                }
-                if (isAdmin) {
-                    botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:underline ml-2">Excluir</button>`;
-                }
+                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:underline">Editar</button>`;
+                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:underline ml-2">Excluir</button>`;
 
                 const funcaoBadge = j.funcao_grupo && j.funcao_grupo !== 'Atleta' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 ml-1">${j.funcao_grupo}</span>` : '';
-                
                 let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
                 if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
                 else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
                 else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
                 else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
 
-                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) 
-                    ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-1" title="Remover presença na rodada">-1 Presença</button>` 
-                    : '';
+                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 hover:underline ml-1">-1 Presença</button>` : '';
 
                 grid.innerHTML += `
                     <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-emerald-500/40 transition">
@@ -1057,11 +894,11 @@
                                     <span class="text-[10px] px-2 py-0.5 rounded ${j.status_mensalidade === 'Pago' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${j.status_mensalidade || 'Pendente'}</span>
                                 </div>
                             </div>
-                            <h4 class="font-bold text-white text-base">${j.nome}</h4>
+                            <h4 onclick="abrirPerfilAtleta(${j.id})" class="font-bold text-white text-base cursor-pointer hover:text-emerald-400 transition" title="Ver Perfil Completo">${j.nome} <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-400 ml-1"></i></h4>
                             <p class="text-xs text-gray-400">Idade: ${idadeStr} | 📞 ${j.telefone || '-'}</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-pitch-700/40 text-xs text-gray-300 flex justify-between items-center">
-                            <span>⚽ Gols: <strong>${j.gols || 0}</strong> | 📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
+                            <span>📋 Jogos: <strong class="text-amber-400">${j.total_participacoes || 0}</strong> ${btnRemoverPresenca}</span>
                             <div>${botoesAcao}</div>
                         </div>
                     </div>
@@ -1069,18 +906,57 @@
             });
         }
 
+        // ABRIR PERFIL DO ATLETA
+        async function abrirPerfilAtleta(jogadorId) {
+            try {
+                const res = await fetch(`${API_URL}/api/jogadores/${jogadorId}/perfil`);
+                if (!res.ok) { showToast('Erro ao carregar perfil.', 'erro'); return; }
+                const dados = await res.json();
+                const j = dados.jogador;
+
+                document.getElementById('perfil-nome').innerText = j.nome;
+                document.getElementById('perfil-detalhes-gerais').innerText = `${j.posicao} • ${j.funcao_grupo || 'Atleta'} • ${j.status_aptidao || 'Ativo'} • 📞 ${j.telefone || '-'}`;
+                document.getElementById('perfil-total-jogos').innerText = dados.presencas.length;
+                
+                const spanMens = document.getElementById('perfil-status-mensalidade');
+                spanMens.innerText = j.status_mensalidade || 'Pendente';
+                spanMens.className = `text-sm font-bold ${j.status_mensalidade === 'Pago' ? 'text-emerald-400' : 'text-rose-400'}`;
+
+                // Lista de Presenças
+                const listaPres = document.getElementById('perfil-lista-presencas');
+                if (dados.presencas.length === 0) {
+                    listaPres.innerHTML = '<span class="text-gray-500 italic">Nenhum registro de presença encontrado.</span>';
+                } else {
+                    listaPres.innerHTML = dados.presencas.map(p => {
+                        const dt = new Date(p.data_partida).toLocaleDateString('pt-BR');
+                        return `<div class="flex justify-between py-1 border-b border-pitch-700/30"><span>Partida / Rodada</span><strong class="text-emerald-400">${dt}</strong></div>`;
+                    }).join('');
+                }
+
+                // Extrato Financeiro Individual
+                const listaFin = document.getElementById('perfil-lista-financeiro');
+                if (dados.financeiro.length === 0) {
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhum lançamento financeiro registrado.</span>';
+                } else {
+                    listaFin.innerHTML = dados.financeiro.map(f => {
+                        const dt = new Date(f.data_lancamento).toLocaleDateString('pt-BR');
+                        return `<div class="flex justify-between py-1 border-b border-pitch-700/30"><span>${f.descricao} (${dt})</span><strong class="text-emerald-400">R$ ${parseFloat(f.valor).toFixed(2)}</strong></div>`;
+                    }).join('');
+                }
+
+                openModal('modal-perfil-atleta');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao buscar dados do perfil.', 'erro');
+            }
+        }
+
         function renderPresenca(jogadores) {
             const lista = document.getElementById('presenca-lista');
             if (!lista) return;
             lista.innerHTML = '';
-            
             const ativos = jogadores.filter(j => !j.status_aptidao || j.status_aptidao === 'Ativo');
-
-            if(ativos.length === 0) {
-                lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta com status Ativo disponível.</p>';
-                return;
-            }
-
+            if(ativos.length === 0) { lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta ativo disponível.</p>'; return; }
             ativos.forEach((j, index) => {
                 lista.innerHTML += `
                     <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-900/50 border border-pitch-700/40 cursor-pointer mb-2 hover:bg-pitch-900">
@@ -1093,120 +969,53 @@
 
         function renderRelatorios(jogadores) {
             document.getElementById('rel-total-membros').innerText = jogadores.length;
-
             const posicoesCount = { Goleiro: 0, Zagueiro: 0, Lateral: 0, Meia: 0, Atacante: 0 };
-            jogadores.forEach(j => {
-                if (posicoesCount[j.posicao] !== undefined) {
-                    posicoesCount[j.posicao]++;
-                } else {
-                    posicoesCount[j.posicao] = (posicoesCount[j.posicao] || 0) + 1;
-                }
-            });
-
+            jogadores.forEach(j => { if (posicoesCount[j.posicao] !== undefined) posicoesCount[j.posicao]++; });
             const listaPos = document.getElementById('relatorio-posicoes-lista');
             listaPos.innerHTML = '';
             for (const [pos, qtd] of Object.entries(posicoesCount)) {
-                listaPos.innerHTML += `
-                    <div class="flex justify-between items-center p-3 bg-pitch-900 rounded-xl border border-pitch-700/40">
-                        <span class="text-gray-300 font-medium">${pos}</span>
-                        <span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs">${qtd} atleta(s)</span>
-                    </div>
-                `;
+                listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-900 rounded-xl border border-pitch-700/40"><span class="text-gray-300 font-medium">${pos}</span><span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs">${qtd} atleta(s)</span></div>`;
             }
-
             const tbodyPres = document.getElementById('tabela-relatorio-presencas');
             tbodyPres.innerHTML = '';
-            
-            const ordenados = [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0));
-
-            ordenados.forEach(j => {
-                let aptidaoCor = 'bg-emerald-500/20 text-emerald-300';
-                if (j.status_aptidao === 'Suspenso') aptidaoCor = 'bg-rose-500/20 text-rose-300';
-                else if (j.status_aptidao === 'Bloqueado') aptidaoCor = 'bg-gray-500/20 text-gray-300';
-                else if (j.status_aptidao === 'Disciplinado') aptidaoCor = 'bg-amber-500/20 text-amber-300';
-                else if (j.status_aptidao === 'DM') aptidaoCor = 'bg-blue-500/20 text-blue-300';
-
+            [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
                 tbodyPres.innerHTML += `
                     <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
                         <td class="py-3 font-medium text-white">${j.nome}</td>
                         <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
                         <td class="py-3"><span class="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-400">${j.posicao}</span></td>
-                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] ${aptidaoCor}">${j.status_aptidao || 'Ativo'}</span></td>
+                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300">${j.status_aptidao || 'Ativo'}</span></td>
                         <td class="py-3 text-right font-bold text-amber-400">${j.total_participacoes || 0} jogo(s)</td>
                     </tr>
                 `;
             });
         }
 
-        function toggleSelecionarTodos(masterCb) {
-            document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked);
-        }
+        function toggleSelecionarTodos(masterCb) { document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked); }
 
-        // ==========================================
-        // SALVAMENTO DE PRESENÇAS MANUALMENTE
-        // ==========================================
         async function salvarPresencasManualmente(btn) {
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
-            if (checkboxes.length === 0) {
-                showToast('Selecione pelo menos um atleta para registrar presença.', 'aviso');
-                return;
-            }
-
+            if (checkboxes.length === 0) { showToast('Selecione pelo menos um atleta.', 'aviso'); return; }
             const dataPresenca = document.getElementById('data-presenca-manual').value || configsGlobal.partida_data || new Date().toISOString().split('T')[0];
             const jogadorIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
-            if (!confirm(`Confirmar registro manual de presença para ${jogadorIds.length} atleta(s) na data ${new Date(dataPresenca + 'T00:00:00').toLocaleDateString('pt-BR')}?`)) {
-                return;
-            }
-
             setBotaoCarregando(btn, true);
             try {
-                const res = await fetch(`${API_URL}/api/presencas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ data_partida: dataPresenca, jogador_ids: jogadorIds })
-                });
-
-                if (res.ok) {
-                    showToast('Presenças registradas manualmente com sucesso!');
-                    carregarJogadores();
-                } else {
-                    const err = await res.json();
-                    showToast(err.erro || 'Falha ao salvar presenças.', 'erro');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Erro de conexão ao registrar presenças.', 'erro');
-            } finally {
-                setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double"></i><span>Salvar Presenças Selecionadas</span>');
-            }
+                const res = await fetch(`${API_URL}/api/presencas`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ data_partida: dataPresenca, jogador_ids: jogadorIds }) });
+                if (res.ok) { showToast('Presenças registradas!'); carregarJogadores(); }
+                else { const err = await res.json(); showToast(err.erro || 'Falha ao salvar.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double"></i><span>Salvar Presenças Selecionadas</span>'); }
         }
 
         async function removerPresencaAtleta(jogadorId, nomeAtleta) {
             const dataPartida = document.getElementById('data-presenca-manual').value || configsGlobal.partida_data || new Date().toISOString().split('T')[0];
-            
-            if (!confirm(`Deseja remover o registro de presença de "${nomeAtleta}" referente à data ${dataPartida}?`)) {
-                return;
-            }
-
+            if (!confirm(`Remover presença de "${nomeAtleta}" em ${dataPartida}?`)) return;
             try {
-                const res = await fetch(`${API_URL}/api/presencas`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ jogador_id: jogadorId, data_partida: dataPartida })
-                });
-
-                if (res.ok) {
-                    showToast(`Presença de ${nomeAtleta} removida!`);
-                    carregarJogadores();
-                } else {
-                    const errJson = await res.json();
-                    showToast(errJson.erro || 'Não foi possível remover a presença.', 'erro');
-                }
-            } catch (err) {
-                console.error('Erro ao remover presença:', err);
-                showToast('Erro de conexão ao remover presença.', 'erro');
-            }
+                const res = await fetch(`${API_URL}/api/presencas`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ jogador_id: jogadorId, data_partida: dataPartida }) });
+                if (res.ok) { showToast('Presença removida!'); carregarJogadores(); }
+                else { const errJson = await res.json(); showToast(errJson.erro || 'Erro ao remover.', 'erro'); }
+            } catch (err) { console.error(err); }
         }
 
         async function salvarJogador(e) {
@@ -1222,29 +1031,21 @@
                 funcao_grupo: document.getElementById('input-funcao').value,
                 status_aptidao: document.getElementById('input-aptidao').value,
                 posicao: document.getElementById('input-posicao').value,
-                status_mensalidade: document.getElementById('input-mensalidade').value,
-                gols: parseInt(document.getElementById('input-gols').value || 0)
+                status_mensalidade: document.getElementById('input-mensalidade').value
             };
 
             const metodo = id ? 'PUT' : 'POST';
             const url = id ? `${API_URL}/api/jogadores/${id}` : `${API_URL}/api/jogadores`;
 
             try {
-                const res = await fetch(url, {
-                    method: metodo,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(dados)
-                });
+                const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
                 if (res.ok) {
                     showToast('Atleta salvo com sucesso!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
                     carregarFinanceiro();
-                } else {
-                    const errJson = await res.json();
-                    showToast(errJson.erro || 'Verifique os dados do atleta.', 'erro');
-                }
-            } catch (err) { console.error(err); showToast('Erro de conexão ao salvar.', 'erro'); }
+                } else { const errJson = await res.json(); showToast(errJson.erro || 'Erro ao salvar.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
             finally { setBotaoCarregando(btn, false, 'Salvar Atleta'); }
         }
 
@@ -1257,26 +1058,19 @@
             document.getElementById('input-aptidao').value = j.status_aptidao || 'Ativo';
             document.getElementById('input-posicao').value = j.posicao;
             document.getElementById('input-mensalidade').value = j.status_mensalidade || 'Pendente';
-            document.getElementById('input-gols').value = j.gols || 0;
             document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta';
             openModal('modal-novo-jogador');
         }
 
         async function excluirJogador(id) {
-            if (!confirm('Deseja excluir este atleta? (Apenas Admin)')) return;
+            if (!confirm('Deseja excluir este atleta?')) return;
             try {
-                const res = await fetch(`${API_URL}/api/jogadores/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showToast('Atleta excluído.');
-                    carregarJogadores();
-                } else showToast('Acesso negado. Apenas administradores.', 'erro');
+                const res = await fetch(`${API_URL}/api/jogadores/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Atleta excluído.'); carregarJogadores(); }
+                else showToast('Acesso negado.', 'erro');
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO, GRÁFICO & RECIBOS
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
@@ -1286,7 +1080,6 @@
         function atualizarGraficoFinanceiro(lancamentos) {
             const ctx = document.getElementById('grafico-financeiro');
             if (!ctx) return;
-
             const anoAtual = new Date().getFullYear().toString();
             const mesesLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             const entradasPorMes = Array(12).fill(0);
@@ -1304,7 +1097,6 @@
             });
 
             if (chartFinanceiroInstance) chartFinanceiroInstance.destroy();
-
             chartFinanceiroInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1314,15 +1106,7 @@
                         { label: 'Saídas (R$)', data: saidasPorMes, backgroundColor: '#f43f5e', borderRadius: 6 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 } } } },
-                    scales: {
-                        x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
-                        y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { display: false } }, y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
             });
         }
 
@@ -1332,34 +1116,25 @@
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
                     atualizarGraficoFinanceiro(dados);
-
                     const mesFiltro = document.getElementById('filtro-mes').value;
                     let saldoGeralAcumulado = 0;
                     dados.forEach(l => {
                         const val = parseFloat(l.valor) || 0;
-                        if (l.tipo === 'Entrada') saldoGeralAcumulado += val;
-                        else saldoGeralAcumulado -= val;
+                        if (l.tipo === 'Entrada') saldoGeralAcumulado += val; else saldoGeralAcumulado -= val;
                     });
 
-                    let mesEntradas = 0;
-                    let mesSaidas = 0;
+                    let mesEntradas = 0, mesSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
                     tbody.innerHTML = '';
-
                     dados.forEach(l => {
                         const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
                         const val = parseFloat(l.valor) || 0;
-
                         if (mesFiltro && dataStr.startsWith(mesFiltro)) {
-                            if (l.tipo === 'Entrada') mesEntradas += val;
-                            else mesSaidas += val;
+                            if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
                         }
-
                         if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
-
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                         const isAdmin = usuarioLogado.perfil === 'admin';
-
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40">
                                 <td class="py-3 text-gray-300">${dataFmt}</td>
@@ -1373,11 +1148,9 @@
                             </tr>
                         `;
                     });
-
                     document.getElementById('fin-saldo').innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
                     document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
                     document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
-                    
                     const dashSaldo = document.getElementById('dash-saldo-val');
                     if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeralAcumulado.toFixed(2)}`;
                 }
@@ -1396,61 +1169,33 @@
             e.preventDefault();
             const btn = document.getElementById('btn-submit-lancamento');
             setBotaoCarregando(btn, true);
-
-            const dados = {
-                descricao: document.getElementById('fin-desc').value,
-                tipo: document.getElementById('fin-tipo').value,
-                valor: parseFloat(document.getElementById('fin-valor').value),
-                data_lancamento: document.getElementById('fin-data').value || new Date()
-            };
-
+            const dados = { descricao: document.getElementById('fin-desc').value, tipo: document.getElementById('fin-tipo').value, valor: parseFloat(document.getElementById('fin-valor').value), data_lancamento: document.getElementById('fin-data').value || new Date() };
             try {
-                const res = await fetch(`${API_URL}/api/financeiro`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(dados)
-                });
-                if (res.ok) {
-                    showToast('Lançamento efetuado com sucesso!');
-                    closeModal('modal-lancamento');
-                    document.getElementById('fin-desc').value = '';
-                    document.getElementById('fin-valor').value = '';
-                    carregarFinanceiro();
-                } else { showToast('Erro ao lançar.', 'erro'); }
-            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+                const res = await fetch(`${API_URL}/api/financeiro`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
+                if (res.ok) { showToast('Lançamento efetuado!'); closeModal('modal-lancamento'); document.getElementById('fin-desc').value = ''; document.getElementById('fin-valor').value = ''; carregarFinanceiro(); }
+                else { showToast('Erro ao lançar.', 'erro'); }
+            } catch (err) { console.error(err); }
             finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         async function excluirLancamento(id) {
-            if (!confirm('Excluir este lançamento? (Apenas Admin)')) return;
+            if (!confirm('Excluir este lançamento?')) return;
             try {
-                const res = await fetch(`${API_URL}/api/financeiro/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showToast('Lançamento removido.');
-                    carregarFinanceiro();
-                } else showToast('Acesso negado. Apenas administradores.', 'erro');
+                const res = await fetch(`${API_URL}/api/financeiro/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Lançamento removido.'); carregarFinanceiro(); }
             } catch (err) { console.error(err); }
         }
 
-        // USUÁRIOS
         async function carregarUsuariosSistema() {
             const container = document.getElementById('usuarios-lista');
             if (!container) return;
             try {
-                const res = await fetch(`${API_URL}/api/usuarios`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`${API_URL}/api/usuarios`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (res.ok) {
                     const usuarios = await res.json();
                     container.innerHTML = usuarios.map(u => `
                         <div class="p-4 bg-pitch-900 rounded-xl border border-pitch-700/50 flex justify-between items-center">
-                            <div>
-                                <p class="text-sm font-bold text-white">${u.nome} (${u.email})</p>
-                                <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span>
-                            </div>
+                            <div><p class="text-sm font-bold text-white">${u.nome} (${u.email})</p><span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span></div>
                             <div class="space-x-3">
                                 <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 text-xs hover:underline">Editar</button>
                                 <button onclick="excluirUsuario(${u.id})" class="text-rose-400 text-xs hover:underline">Excluir</button>
@@ -1485,113 +1230,56 @@
             e.preventDefault();
             const btn = document.getElementById('btn-submit-usuario');
             setBotaoCarregando(btn, true);
-
             const id = document.getElementById('input-usuario-id').value;
-            const dados = {
-                nome: document.getElementById('user-nome').value,
-                email: document.getElementById('user-email').value,
-                senha: document.getElementById('user-senha').value,
-                perfil: document.getElementById('user-perfil').value
-            };
-
+            const dados = { nome: document.getElementById('user-nome').value, email: document.getElementById('user-email').value, senha: document.getElementById('user-senha').value, perfil: document.getElementById('user-perfil').value };
             const metodo = id ? 'PUT' : 'POST';
             const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
-
             try {
-                const res = await fetch(url, {
-                    method: metodo,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(dados)
-                });
-                if (res.ok) {
-                    showToast('Usuário salvo com sucesso!');
-                    closeModal('modal-usuario');
-                    carregarUsuariosSistema();
-                } else { showToast('Erro ao salvar usuário.', 'erro'); }
+                const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
+                if (res.ok) { showToast('Usuário salvo!'); closeModal('modal-usuario'); carregarUsuariosSistema(); }
+                else { showToast('Erro ao salvar.', 'erro'); }
             } catch (err) { console.error(err); }
             finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         async function excluirUsuario(id) {
-            if (!confirm('Deseja excluir este usuário?')) return;
+            if (!confirm('Excluir este usuário?')) return;
             try {
-                const res = await fetch(`${API_URL}/api/usuarios/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showToast('Usuário removido.');
-                    carregarUsuariosSistema();
-                }
+                const res = await fetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Usuário removido.'); carregarUsuariosSistema(); }
             } catch (err) { console.error(err); }
         }
 
-        // ==========================================
-        // SORTEIO DE TIMES (INDEPENDENTE DA PRESENÇA)
-        // ==========================================
         function verificarTravaRodadaAtual() {
             const dataPartidaAtual = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
             const alerta = document.getElementById('alerta-rodada-travada');
             const btnGerar = document.getElementById('btn-gerar-sorteio');
-
-            const jaExiste = historicoSorteiosGlobal.some(s => {
-                if (!s.data_partida) return false;
-                const dataSorteio = s.data_partida.split('T')[0];
-                return dataSorteio === dataPartidaAtual;
-            });
-
+            const jaExiste = historicoSorteiosGlobal.some(s => s.data_partida && s.data_partida.split('T')[0] === dataPartidaAtual);
             if (jaExiste) {
                 if (alerta) alerta.classList.remove('hidden');
-                if (btnGerar) {
-                    btnGerar.disabled = true;
-                    btnGerar.classList.add('opacity-50', 'cursor-not-allowed');
-                    btnGerar.innerText = 'Sorteio Travado';
-                }
+                if (btnGerar) { btnGerar.disabled = true; btnGerar.classList.add('opacity-50', 'cursor-not-allowed'); btnGerar.innerText = 'Sorteio Travado'; }
                 return true;
             } else {
                 if (alerta) alerta.classList.add('hidden');
-                if (btnGerar) {
-                    btnGerar.disabled = false;
-                    btnGerar.classList.remove('opacity-50', 'cursor-not-allowed');
-                    btnGerar.innerHTML = '<i class="fa-solid fa-shuffle mr-1"></i> Sortear Times com Selecionados';
-                }
+                if (btnGerar) { btnGerar.disabled = false; btnGerar.classList.remove('opacity-50', 'cursor-not-allowed'); btnGerar.innerHTML = '<i class="fa-solid fa-shuffle mr-1"></i> Sortear com Selecionados'; }
                 return false;
             }
         }
 
         function iniciarSorteioIndependente() {
-            if (verificarTravaRodadaAtual()) {
-                showToast('O sorteio oficial para esta data já foi travado! Altere a data da partida.', 'aviso');
-                return;
-            }
-
-            const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({
-                id: parseInt(cb.value),
-                nome: cb.dataset.nome,
-                posicao: cb.dataset.posicao
-            }));
-
+            if (verificarTravaRodadaAtual()) { showToast('Sorteio já travado para esta data!', 'aviso'); return; }
+            const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({ id: parseInt(cb.value), nome: cb.dataset.nome, posicao: cb.dataset.posicao }));
             const numTimes = parseInt(document.getElementById('qtd-times').value) || 2;
-            if (selecionados.length < numTimes) {
-                showToast(`Marque pelo menos ${numTimes} atletas na lista ao lado.`, 'aviso');
-                return;
-            }
+            if (selecionados.length < numTimes) { showToast(`Selecione pelo menos ${numTimes} atletas.`, 'aviso'); return; }
 
             const goleiros = selecionados.filter(j => j.posicao && j.posicao.toLowerCase() === 'goleiro');
             const linha = selecionados.filter(j => !j.posicao || j.posicao.toLowerCase() !== 'goleiro');
-
             goleiros.sort(() => 0.5 - Math.random());
             linha.sort(() => 0.5 - Math.random());
 
             const times = Array.from({ length: numTimes }, () => []);
-
-            goleiros.forEach((g, idx) => {
-                times[idx % numTimes].push(g);
-            });
-
-            linha.forEach((atleta, index) => {
-                times[index % numTimes].push(atleta);
-            });
+            goleiros.forEach((g, idx) => times[idx % numTimes].push(g));
+            linha.forEach((atleta, index) => times[index % numTimes].push(atleta));
 
             const paletaCores = [
                 { nome: 'Time Colete Preto', classe: 'border-gray-500 text-gray-200 bg-black/40' },
@@ -1600,12 +1288,9 @@
                 { nome: 'Time Colete Laranja', classe: 'border-orange-500 text-orange-400' }
             ];
 
-            const dataPartidaStr = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
-            const localPartidaStr = configsGlobal.partida_local || 'Campo Principal - CMV';
-
             ultimoSorteioGerado = {
-                data_partida: dataPartidaStr,
-                local_partida: localPartidaStr,
+                data_partida: configsGlobal.partida_data || new Date().toISOString().split('T')[0],
+                local_partida: configsGlobal.partida_local || 'Campo Principal - CMV',
                 num_times: numTimes,
                 dados_times: times.map((t, idx) => ({ nome: paletaCores[idx % paletaCores.length].nome, jogadores: t }))
             };
@@ -1617,114 +1302,56 @@
 
             times.forEach((tJogadores, idx) => {
                 const cor = paletaCores[idx % paletaCores.length];
-                let htmlMembros = tJogadores.map(j => `
-                    <div class="p-2 bg-pitch-900 rounded border border-pitch-700 text-xs text-white flex justify-between mb-1">
-                        <span>${j.nome}</span><span class="text-gray-400">${j.posicao}</span>
-                    </div>
-                `).join('');
-
                 container.innerHTML += `
                     <div class="bg-pitch-800 border ${cor.classe} rounded-2xl p-4 mb-4 shadow-md">
                         <h4 class="font-bold text-sm mb-3">${cor.nome} (${tJogadores.length} atletas)</h4>
-                        <div class="space-y-1">${htmlMembros}</div>
+                        <div class="space-y-1">${tJogadores.map(j => `<div class="p-2 bg-pitch-900 rounded border border-pitch-700 text-xs text-white flex justify-between"><span>${j.nome}</span><span class="text-gray-400">${j.posicao}</span></div>`).join('')}</div>
                     </div>
                 `;
             });
-
             document.getElementById('container-btn-confirmar').classList.remove('hidden');
             document.getElementById('status-sorteio-badge').classList.add('hidden');
-            showToast('Prévia de sorteio gerada!', 'sucesso');
+            showToast('Prévia gerada!');
         }
 
         async function confirmarETravarSorteio(btn) {
-            if (!ultimoSorteioGerado) {
-                showToast('Nenhum sorteio gerado para confirmar.', 'aviso');
-                return;
-            }
-
-            if (!confirm('Deseja confirmar e travar este resultado no histórico oficial de sorteios?')) {
-                return;
-            }
-
+            if (!ultimoSorteioGerado) return;
+            if (!confirm('Deseja confirmar e travar este sorteio?')) return;
             setBotaoCarregando(btn, true);
             try {
-                const resSorteio = await fetch(`${API_URL}/api/sorteios`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(ultimoSorteioGerado)
-                });
-
-                if (!resSorteio.ok) {
-                    const err = await resSorteio.json();
-                    showToast(err.erro || 'Não foi possível salvar o sorteio.', 'erro');
-                    return;
-                }
-
-                showToast('Sorteio travado e salvo no histórico!');
+                const res = await fetch(`${API_URL}/api/sorteios`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(ultimoSorteioGerado) });
+                if (!res.ok) { const err = await res.json(); showToast(err.erro || 'Erro ao salvar.', 'erro'); return; }
+                showToast('Sorteio travado com sucesso!');
                 document.getElementById('container-btn-confirmar').classList.add('hidden');
                 document.getElementById('status-sorteio-badge').classList.remove('hidden');
-                
                 await carregarHistoricoSorteios();
-            } catch (err) {
-                console.error('Erro:', err);
-                showToast('Erro de conexão ao salvar.', 'erro');
-            } finally {
-                setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock text-base"></i><span>Confirmar e Travar Resultado do Sorteio no Histórico</span>');
-            }
+            } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock text-base"></i><span>Confirmar e Travar Sorteio no Histórico</span>'); }
         }
 
         async function carregarHistoricoSorteios() {
             const tbody = document.getElementById('tabela-historico-sorteios');
             if (!tbody) return;
-
             try {
                 const res = await fetch(`${API_URL}/api/sorteios`);
                 if (res.ok) {
                     historicoSorteiosGlobal = await res.json();
                     verificarTravaRodadaAtual();
-
-                    if (historicoSorteiosGlobal.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado no histórico ainda.</td></tr>`;
-                        return;
-                    }
-
+                    if (historicoSorteiosGlobal.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 text-xs">Nenhum sorteio registrado.</td></tr>`; return; }
                     tbody.innerHTML = '';
                     historicoSorteiosGlobal.forEach(s => {
-                        let dataFmt = '-';
-                        if (s.data_partida) {
-                            const partes = s.data_partida.split('T')[0].split('-');
-                            if (partes.length === 3) {
-                                dataFmt = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                            }
-                        }
-                        
-                        const localJogo = s.local_partida || configsGlobal.partida_local || 'Campo Principal - CMV';
-
-                        let timesHtml = '';
-                        if (Array.isArray(s.dados_times)) {
-                            timesHtml = s.dados_times.map(t => `
-                                <div class="mb-2 p-2 bg-pitch-900 rounded border border-pitch-700/60">
-                                    <strong class="text-amber-400 text-xs">${t.nome}:</strong> 
-                                    <span class="text-xs text-gray-300">${t.jogadores.map(j => j.nome).join(', ')}</span>
-                                </div>
-                            `).join('');
-                        }
-
+                        let dataFmt = s.data_partida ? s.data_partida.split('T')[0].split('-').reverse().join('/') : '-';
+                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-2 p-2 bg-pitch-900 rounded border border-pitch-700/60"><strong class="text-amber-400 text-xs">${t.nome}:</strong> <span class="text-xs text-gray-300">${t.jogadores.map(j => j.nome).join(', ')}</span></div>`).join('') : '';
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-700/50 hover:bg-pitch-900/40 align-top">
-                                <td class="py-3 font-medium text-white">
-                                    <div class="text-emerald-400 font-bold">${dataFmt}</div>
-                                    <div class="text-[11px] text-gray-400 mt-0.5">${localJogo}</div>
-                                </td>
+                                <td class="py-3 font-medium text-white"><div class="text-emerald-400 font-bold">${dataFmt}</div></td>
                                 <td class="py-3 text-gray-300">${s.num_times} Times</td>
                                 <td class="py-3">${timesHtml}</td>
                             </tr>
                         `;
                     });
                 }
-            } catch (err) {
-                console.error('Erro ao carregar histórico de sorteios:', err);
-            }
+            } catch (err) { console.error(err); }
         }
     </script>
 </body>
