@@ -6,6 +6,7 @@
     <title>Painel - Clube Meninos da Vila</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -18,29 +19,39 @@
         }
     </script>
     <style>
+        @page { size: A4 portrait; margin: 10mm; }
         @media print {
+            body { background: white !important; color: black !important; font-size: 11px !important; }
             body * { visibility: hidden; }
             
             /* Modo Impressão de Recibo Individual */
             body.imprimindo-recibo #modal-recibo-conteudo, 
             body.imprimindo-recibo #modal-recibo-conteudo * { visibility: visible; }
-            body.imprimindo-recibo #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+            body.imprimindo-recibo #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: 1px solid #ccc; }
             
-            /* Modo Impressão de Relatórios Gerais */
+            /* Modo Impressão de Relatórios Gerais (A4 Otimizado) */
             body:not(.imprimindo-recibo) #relatorios-conteudo-impressao, 
             body:not(.imprimindo-recibo) #relatorios-conteudo-impressao * { visibility: visible; }
-            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
+            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao { position: absolute; left: 0; top: 0; width: 100%; }
             
-            /* Modo Impressão de Extrato Financeiro */
+            /* Modo Impressão de Extrato Financeiro (A4 Otimizado) */
             body:not(.imprimindo-recibo) #financeiro-relatorio-impressao, 
             body:not(.imprimindo-recibo) #financeiro-relatorio-impressao * { visibility: visible; }
-            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
+            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; }
 
+            /* Ajustes de tabela e blocos para caber em 1 página A4 */
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { padding: 4px 6px !important; border-bottom: 1px solid #ddd !important; color: black !important; }
+            .bg-pitch-800, .bg-pitch-900 { background: transparent !important; border-color: #ccc !important; box-shadow: none !important; }
+            .text-white, .text-gray-300, .text-gray-400 { color: #111 !important; }
             .print\:hidden { display: none !important; }
         }
     </style>
 </head>
 <body class="bg-pitch-900 text-white min-h-screen flex">
+
+    <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col space-y-3 pointer-events-none print:hidden"></div>
 
     <!-- MENU LATERAL -->
     <aside class="w-64 bg-pitch-800 border-r border-pitch-700/60 flex flex-col justify-between hidden md:flex print:hidden">
@@ -166,15 +177,48 @@
                 </div>
             </div>
 
-            <!-- ABA ELENCO -->
-            <div id="tab-elenco" class="tab-content hidden">
+            <!-- ABA ELENCO COM FILTROS AVANÇADOS -->
+            <div id="tab-elenco" class="tab-content hidden space-y-5">
+                <div class="bg-pitch-800 border border-pitch-700/60 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="text-[11px] text-gray-400 block mb-1">Buscar Atleta:</label>
+                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Nome do jogador..." class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-gray-400 block mb-1">Posição:</label>
+                        <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="">Todas as Posições</option>
+                            <option value="Goleiro">Goleiro</option>
+                            <option value="Zagueiro">Zagueiro</option>
+                            <option value="Lateral">Lateral</option>
+                            <option value="Meia">Meia</option>
+                            <option value="Atacante">Atacante</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-gray-400 block mb-1">Mensalidade:</label>
+                        <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="">Todos os Status</option>
+                            <option value="Pago">Em Dia (Pago)</option>
+                            <option value="Pendente">Pendente</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-gray-400 block mb-1">Aptidão:</label>
+                        <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-900 border border-pitch-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="">Todos</option>
+                            <option value="Ativo">Ativos (Aptos)</option>
+                            <option value="Afastados">Afastados (DM / Suspenso)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div id="jogadores-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
             </div>
 
             <!-- ABA PRESENÇA & SORTEIO (SEPARADOS) -->
             <div id="tab-presenca" class="tab-content hidden space-y-6">
                 
-                <!-- Alerta se o sorteio da data atual já foi travado -->
                 <div id="alerta-rodada-travada" class="hidden bg-amber-500/20 border border-amber-500 text-amber-300 p-4 rounded-2xl text-sm flex items-center space-x-3">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                     <div>
@@ -201,7 +245,7 @@
                         <p class="text-[11px] text-gray-400 mb-3">Marque os atletas presentes para registrar presença ou sortear os times:</p>
                         <div id="presenca-lista" class="space-y-2 max-h-[340px] overflow-y-auto pr-2 flex-1 mb-4"></div>
                         
-                        <button onclick="salvarPresencasManualmente()" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-2 hidden">
+                        <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-2 hidden">
                             <i class="fa-solid fa-check-double"></i>
                             <span>Salvar Presenças Selecionadas</span>
                         </button>
@@ -244,7 +288,7 @@
                         <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
 
                         <div id="container-btn-confirmar" class="mt-4 pt-4 border-t border-pitch-700/60 hidden">
-                            <button onclick="confirmarETravarSorteio()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
+                            <button id="btn-confirmar-sorteio" onclick="confirmarETravarSorteio(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-sm shadow-xl flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-lock text-base"></i>
                                 <span>Confirmar e Travar Resultado do Sorteio no Histórico</span>
                             </button>
@@ -272,7 +316,7 @@
                 </div>
             </div>
 
-            <!-- ABA FINANCEIRO -->
+            <!-- ABA FINANCEIRO COM GRÁFICO -->
             <div id="tab-financeiro" class="tab-content hidden space-y-6">
                 <div id="financeiro-relatorio-impressao" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -290,6 +334,14 @@
                             <p class="text-xs text-gray-400 uppercase font-bold">Saídas (Mês Selecionado)</p>
                             <h3 id="fin-saidas" class="text-2xl font-bold text-rose-400 mt-1">R$ 0,00</h3>
                             <span class="text-[10px] text-gray-400 mt-1 block">Despesas do período</span>
+                        </div>
+                    </div>
+
+                    <!-- GRÁFICO DE RECEITAS VS DESPESAS -->
+                    <div class="bg-pitch-800 border border-pitch-700/60 p-6 rounded-2xl print:hidden">
+                        <h3 class="font-bold text-sm text-amber-400 mb-3"><i class="fa-solid fa-chart-column mr-2"></i>Comparativo Anual (Entradas vs. Saídas)</h3>
+                        <div class="h-56 w-full">
+                            <canvas id="grafico-financeiro"></canvas>
                         </div>
                     </div>
 
@@ -531,7 +583,7 @@
                 </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Atleta</button>
+                    <button type="submit" id="btn-submit-jogador" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar Atleta</button>
                 </div>
             </form>
         </div>
@@ -599,7 +651,7 @@
                 </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="submit" id="btn-submit-lancamento" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
                 </div>
             </form>
         </div>
@@ -633,7 +685,7 @@
                 </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="closeModal('modal-usuario')" class="w-1/2 bg-pitch-700 py-2.5 rounded-xl text-sm font-bold text-gray-300">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
+                    <button type="submit" id="btn-submit-usuario" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white">Salvar</button>
                 </div>
             </form>
         </div>
@@ -646,11 +698,56 @@
         let configsGlobal = {};
         let historicoSorteiosGlobal = [];
         let ultimoSorteioGerado = null;
+        let chartFinanceiroInstance = null;
 
         const token = localStorage.getItem('token');
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
         if (!token && !window.location.pathname.endsWith('login.html')) {
             window.location.href = 'login.html';
+        }
+
+        // ==========================================
+        // NOTIFICAÇÕES TOAST & SPINNERS DE BOTÃO
+        // ==========================================
+        function showToast(mensagem, tipo = 'sucesso') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const cores = {
+                sucesso: 'bg-emerald-600 border-emerald-400 text-white',
+                erro: 'bg-rose-600 border-rose-400 text-white',
+                aviso: 'bg-amber-500 border-amber-300 text-gray-950'
+            };
+            const icones = {
+                sucesso: 'fa-circle-check',
+                erro: 'fa-circle-exclamation',
+                aviso: 'fa-triangle-exclamation'
+            };
+
+            toast.className = `pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-xl border shadow-2xl text-xs font-bold transform transition-all duration-300 translate-x-full opacity-0 ${cores[tipo] || cores.sucesso}`;
+            toast.innerHTML = `<i class="fa-solid ${icones[tipo]} text-base"></i><span>${mensagem}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function setBotaoCarregando(btn, carregando, textoOriginal = '') {
+            if (!btn) return;
+            if (carregando) {
+                btn.dataset.textoOriginal = btn.innerHTML;
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Processando...`;
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                btn.innerHTML = textoOriginal || btn.dataset.textoOriginal || 'Salvar';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -766,6 +863,9 @@
 
         async function salvarConfigClube(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            setBotaoCarregando(btn, true);
+
             const payload = {
                 ...configsGlobal,
                 nome_clube: document.getElementById('cfg-nome-clube').value,
@@ -780,11 +880,12 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    alert('Identidade atualizada com sucesso!');
+                    showToast('Identidade atualizada com sucesso!');
                     closeModal('modal-config-clube');
                     carregarConfiguracoes();
-                } else { alert('Erro ao atualizar. Apenas administradores.'); }
-            } catch (err) { console.error(err); }
+                } else { showToast('Erro ao atualizar. Apenas administradores.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         function abrirModalPartida() {
@@ -797,6 +898,9 @@
 
         async function salvarPartidaConfig(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            setBotaoCarregando(btn, true);
+
             const payload = {
                 ...configsGlobal,
                 partida_data: document.getElementById('cfg-data').value,
@@ -812,12 +916,13 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    alert('Dados da partida atualizados com sucesso!');
+                    showToast('Dados da partida atualizados!');
                     closeModal('modal-partida');
                     await carregarConfiguracoes();
                     verificarTravaRodadaAtual();
-                } else { alert('Erro ao atualizar.'); }
-            } catch (err) { console.error(err); }
+                } else { showToast('Erro ao atualizar.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         function abrirModalNovoJogador() {
@@ -834,11 +939,28 @@
                 if (Array.isArray(dados)) {
                     listaAtletasGlobal = dados;
                     renderDashboard(dados);
-                    renderElenco(dados);
+                    aplicarFiltrosElenco();
                     renderPresenca(dados);
                     renderRelatorios(dados);
                 }
             } catch (err) { console.error('Erro ao buscar atletas:', err); }
+        }
+
+        function aplicarFiltrosElenco() {
+            const termo = (document.getElementById('filtro-elenco-nome')?.value || '').toLowerCase();
+            const pos = document.getElementById('filtro-elenco-posicao')?.value || '';
+            const mens = document.getElementById('filtro-elenco-mensalidade')?.value || '';
+            const apt = document.getElementById('filtro-elenco-aptidao')?.value || '';
+
+            const filtrados = listaAtletasGlobal.filter(j => {
+                const matchNome = j.nome.toLowerCase().includes(termo);
+                const matchPos = !pos || j.posicao === pos;
+                const matchMens = !mens || (j.status_mensalidade || 'Pendente') === mens;
+                const matchApt = !apt || (apt === 'Ativo' ? (!j.status_aptidao || j.status_aptidao === 'Ativo') : (j.status_aptidao && j.status_aptidao !== 'Ativo'));
+                return matchNome && matchPos && matchMens && matchApt;
+            });
+
+            renderElenco(filtrados);
         }
 
         function renderDashboard(jogadores) {
@@ -887,6 +1009,11 @@
             const podeGerenciar = usuarioLogado.perfil === 'admin' || usuarioLogado.perfil === 'gestor';
             const isAdmin = usuarioLogado.perfil === 'admin';
 
+            if (jogadores.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-gray-400 text-sm">Nenhum atleta encontrado com os filtros aplicados.</div>`;
+                return;
+            }
+
             grid.innerHTML = '';
             jogadores.forEach(j => {
                 let idadeStr = '-';
@@ -918,7 +1045,7 @@
                     : '';
 
                 grid.innerHTML += `
-                    <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                    <div class="bg-pitch-800 border border-pitch-700/60 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-emerald-500/40 transition">
                         <div>
                             <div class="flex justify-between items-start flex-wrap gap-1 mb-2">
                                 <div>
@@ -956,7 +1083,7 @@
 
             ativos.forEach((j, index) => {
                 lista.innerHTML += `
-                    <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-900/50 border border-pitch-700/40 cursor-pointer mb-2">
+                    <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-900/50 border border-pitch-700/40 cursor-pointer mb-2 hover:bg-pitch-900">
                         <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id || index}" data-nome="${j.nome}" data-posicao="${j.posicao}">
                         <span class="text-sm font-medium text-white">${j.nome} (${j.posicao})</span>
                     </label>
@@ -1016,12 +1143,12 @@
         }
 
         // ==========================================
-        // 1. SALVAMENTO DE PRESENÇAS MANUALMENTE
+        // SALVAMENTO DE PRESENÇAS MANUALMENTE
         // ==========================================
-        async function salvarPresencasManualmente() {
+        async function salvarPresencasManualmente(btn) {
             const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
             if (checkboxes.length === 0) {
-                alert('Selecione pelo menos um atleta para registrar presença.');
+                showToast('Selecione pelo menos um atleta para registrar presença.', 'aviso');
                 return;
             }
 
@@ -1032,6 +1159,7 @@
                 return;
             }
 
+            setBotaoCarregando(btn, true);
             try {
                 const res = await fetch(`${API_URL}/api/presencas`, {
                     method: 'POST',
@@ -1040,15 +1168,17 @@
                 });
 
                 if (res.ok) {
-                    alert('Presenças registradas manualmente com sucesso!');
+                    showToast('Presenças registradas manualmente com sucesso!');
                     carregarJogadores();
                 } else {
                     const err = await res.json();
-                    alert(`Erro: ${err.erro || 'Falha ao salvar presenças.'}`);
+                    showToast(err.erro || 'Falha ao salvar presenças.', 'erro');
                 }
             } catch (err) {
                 console.error(err);
-                alert('Erro de conexão ao registrar presenças.');
+                showToast('Erro de conexão ao registrar presenças.', 'erro');
+            } finally {
+                setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double"></i><span>Salvar Presenças Selecionadas</span>');
             }
         }
 
@@ -1067,20 +1197,23 @@
                 });
 
                 if (res.ok) {
-                    alert(`Presença de ${nomeAtleta} removida com sucesso!`);
+                    showToast(`Presença de ${nomeAtleta} removida!`);
                     carregarJogadores();
                 } else {
                     const errJson = await res.json();
-                    alert(`Erro: ${errJson.erro || 'Não foi possível remover a presença.'}`);
+                    showToast(errJson.erro || 'Não foi possível remover a presença.', 'erro');
                 }
             } catch (err) {
                 console.error('Erro ao remover presença:', err);
-                alert('Erro de conexão ao remover presença.');
+                showToast('Erro de conexão ao remover presença.', 'erro');
             }
         }
 
         async function salvarJogador(e) {
             e.preventDefault();
+            const btn = document.getElementById('btn-submit-jogador');
+            setBotaoCarregando(btn, true);
+
             const id = document.getElementById('input-jogador-id').value;
             const dados = {
                 nome: document.getElementById('input-nome').value,
@@ -1103,14 +1236,16 @@
                     body: JSON.stringify(dados)
                 });
                 if (res.ok) {
-                    alert('Atleta salvo com sucesso!');
+                    showToast('Atleta salvo com sucesso!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
+                    carregarFinanceiro();
                 } else {
                     const errJson = await res.json();
-                    alert(`Erro ao salvar atleta: ${errJson.erro || 'Verifique os dados.'}`);
+                    showToast(errJson.erro || 'Verifique os dados do atleta.', 'erro');
                 }
-            } catch (err) { console.error(err); alert('Erro de conexão ao salvar.'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão ao salvar.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, 'Salvar Atleta'); }
         }
 
         function prepararEdicaoJogador(j) {
@@ -1134,16 +1269,61 @@
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) carregarJogadores();
-                else alert('Acesso negado. Apenas administradores podem excluir.');
+                if (res.ok) {
+                    showToast('Atleta excluído.');
+                    carregarJogadores();
+                } else showToast('Acesso negado. Apenas administradores.', 'erro');
             } catch (err) { console.error(err); }
         }
 
-        // FINANCEIRO & RECIBOS
+        // FINANCEIRO, GRÁFICO & RECIBOS
         function preencherValorFin(desc, valor, tipo) {
             document.getElementById('fin-desc').value = desc;
             document.getElementById('fin-valor').value = valor;
             document.getElementById('fin-tipo').value = tipo;
+        }
+
+        function atualizarGraficoFinanceiro(lancamentos) {
+            const ctx = document.getElementById('grafico-financeiro');
+            if (!ctx) return;
+
+            const anoAtual = new Date().getFullYear().toString();
+            const mesesLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const entradasPorMes = Array(12).fill(0);
+            const saidasPorMes = Array(12).fill(0);
+
+            lancamentos.forEach(l => {
+                if (!l.data_lancamento) return;
+                const dataStr = l.data_lancamento.split('T')[0];
+                if (dataStr.startsWith(anoAtual)) {
+                    const mesIdx = parseInt(dataStr.split('-')[1], 10) - 1;
+                    const val = parseFloat(l.valor) || 0;
+                    if (l.tipo === 'Entrada') entradasPorMes[mesIdx] += val;
+                    else saidasPorMes[mesIdx] += val;
+                }
+            });
+
+            if (chartFinanceiroInstance) chartFinanceiroInstance.destroy();
+
+            chartFinanceiroInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mesesLabels,
+                    datasets: [
+                        { label: 'Entradas (R$)', data: entradasPorMes, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Saídas (R$)', data: saidasPorMes, backgroundColor: '#f43f5e', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+                        y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
         }
 
         async function carregarFinanceiro() {
@@ -1151,6 +1331,8 @@
                 const res = await fetch(`${API_URL}/api/financeiro`);
                 const dados = await res.json();
                 if (Array.isArray(dados)) {
+                    atualizarGraficoFinanceiro(dados);
+
                     const mesFiltro = document.getElementById('filtro-mes').value;
                     let saldoGeralAcumulado = 0;
                     dados.forEach(l => {
@@ -1212,6 +1394,9 @@
 
         async function salvarLancamento(e) {
             e.preventDefault();
+            const btn = document.getElementById('btn-submit-lancamento');
+            setBotaoCarregando(btn, true);
+
             const dados = {
                 descricao: document.getElementById('fin-desc').value,
                 tipo: document.getElementById('fin-tipo').value,
@@ -1226,13 +1411,14 @@
                     body: JSON.stringify(dados)
                 });
                 if (res.ok) {
-                    alert('Lançamento efetuado com sucesso!');
+                    showToast('Lançamento efetuado com sucesso!');
                     closeModal('modal-lancamento');
                     document.getElementById('fin-desc').value = '';
                     document.getElementById('fin-valor').value = '';
                     carregarFinanceiro();
-                } else { alert('Erro ao lançar.'); }
-            } catch (err) { console.error(err); }
+                } else { showToast('Erro ao lançar.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         async function excluirLancamento(id) {
@@ -1242,8 +1428,10 @@
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) carregarFinanceiro();
-                else alert('Acesso negado. Apenas administradores.');
+                if (res.ok) {
+                    showToast('Lançamento removido.');
+                    carregarFinanceiro();
+                } else showToast('Acesso negado. Apenas administradores.', 'erro');
             } catch (err) { console.error(err); }
         }
 
@@ -1295,6 +1483,9 @@
 
         async function salvarUsuario(e) {
             e.preventDefault();
+            const btn = document.getElementById('btn-submit-usuario');
+            setBotaoCarregando(btn, true);
+
             const id = document.getElementById('input-usuario-id').value;
             const dados = {
                 nome: document.getElementById('user-nome').value,
@@ -1313,11 +1504,12 @@
                     body: JSON.stringify(dados)
                 });
                 if (res.ok) {
-                    alert('Usuário salvo com sucesso!');
+                    showToast('Usuário salvo com sucesso!');
                     closeModal('modal-usuario');
                     carregarUsuariosSistema();
-                } else { alert('Erro ao salvar usuário.'); }
+                } else { showToast('Erro ao salvar usuário.', 'erro'); }
             } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
         }
 
         async function excluirUsuario(id) {
@@ -1327,12 +1519,15 @@
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) carregarUsuariosSistema();
+                if (res.ok) {
+                    showToast('Usuário removido.');
+                    carregarUsuariosSistema();
+                }
             } catch (err) { console.error(err); }
         }
 
         // ==========================================
-        // 2. SORTEIO DE TIMES (INDEPENDENTE DA PRESENÇA)
+        // SORTEIO DE TIMES (INDEPENDENTE DA PRESENÇA)
         // ==========================================
         function verificarTravaRodadaAtual() {
             const dataPartidaAtual = configsGlobal.partida_data || new Date().toISOString().split('T')[0];
@@ -1366,7 +1561,7 @@
 
         function iniciarSorteioIndependente() {
             if (verificarTravaRodadaAtual()) {
-                alert('O sorteio oficial para esta data já foi confirmado e travado! Altere a data da próxima partida para realizar um novo sorteio.');
+                showToast('O sorteio oficial para esta data já foi travado! Altere a data da partida.', 'aviso');
                 return;
             }
 
@@ -1378,7 +1573,7 @@
 
             const numTimes = parseInt(document.getElementById('qtd-times').value) || 2;
             if (selecionados.length < numTimes) {
-                alert(`Marque pelo menos ${numTimes} atletas na lista ao lado para realizar o sorteio.`);
+                showToast(`Marque pelo menos ${numTimes} atletas na lista ao lado.`, 'aviso');
                 return;
             }
 
@@ -1438,11 +1633,12 @@
 
             document.getElementById('container-btn-confirmar').classList.remove('hidden');
             document.getElementById('status-sorteio-badge').classList.add('hidden');
+            showToast('Prévia de sorteio gerada!', 'sucesso');
         }
 
-        async function confirmarETravarSorteio() {
+        async function confirmarETravarSorteio(btn) {
             if (!ultimoSorteioGerado) {
-                alert('Nenhum sorteio gerado para confirmar.');
+                showToast('Nenhum sorteio gerado para confirmar.', 'aviso');
                 return;
             }
 
@@ -1450,6 +1646,7 @@
                 return;
             }
 
+            setBotaoCarregando(btn, true);
             try {
                 const resSorteio = await fetch(`${API_URL}/api/sorteios`, {
                     method: 'POST',
@@ -1459,18 +1656,20 @@
 
                 if (!resSorteio.ok) {
                     const err = await resSorteio.json();
-                    alert(`Atenção: ${err.erro || 'Não foi possível salvar o sorteio.'}`);
+                    showToast(err.erro || 'Não foi possível salvar o sorteio.', 'erro');
                     return;
                 }
 
-                alert('Sorteio travado e salvo no histórico com sucesso!');
+                showToast('Sorteio travado e salvo no histórico!');
                 document.getElementById('container-btn-confirmar').classList.add('hidden');
                 document.getElementById('status-sorteio-badge').classList.remove('hidden');
                 
                 await carregarHistoricoSorteios();
             } catch (err) {
                 console.error('Erro:', err);
-                alert('Erro de conexão ao salvar.');
+                showToast('Erro de conexão ao salvar.', 'erro');
+            } finally {
+                setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock text-base"></i><span>Confirmar e Travar Resultado do Sorteio no Histórico</span>');
             }
         }
 
