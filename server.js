@@ -26,36 +26,48 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
-function verificarAdmin(req, res, next) {
+// ================= MIDDLEWARES DE AUTORIZAÇÃO =================
+function verificarTokenBase(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.usuario = decoded;
-        if (decoded.perfil !== 'admin') {
-            return res.status(403).json({ erro: 'Acesso negado. Apenas administradores.' });
-        }
         next();
     } catch (err) {
         return res.status(403).json({ erro: 'Token inválido ou expirado.' });
     }
 }
 
+function verificarAdmin(req, res, next) {
+    verificarTokenBase(req, res, () => {
+        if (req.usuario.perfil !== 'admin') {
+            return res.status(403).json({ erro: 'Acesso negado. Apenas administradores.' });
+        }
+        next();
+    });
+}
+
 function verificarGestorOuAdmin(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) return res.status(401).json({ erro: 'Token não fornecido.' });
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.usuario = decoded;
-        if (decoded.perfil !== 'admin' && decoded.perfil !== 'gestor') {
+    verificarTokenBase(req, res, () => {
+        if (!['admin', 'gestor'].includes(req.usuario.perfil)) {
             return res.status(403).json({ erro: 'Acesso negado. Requer perfil de gestor ou administrador.' });
         }
         next();
-    } catch (err) {
-        return res.status(403).json({ erro: 'Token inválido ou expirado.' });
-    }
+    });
+}
+
+// Middleware genérico para permitir múltiplos perfis autorizados
+function verificarPerfisPermitidos(perfisPermitidos) {
+    return (req, res, next) => {
+        verificarTokenBase(req, res, () => {
+            if (!perfisPermitidos.includes(req.usuario.perfil)) {
+                return res.status(403).json({ erro: 'Acesso negado para este perfil de usuário.' });
+            }
+            next();
+        });
+    };
 }
 
 app.get('/api/status', (req, res) => {
@@ -83,7 +95,7 @@ async function processarLogin(req, res) {
 app.post('/api/login', processarLogin);
 app.post('/api/auth/login', processarLogin);
 
-// JOGADORES
+// ================= JOGADORES =================
 app.get('/api/jogadores', async (req, res) => {
     try {
         const r = await pool.query(`
@@ -95,7 +107,7 @@ app.get('/api/jogadores', async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao buscar jogadores' }); }
 });
 
-// PERFIL INDIVIDUAL DO ATLETA (Presenças e Financeiro)
+// PERFIL INDIVIDUAL DO ATLETA
 app.get('/api/jogadores/:id/perfil', async (req, res) => {
     const { id } = req.params;
     try {
@@ -117,7 +129,8 @@ app.get('/api/jogadores/:id/perfil', async (req, res) => {
     }
 });
 
-app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
+// Criar Atleta: Permitido para admin, gestor, tesoureiro, secretário
+app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
     
     if (!nome || !data_nascimento || !telefone) {
@@ -125,6 +138,9 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
     }
 
     try {
+        // Se o usuário for secretário, ele não define a mensalidade (fica padrão 'Pendente')
+        const mensalidadeFinal = (req.usuario.perfil === 'secretario') ? 'Pendente' : (status_mensalidade || 'Pendente');
+
         const q = `INSERT INTO jogadores (nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, gols, funcao_grupo, status_aptidao) VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8) RETURNING *;`;
         const r = await pool.query(q, [
             nome, 
@@ -132,14 +148,14 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
             telefone, 
             posicao || 'Meia', 
             parseInt(nivel) || 3, 
-            status_mensalidade || 'Pendente', 
+            mensalidadeFinal, 
             funcao_grupo || 'Atleta',
             status_aptidao || 'Ativo'
         ]);
 
         const novoJogador = r.rows[0];
 
-        if (status_mensalidade === 'Pago') {
+        if (mensalidadeFinal === 'Pago') {
             const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
             const mesAtual = new Date().toISOString().slice(0, 7);
             const descricaoMensalidade = `Mensalidade - ${nome}`;
@@ -164,7 +180,8 @@ app.post('/api/jogadores', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
-app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
+// Atualizar Atleta: Permitido para admin, gestor, tesoureiro, secretário
+app.put('/api/jogadores/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { id } = req.params;
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao } = req.body;
     
@@ -174,7 +191,14 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
 
     try {
         const atletaAntigo = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        if (atletaAntigo.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+        
         const statusAnterior = atletaAntigo.rows[0]?.status_mensalidade;
+
+        // Se for secretário, mantém o status de mensalidade anterior (não permite alterar dados financeiros)
+        const statusMensalidadeFinal = (req.usuario.perfil === 'secretario') 
+            ? statusAnterior 
+            : (status_mensalidade || 'Pendente');
 
         const q = `UPDATE jogadores SET nome=$1, data_nascimento=$2, telefone=$3, posicao=$4, nivel=$5, status_mensalidade=$6, funcao_grupo=$7, status_aptidao=$8 WHERE id=$9 RETURNING *;`;
         const r = await pool.query(q, [
@@ -183,7 +207,7 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
             telefone, 
             posicao, 
             parseInt(nivel) || 3, 
-            status_mensalidade || 'Pendente', 
+            statusMensalidadeFinal, 
             funcao_grupo || 'Atleta',
             status_aptidao || 'Ativo',
             id
@@ -193,25 +217,28 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
         const mesAtual = new Date().toISOString().slice(0, 7);
         const descricaoMensalidade = `Mensalidade - ${nome}`;
 
-        if (statusAnterior !== 'Pago' && status_mensalidade === 'Pago') {
-            const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
-            
-            const existe = await pool.query(
-                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
-                [descricaoMensalidade, mesAtual]
-            );
+        // Se não for secretário, processa entrada/saída no financeiro caso mude o status da mensalidade
+        if (req.usuario.perfil !== 'secretario') {
+            if (statusAnterior !== 'Pago' && statusMensalidadeFinal === 'Pago') {
+                const valorMensalidade = (posicao === 'Goleiro') ? 20.00 : 40.00;
+                
+                const existe = await pool.query(
+                    `SELECT id FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2`,
+                    [descricaoMensalidade, mesAtual]
+                );
 
-            if (existe.rows.length === 0) {
+                if (existe.rows.length === 0) {
+                    await pool.query(
+                        `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                        [descricaoMensalidade, valorMensalidade]
+                    );
+                }
+            } else if (statusAnterior === 'Pago' && statusMensalidadeFinal === 'Pendente') {
                 await pool.query(
-                    `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
-                    [descricaoMensalidade, valorMensalidade]
+                    `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2 AND tipo = 'Entrada'`,
+                    [descricaoMensalidade, mesAtual]
                 );
             }
-        } else if (statusAnterior === 'Pago' && status_mensalidade === 'Pendente') {
-            await pool.query(
-                `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND TO_CHAR(data_lancamento, 'YYYY-MM') = $2 AND tipo = 'Entrada'`,
-                [descricaoMensalidade, mesAtual]
-            );
         }
 
         res.json(jogadorAtualizado);
@@ -221,6 +248,7 @@ app.put('/api/jogadores/:id', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
+// Excluir Atleta: Apenas Admin (como no original)
 app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -229,8 +257,8 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
 });
 
-// PRESENÇAS
-app.post('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
+// ================= PRESENÇAS =================
+app.post('/api/presencas', verificarPerfisPermitidos(['admin', 'gestor', 'secretario']), async (req, res) => {
     const { data_partida, jogador_ids } = req.body;
     if (!data_partida || !Array.isArray(jogador_ids)) {
         return res.status(400).json({ erro: 'Data da partida e lista de jogadores são obrigatórias.' });
@@ -250,7 +278,7 @@ app.post('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
-app.delete('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
+app.delete('/api/presencas', verificarPerfisPermitidos(['admin', 'gestor', 'secretario']), async (req, res) => {
     const { jogador_id, data_partida } = req.body;
     if (!jogador_id || !data_partida) {
         return res.status(400).json({ erro: 'ID do jogador e data da partida são obrigatórios.' });
@@ -273,8 +301,8 @@ app.delete('/api/presencas', verificarGestorOuAdmin, async (req, res) => {
     }
 });
 
-// SORTEIOS
-app.post('/api/sorteios', verificarGestorOuAdmin, async (req, res) => {
+// ================= SORTEIOS =================
+app.post('/api/sorteios', verificarPerfisPermitidos(['admin', 'gestor', 'secretario']), async (req, res) => {
     const { data_partida, num_times, dados_times } = req.body;
     
     if (!data_partida || !dados_times) {
@@ -306,15 +334,15 @@ app.get('/api/sorteios', async (req, res) => {
     }
 });
 
-// FINANCEIRO
-app.get('/api/financeiro', async (req, res) => {
+// ================= FINANCEIRO (Bloqueado para secretário) =================
+app.get('/api/financeiro', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro']), async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM financeiro_lancamentos ORDER BY data_lancamento DESC, id DESC');
         res.json(r.rows);
     } catch (err) { res.status(500).json({ erro: 'Erro ao buscar financeiro.' }); }
 });
 
-app.post('/api/financeiro', verificarGestorOuAdmin, async (req, res) => {
+app.post('/api/financeiro', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro']), async (req, res) => {
     const { descricao, tipo, valor, data_lancamento } = req.body;
     try {
         const q = `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, $2, $3, $4) RETURNING *;`;
@@ -323,7 +351,7 @@ app.post('/api/financeiro', verificarGestorOuAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao lançar transação.' }); }
 });
 
-app.delete('/api/financeiro/:id', verificarAdmin, async (req, res) => {
+app.delete('/api/financeiro/:id', verificarPerfisPermitidos(['admin', 'tesoureiro']), async (req, res) => {
     const { id } = req.params;
     try {
         await pool.query('DELETE FROM financeiro_lancamentos WHERE id=$1', [id]);
@@ -331,7 +359,7 @@ app.delete('/api/financeiro/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir lançamento.' }); }
 });
 
-// CONFIGURAÇÕES
+// ================= CONFIGURAÇÕES =================
 app.get('/api/configuracoes', async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM configuracoes_clube');
@@ -358,7 +386,7 @@ app.post('/api/configuracoes', verificarAdmin, async (req, res) => {
     }
 });
 
-// USUÁRIOS
+// ================= USUÁRIOS =================
 app.get('/api/usuarios', verificarAdmin, async (req, res) => {
     try {
         const r = await pool.query('SELECT id, nome, email, perfil FROM usuarios ORDER BY id ASC');
