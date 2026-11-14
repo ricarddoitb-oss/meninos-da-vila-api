@@ -169,30 +169,30 @@
                     </div>
                 </div>
 
-                <!-- CARDS DE ESTATÍSTICAS COM PROTEÇÃO CONTRA ESTOURO DE TEXTO -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 md:gap-6" id="dashboard-cards-grid">
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group min-w-0 overflow-hidden">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Elenco Total</p>
-                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white mt-2 truncate">0</h3>
-                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
+                <!-- CARDS DE ESTATÍSTICAS COM QUEBRA DE LINHA SEGURA -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6" id="dashboard-cards-grid">
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Elenco Total</p>
+                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white my-1.5 truncate">0</h3>
+                        <span class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
                     </div>
                     
-                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group min-w-0 overflow-hidden">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Afastados</p>
-                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 mt-2 truncate">0</h3>
-                        <span class="text-[11px] text-rose-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Suspensos</span>
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group flex flex-col justify-between">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Afastados</p>
+                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 my-1.5 truncate">0</h3>
+                        <span class="text-[10px] md:text-[11px] text-rose-400 font-semibold block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Suspensos</span>
                     </div>
 
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group min-w-0 overflow-hidden">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Em Dia (<span id="dash-lbl-comp">-</span>)</p>
-                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 mt-2 truncate">0/0</h3>
-                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitados</span>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Em Dia <span id="dash-lbl-comp" class="normal-case font-normal text-gray-400">(-)</span></p>
+                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 my-1.5 truncate">0/0</h3>
+                        <span class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitados</span>
                     </div>
 
-                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group min-w-0 overflow-hidden">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Saldo em Caixa</p>
-                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 mt-2 truncate">R$ 0,00</h3>
-                        <span class="text-[11px] text-amber-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
+                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group flex flex-col justify-between">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Saldo em Caixa</p>
+                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 my-1.5 truncate">R$ 0,00</h3>
+                        <span class="text-[10px] md:text-[11px] text-amber-400 font-semibold block truncate"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
                     </div>
                 </div>
 
@@ -461,7 +461,7 @@
                     </button>
                 </div>
 
-                <div class="flex flex-wrap gap-2 print:hidden">
+                <div class="flex flex-wrap gap-2 print:hidden" id="container-botoes-relatorios">
                     <button onclick="mudarRelatorio('posicoes')" id="btn-rel-posicoes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-emerald-500/40 shadow">
                         <i class="fa-solid fa-chart-bar mr-1.5"></i>Por Posição
                     </button>
@@ -847,7 +847,7 @@
             
             const lblFmt = formatarCompetenciaLabel(novaComp);
             const elDashComp = document.getElementById('dash-lbl-comp');
-            if (elDashComp) elDashComp.innerText = lblFmt;
+            if (elDashComp) elDashComp.innerText = `(${lblFmt})`;
 
             const elModalComp = document.getElementById('modal-lbl-comp');
             if (elModalComp) elModalComp.innerText = lblFmt;
@@ -886,6 +886,9 @@
                 document.getElementById('btn-rel-presencas')?.remove();
                 document.getElementById('bloco-rel-posicoes')?.remove();
                 document.getElementById('bloco-rel-presencas')?.remove();
+                
+                // Força exibição exclusiva do bloco de inadimplentes sem misturar relatórios
+                document.getElementById('container-botoes-relatorios')?.remove();
                 mudarRelatorio('inadimplentes');
             } else {
                 mudarRelatorio('posicoes');
@@ -973,6 +976,10 @@
         function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
         function mudarRelatorio(tipo) {
+            // Se for tesoureiro, força sempre o bloco de inadimplentes para evitar qualquer mistura
+            if (usuarioLogado.perfil === 'tesoureiro') {
+                tipo = 'inadimplentes';
+            }
             document.querySelectorAll('.rel-bloco').forEach(b => b.classList.add('hidden'));
             document.querySelectorAll('.rel-btn').forEach(b => {
                 b.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow";
@@ -1153,7 +1160,6 @@
             } else { banner.classList.add('hidden'); }
         }
 
-        // RENDER DE ELENCO COMPACTO COM PROTEÇÃO DE ESTOURO DE TEXTO
         function renderElencoCompacto(jogadores) {
             const grid = document.getElementById('jogadores-grid');
             if (!grid) return;
@@ -1293,51 +1299,61 @@
         }
 
         function renderRelatorios(jogadores) {
-            document.getElementById('rel-total-membros').innerText = jogadores.length;
+            const elTotalMembros = document.getElementById('rel-total-membros');
+            if (elTotalMembros) elTotalMembros.innerText = jogadores.length;
+            
             const posicoesCount = { Goleiro: 0, Zagueiro: 0, Lateral: 0, Meia: 0, Atacante: 0 };
             jogadores.forEach(j => { if (posicoesCount[j.posicao] !== undefined) posicoesCount[j.posicao]++; });
             const listaPos = document.getElementById('relatorio-posicoes-lista');
-            listaPos.innerHTML = '';
-            for (const [pos, qtd] of Object.entries(posicoesCount)) {
-                listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-950 rounded-xl border border-pitch-800"><span class="text-gray-300">${pos}</span><span class="px-3 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold text-xs">${qtd}</span></div>`;
+            if (listaPos) {
+                listaPos.innerHTML = '';
+                for (const [pos, qtd] of Object.entries(posicoesCount)) {
+                    listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-950 rounded-xl border border-pitch-800"><span class="text-gray-300">${pos}</span><span class="px-3 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold text-xs">${qtd}</span></div>`;
+                }
             }
 
             const tbodyPres = document.getElementById('tabela-relatorio-presencas');
-            tbodyPres.innerHTML = '';
-            [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
-                tbodyPres.innerHTML += `
-                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                        <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
-                        <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
-                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
-                        <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">${j.status_aptidao || 'Ativo'}</span></td>
-                        <td class="py-3 text-right font-black text-amber-400">${j.total_participacoes || 0}</td>
-                    </tr>
-                `;
-            });
+            if (tbodyPres) {
+                tbodyPres.innerHTML = '';
+                [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
+                    tbodyPres.innerHTML += `
+                        <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                            <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
+                            <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
+                            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">${j.status_aptidao || 'Ativo'}</span></td>
+                            <td class="py-3 text-right font-black text-amber-400">${j.total_participacoes || 0}</td>
+                        </tr>
+                    `;
+                });
+            }
 
             const blocoInad = document.getElementById('bloco-rel-inadimplentes');
             if (blocoInad) {
                 const inadimplentes = jogadores.filter(j => (j.status_mensalidade || 'Pendente') === 'Pendente');
-                document.getElementById('contador-inadimplentes').innerText = `${inadimplentes.length} pendentes`;
+                const contadorInad = document.getElementById('contador-inadimplentes');
+                if (contadorInad) contadorInad.innerText = `${inadimplentes.length} pendentes`;
+                
                 const tbodyInad = document.getElementById('tabela-relatorio-inadimplentes');
-                if (inadimplentes.length === 0) {
-                    tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta pendente! 🎉</td></tr>`;
-                } else {
-                    tbodyInad.innerHTML = '';
-                    inadimplentes.forEach(j => {
-                        const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
-                        const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '${valorCobranca}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1 ml-auto"><i class="fa-brands fa-whatsapp text-sm"><span>Cobrar</span></i></button>` : '-';
-                        tbodyInad.innerHTML += `
-                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
-                                <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
-                                <td class="py-3 text-gray-300">${j.telefone || '-'}</td>
-                                <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
-                                <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
-                                <td class="py-3 text-right">${btnWp}</td>
-                            </tr>
-                        `;
-                    });
+                if (tbodyInad) {
+                    if (inadimplentes.length === 0) {
+                        tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta pendente! 🎉</td></tr>`;
+                    } else {
+                        tbodyInad.innerHTML = '';
+                        inadimplentes.forEach(j => {
+                            const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
+                            const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '${valorCobranca}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1 ml-auto"><i class="fa-brands fa-whatsapp text-sm"><span>Cobrar</span></i></button>` : '-';
+                            tbodyInad.innerHTML += `
+                                <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                                    <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
+                                    <td class="py-3 text-gray-300">${j.telefone || '-'}</td>
+                                    <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                                    <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
+                                    <td class="py-3 text-right">${btnWp}</td>
+                                </tr>
+                            `;
+                        });
+                    }
                 }
             }
         }
