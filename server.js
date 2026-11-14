@@ -26,6 +26,25 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
+// ================= CRIAÇÃO AUTOMÁTICA DA TABELA DE CONVIDADOS =================
+async function criarTabelaConvidados() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS convidados (
+                id SERIAL PRIMARY KEY,
+                nome TEXT NOT NULL,
+                telefone TEXT,
+                valor_diaria NUMERIC(10, 2) DEFAULT 15.00,
+                participacoes INTEGER DEFAULT 0
+            );
+        `);
+        console.log('🟢 Tabela de convidados verificada/criada com sucesso!');
+    } catch (err) {
+        console.error('🔴 Erro ao criar tabela de convidados:', err);
+    }
+}
+criarTabelaConvidados();
+
 // ================= MIDDLEWARES DE AUTORIZAÇÃO =================
 function verificarTokenBase(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -264,6 +283,90 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
         await pool.query('DELETE FROM jogadores WHERE id=$1', [id]);
         res.json({ mensagem: 'Removido com sucesso.' });
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
+});
+
+// ================= GESTÃO DE CONVIDADOS (API) =================
+app.get('/api/convidados', verificarTokenBase, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM convidados ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+app.post('/api/convidados', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
+    try {
+        const { nome, telefone, valor_diaria } = req.body;
+        if (!nome) return res.status(400).json({ erro: 'Nome é obrigatório.' });
+
+        const result = await pool.query(
+            `INSERT INTO convidados (nome, telefone, valor_diaria, participacoes) VALUES ($1, $2, $3, 0) RETURNING *`,
+            [nome, telefone, valor_diaria || 15.00]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+app.put('/api/convidados/:id', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
+    try {
+        const { nome, telefone, valor_diaria } = req.body;
+        const { id } = req.params;
+
+        await pool.query(
+            `UPDATE convidados SET nome = $1, telefone = $2, valor_diaria = $3 WHERE id = $4`,
+            [nome, telefone, valor_diaria, id]
+        );
+        res.json({ mensagem: 'Convidado atualizado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+app.delete('/api/convidados/:id', verificarAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query(`DELETE FROM convidados WHERE id = $1`, [id]);
+        res.json({ mensagem: 'Convidado removido com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+app.post('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { pagar_diaria, valor_diaria } = req.body;
+
+        const convResult = await pool.query(
+            `UPDATE convidados SET participacoes = participacoes + 1 WHERE id = $1 RETURNING nome`,
+            [id]
+        );
+
+        if (convResult.rows.length === 0) {
+            return res.status(404).json({ erro: 'Convidado não encontrado.' });
+        }
+
+        const nomeConvidado = convResult.rows[0].nome;
+
+        if (pagar_diaria) {
+            const descricao = `Diária Convidado: ${nomeConvidado}`;
+            const tipo = 'Entrada';
+            const valor = parseFloat(valor_diaria) || 15.00;
+            const data_lancamento = new Date().toISOString().split('T')[0];
+
+            await pool.query(
+                `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, $2, $3, $4)`,
+                [descricao, tipo, valor, data_lancamento]
+            );
+        }
+
+        res.json({ mensagem: 'Presença registrada com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 // ================= PRESENÇAS =================
