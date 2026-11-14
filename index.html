@@ -74,6 +74,9 @@
                 <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
                     <i class="fa-solid fa-users w-4 text-gray-400"></i><span>Jogadores</span>
                 </button>
+                <button onclick="switchTab('convidados')" id="nav-convidados" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-user-clock w-4 text-amber-400"></i><span>Convidados (Diárias)</span>
+                </button>
                 <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
                     <i class="fa-solid fa-clipboard-check w-4 text-gray-400"></i><span>Lista de Presença</span>
                 </button>
@@ -116,24 +119,27 @@
     </header>
 
     <!-- MOBILE BOTTOM NAVIGATION BAR -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-xl border-t border-pitch-800/80 flex justify-around p-2.5 z-50 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" id="mobile-nav-container">
-        <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center text-emerald-400 text-[10px] font-bold transition">
-            <i class="fa-solid fa-chart-pie text-base mb-0.5"></i><span>Início</span>
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-xl border-t border-pitch-800/80 flex justify-around p-2 z-50 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.5)] overflow-x-auto" id="mobile-nav-container">
+        <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center text-emerald-400 text-[9px] font-bold transition shrink-0 px-2">
+            <i class="fa-solid fa-chart-pie text-sm mb-0.5"></i><span>Início</span>
         </button>
-        <button onclick="switchTab('elenco')" id="mob-nav-elenco" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-users text-base mb-0.5"></i><span>Jogadores</span>
+        <button onclick="switchTab('elenco')" id="mob-nav-elenco" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-users text-sm mb-0.5"></i><span>Jogadores</span>
         </button>
-        <button onclick="switchTab('presenca')" id="mob-nav-presenca" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-clipboard-check text-base mb-0.5"></i><span>Presença</span>
+        <button onclick="switchTab('convidados')" id="mob-nav-convidados" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-user-clock text-sm mb-0.5"></i><span>Convidados</span>
         </button>
-        <button onclick="switchTab('sorteio')" id="mob-nav-sorteio" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-shuffle text-base mb-0.5"></i><span>Sorteio</span>
+        <button onclick="switchTab('presenca')" id="mob-nav-presenca" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-clipboard-check text-sm mb-0.5"></i><span>Presença</span>
         </button>
-        <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-wallet text-base mb-0.5"></i><span>Financeiro</span>
+        <button onclick="switchTab('sorteio')" id="mob-nav-sorteio" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-shuffle text-sm mb-0.5"></i><span>Sorteio</span>
         </button>
-        <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-file-lines text-base mb-0.5"></i><span>Mais</span>
+        <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-wallet text-sm mb-0.5"></i><span>Caixa</span>
+        </button>
+        <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-file-lines text-sm mb-0.5"></i><span>Mais</span>
         </button>
     </nav>
 
@@ -160,7 +166,6 @@
             <!-- ABA DASHBOARD PRO -->
             <div id="tab-dashboard" class="tab-content space-y-5">
                 
-                <!-- BANNER DE BOAS-VINDAS -->
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-pitch-900 to-pitch-950 border border-emerald-500/30 p-5 md:p-7 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 pointer-events-none bg-cover bg-center" style="background-image: url('https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png');"></div>
                     <div class="z-10">
@@ -224,7 +229,6 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO DE MOVIMENTAÇÕES RECENTES E PRÓXIMA PARTIDA -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="md:col-span-2 bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
                         <div>
@@ -325,6 +329,23 @@
                 </button>
             </div>
 
+            <!-- NOVA ABA: CONVIDADOS (DIÁRIAS) -->
+            <div id="tab-convidados" class="tab-content hidden space-y-4">
+                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
+                    <div>
+                        <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-user-clock mr-2"></i>Gestão de Convidados & Diárias</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Cadastro independente de mensalistas com valor de diária personalizado e contagem de participações.</p>
+                    </div>
+                    <button onclick="abrirModalNovoConvidado()" class="manager-access bg-amber-500 hover:bg-amber-400 text-gray-950 font-black px-4 py-2.5 rounded-2xl text-xs shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-user-plus"></i><span>Novo Convidado</span>
+                    </button>
+                </div>
+
+                <div id="convidados-grid" class="bg-pitch-900/90 border border-pitch-800 rounded-3xl shadow-xl overflow-hidden divide-y divide-pitch-800/60">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+
             <!-- ABA LISTA DE PRESENÇA -->
             <div id="tab-presenca" class="tab-content hidden space-y-5">
                 <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
@@ -422,7 +443,6 @@
             <div id="tab-financeiro" class="tab-content hidden space-y-5">
                 <div id="financeiro-relatorio-impressao" class="space-y-5">
                     
-                    <!-- CARD SALDO ATUAL DESTAQUE -->
                     <div class="bg-gradient-to-r from-emerald-900/60 via-pitch-900 to-pitch-950 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
                             <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block mb-1">Tesouraria Consolidada</span>
@@ -467,12 +487,9 @@
                         </div>
                     </div>
 
-                    <!-- EXTRATO DO LIVRO CAIXA OTIMIZADO (MOBILE & DESKTOP FRIENDLY) -->
                     <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl space-y-3">
                         <h3 class="font-black text-sm mb-3 text-white"><i class="fa-solid fa-book mr-2"></i>Extrato do Livro Caixa</h3>
-                        <div id="tabela-financeiro-body" class="space-y-2.5">
-                            <!-- Preenchido dinamicamente com cards otimizados -->
-                        </div>
+                        <div id="tabela-financeiro-body" class="space-y-2.5"></div>
                     </div>
                 </div>
             </div>
@@ -626,6 +643,23 @@
         </div>
     </div>
 
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE CONVIDADO -->
+    <div id="modal-convidado" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 id="modal-convidado-titulo" class="text-sm font-bold text-amber-400 mb-4">Cadastrar / Editar Convidado</h3>
+            <form id="form-convidado" onsubmit="salvarConvidado(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="input-convidado-id">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nome do Convidado *</label><input type="text" id="conv-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">WhatsApp *</label><input type="text" id="conv-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Valor da Diária (R$) *</label><input type="number" step="0.01" id="conv-valor" required placeholder="15.00" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-amber-400 font-bold"></div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-convidado')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-convidado" class="w-1/2 bg-amber-500 hover:bg-amber-400 py-3 rounded-xl font-bold text-gray-950 transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL DE RECIBO -->
     <div id="modal-recibo" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white text-gray-900 rounded-3xl p-6 w-full max-w-md shadow-2xl relative" id="modal-recibo-conteudo">
@@ -682,7 +716,6 @@
                         <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Função</label>
                         <select id="input-funcao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
                             <option value="Atleta">Atleta (Mensalista)</option>
-                            <option value="Convidado">Convidado (Diária)</option>
                             <option value="Diretor">Diretor</option>
                             <option value="Vice Diretor">Vice Diretor</option>
                             <option value="Secretário">Secretário</option>
@@ -753,7 +786,6 @@
             <div class="flex flex-wrap gap-1.5 mb-3">
                 <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold border border-pitch-700">Goleiro (R$ 20)</button>
                 <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold border border-pitch-700">Jogador (R$ 40)</button>
-                <button type="button" onclick="preencherValorFin('Diária Convidado', 15, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-amber-400 font-bold border border-pitch-700">Convidado (R$ 15)</button>
                 <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-rose-400 font-bold border border-pitch-700">Campo (R$ 100)</button>
             </div>
             <form onsubmit="salvarLancamento(event)" class="space-y-3 text-xs">
@@ -814,6 +846,7 @@
 
         const API_URL = 'https://meninos-da-vila-api.onrender.com';
         let listaAtletasGlobal = [];
+        let listaConvidadosGlobal = JSON.parse(localStorage.getItem('cmv_convidados') || '[]');
         let configsGlobal = {};
         let historicoSorteiosGlobal = [];
         let ultimoSorteioGerado = null;
@@ -936,6 +969,7 @@
             }
             carregarUsuariosSistema();
             await carregarHistoricoSorteios();
+            renderConvidados();
             atualizarDataRodada();
         });
 
@@ -1037,13 +1071,8 @@
         }
 
         function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
-            if (usuarioLogado.perfil === 'secretario' && tipo === 'cobranca') {
-                showToast('O perfil de secretário não possui permissão para envio de cobranças.', 'aviso');
-                return;
-            }
-
             if (!telefone || telefone.trim() === '') {
-                showToast('Atleta sem número de telefone cadastrado!', 'erro');
+                showToast('Sem número de telefone cadastrado!', 'erro');
                 return;
             }
             let foneLimpo = telefone.replace(/\D/g, '');
@@ -1053,6 +1082,8 @@
             let mensagem = '';
             if (tipo === 'cobranca') {
                 mensagem = `Olá ${toTitleCase(nomeAtleta)}, tudo bem? Passando para lembrar da sua mensalidade referente a *${compLabel}* no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
+            } else if (tipo === 'cobranca_diaria') {
+                mensagem = `Olá ${toTitleCase(nomeAtleta)}, tudo bem? Passando para lembrar da sua diária no valor de *R$ ${parseFloat(valorExtra).toFixed(2)}* referente à sua participação no Clube Meninos da Vila. Segue a chave Pix para pagamento: [PIX_CLUBE]. Tamo junto! ⚽🔥`;
             } else if (tipo === 'convocacao') {
                 mensagem = `Salve ${toTitleCase(nomeAtleta)}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Tamo junto!`;
             }
@@ -1124,11 +1155,146 @@
             } catch (err) { console.error(err); }
         }
 
-        function abrirModalNovoJogador() {
-            document.getElementById('form-novo-jogador').reset();
-            document.getElementById('input-jogador-id').value = '';
-            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta / Convidado';
-            openModal('modal-novo-jogador');
+        // ==========================================
+        // GESTÃO DE CONVIDADOS (ISOLADA E FLEXÍVEL)
+        // ==========================================
+        function abrirModalNovoConvidado() {
+            document.getElementById('form-convidado').reset();
+            document.getElementById('input-convidado-id').value = '';
+            document.getElementById('conv-valor').value = '15.00';
+            document.getElementById('modal-convidado-titulo').innerText = 'Cadastrar Novo Convidado';
+            openModal('modal-convidado');
+        }
+
+        function prepararEdicaoConvidado(id) {
+            const conv = listaConvidadosGlobal.find(c => c.id === id);
+            if (!conv) return;
+            document.getElementById('input-convidado-id').value = conv.id;
+            document.getElementById('conv-nome').value = conv.nome;
+            document.getElementById('conv-telefone').value = conv.telefone || '';
+            document.getElementById('conv-valor').value = conv.valor_diaria || 15.00;
+            document.getElementById('modal-convidado-titulo').innerText = 'Editar Convidado';
+            openModal('modal-convidado');
+        }
+
+        function salvarConvidado(e) {
+            e.preventDefault();
+            const id = document.getElementById('input-convidado-id').value;
+            const nome = document.getElementById('conv-nome').value;
+            const telefone = document.getElementById('conv-telefone').value;
+            const valorDiaria = parseFloat(document.getElementById('conv-valor').value) || 15.00;
+
+            if (id) {
+                const idx = listaConvidadosGlobal.findIndex(c => c.id == id);
+                if (idx !== -1) {
+                    listaConvidadosGlobal[idx].nome = nome;
+                    listaConvidadosGlobal[idx].telefone = telefone;
+                    listaConvidadosGlobal[idx].valor_diaria = valorDiaria;
+                }
+            } else {
+                const novo = {
+                    id: Date.now(),
+                    nome: nome,
+                    telefone: telefone,
+                    valor_diaria: valorDiaria,
+                    participacoes: 0
+                };
+                listaConvidadosGlobal.push(novo);
+            }
+
+            localStorage.setItem('cmv_convidados', JSON.stringify(listaConvidadosGlobal));
+            showToast('Convidado salvo com sucesso!');
+            closeModal('modal-convidado');
+            renderConvidados();
+        }
+
+        function excluirConvidado(id) {
+            if (!confirm('Deseja realmente remover este convidado?')) return;
+            listaConvidadosGlobal = listaConvidadosGlobal.filter(c => c.id !== id);
+            localStorage.setItem('cmv_convidados', JSON.stringify(listaConvidadosGlobal));
+            showToast('Convidado removido.');
+            renderConvidados();
+        }
+
+        function registrarPresencaConvidado(id) {
+            const conv = listaConvidadosGlobal.find(c => c.id === id);
+            if (!conv) return;
+            conv.participacoes = (conv.participacoes || 0) + 1;
+            localStorage.setItem('cmv_convidados', JSON.stringify(listaConvidadosGlobal));
+
+            // Perguntar se deseja lançar a diária no caixa
+            if (confirm(`Presença registrada para ${toTitleCase(conv.nome)}! Deseja lançar a diária de R$ ${conv.valor_diaria.toFixed(2)} no Caixa do clube agora?`)) {
+                lancarDiariaNoCaixaAutomatico(conv);
+            } else {
+                showToast(`Participação registrada (+1 Jogo para ${toTitleCase(conv.nome)})!`);
+                renderConvidados();
+            }
+        }
+
+        async function lancarDiariaNoCaixaAutomatico(conv) {
+            const dados = {
+                descricao: `Diária Convidado: ${toTitleCase(conv.nome)}`,
+                tipo: 'Entrada',
+                valor: parseFloat(conv.valor_diaria),
+                data_lancamento: new Date().toISOString().split('T')[0]
+            };
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(dados)
+                });
+                if (res.ok) {
+                    showToast('Diária lançada no Caixa e participação computada!');
+                    carregarFinanceiro();
+                } else {
+                    showToast('Participação salva, mas houve erro ao lançar no caixa.', 'aviso');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            renderConvidados();
+        }
+
+        function renderConvidados() {
+            const grid = document.getElementById('convidados-grid');
+            if (!grid) return;
+            if (listaConvidadosGlobal.length === 0) {
+                grid.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">Nenhum convidado cadastrado. Clique em "Novo Convidado" acima.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            listaConvidadosGlobal.forEach(c => {
+                grid.innerHTML += `
+                    <div class="p-3.5 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-pitch-800/40 transition gap-3">
+                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-2xl bg-pitch-950 border border-pitch-800 flex items-center justify-center font-black text-xs text-amber-400 shrink-0 shadow-inner">
+                                <i class="fa-solid fa-user-clock"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-white text-xs truncate flex items-center">
+                                    <span class="truncate">${toTitleCase(c.nome)}</span>
+                                    <span class="ml-2 text-[9px] px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-300">Diária: R$ ${parseFloat(c.valor_diaria || 0).toFixed(2)}</span>
+                                </h4>
+                                <div class="flex items-center space-x-2 mt-0.5 text-[10px] text-gray-400">
+                                    <span>📞 ${c.telefone || 'Sem tel'}</span>
+                                    <span>•</span>
+                                    <span class="text-emerald-400 font-bold">📋 ${c.participacoes || 0} participações</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-0 border-pitch-800">
+                            <button onclick="registrarPresencaConvidado(${c.id})" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1" title="Registrar Presença / Jogo">
+                                <i class="fa-solid fa-check"></i><span>+1 Jogo</span>
+                            </button>
+                            ${c.telefone ? `<button onclick="enviarWhatsApp('${c.telefone}', 'cobranca_diaria', '${c.nome}', '${c.valor_diaria}')" class="bg-pitch-800 hover:bg-pitch-700 text-emerald-400 p-2 rounded-xl text-xs transition" title="Cobrar Diária WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}
+                            <button onclick="prepararEdicaoConvidado(${c.id})" class="bg-pitch-800 hover:bg-pitch-700 text-amber-400 p-2 rounded-xl text-xs transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="excluirConvidado(${c.id})" class="bg-pitch-800 hover:bg-pitch-700 text-rose-400 p-2 rounded-xl text-xs transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         async function carregarJogadores() {
@@ -1556,7 +1722,6 @@
                             `;
                         }
 
-                        // LAYOUT OTIMIZADO EM CARDS PARA O LIVRO CAIXA (ELIMINA TABELA ESPREMIDA NO MOBILE)
                         const corTipo = l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400';
                         const corValor = l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400';
                         
