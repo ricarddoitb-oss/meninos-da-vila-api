@@ -836,21 +836,25 @@
         }
 
         function alterarCompetenciaGlobal(novaComp) {
-            if (!novaComp) return;
-            competenciaAtual = novaComp;
-            const elGlobal = document.getElementById('seletor-competencia-global');
-            const elElenco = document.getElementById('filtro-elenco-competencia');
-            if (elGlobal) elGlobal.value = novaComp;
-            if (elElenco) elElenco.value = novaComp;
-            
-            const lblFmt = formatarCompetenciaLabel(novaComp);
-            document.getElementById('dash-lbl-comp').innerText = lblFmt;
-            document.getElementById('modal-lbl-comp').innerText = lblFmt;
-            const elCompInad = document.getElementById('rel-comp-inadimplentes');
-            if (elCompInad) elCompInad.innerText = lblFmt;
-            
-            carregarJogadores();
-        }
+    if (!novaComp) return;
+    competenciaAtual = novaComp;
+    const elGlobal = document.getElementById('seletor-competencia-global');
+    const elElenco = document.getElementById('filtro-elenco-competencia');
+    if (elGlobal) elGlobal.value = novaComp;
+    if (elElenco) elElenco.value = novaComp;
+    
+    const lblFmt = formatarCompetenciaLabel(novaComp);
+    const elDashComp = document.getElementById('dash-lbl-comp');
+    if (elDashComp) elDashComp.innerText = lblFmt;
+
+    const elModalComp = document.getElementById('modal-lbl-comp');
+    if (elModalComp) elModalComp.innerText = lblFmt;
+
+    const elCompInad = document.getElementById('rel-comp-inadimplentes');
+    if (elCompInad) elCompInad.innerText = lblFmt;
+    
+    carregarJogadores();
+}
 
         document.addEventListener('DOMContentLoaded', async () => {
             const perfil = usuarioLogado.perfil;
