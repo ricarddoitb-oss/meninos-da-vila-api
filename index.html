@@ -329,7 +329,7 @@
                 </button>
             </div>
 
-            <!-- NOVA ABA: CONVIDADOS (DIÁRIAS) -->
+            <!-- ABA: CONVIDADOS (DIÁRIAS) -->
             <div id="tab-convidados" class="tab-content hidden space-y-4">
                 <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
                     <div>
@@ -370,7 +370,7 @@
                         <input type="date" id="data-presenca-manual" onchange="atualizarDataRodada()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-xs text-white font-semibold text-amber-400">
                     </div>
                     <div id="presenca-lista" class="space-y-1.5 max-h-[380px] overflow-y-auto pr-2 mb-5"></div>
-                    <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs shadow-lg hidden transition">
+                    <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs shadow-lg transition">
                         <i class="fa-solid fa-check-double mr-2"></i>Salvar Presenças da Rodada
                     </button>
                 </div>
@@ -449,7 +449,7 @@
                             <h3 id="fin-saldo" class="text-3xl font-black text-amber-400">R$ 0,00</h3>
                         </div>
                         <div class="flex items-center space-x-3 w-full md:w-auto">
-                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-lg hidden transition flex items-center justify-center space-x-2">
+                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-lg transition flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-plus"></i><span>Novo Lançamento</span>
                             </button>
                             <button onclick="imprimirRelatorioGeral()" class="flex-1 md:flex-initial bg-pitch-800 hover:bg-pitch-700 px-4 py-3 rounded-2xl text-xs font-bold text-amber-400 shadow transition flex items-center justify-center space-x-1.5 border border-pitch-700">
@@ -512,6 +512,9 @@
                     <button onclick="mudarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
                         <i class="fa-solid fa-clipboard-user mr-1.5"></i>Presenças
                     </button>
+                    <button onclick="mudarRelatorio('convidados')" id="btn-rel-convidados" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-user-clock mr-1.5"></i>Convidados
+                    </button>
                     <button onclick="mudarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
                         <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Inadimplentes (WhatsApp)
                     </button>
@@ -552,6 +555,30 @@
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-relatorio-presencas"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOVO BLOCO: RELATÓRIO DE CONVIDADOS -->
+                    <div id="bloco-rel-convidados" class="rel-bloco space-y-5 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-black text-sm text-amber-400">Relatório de Convidados & Participações</h3>
+                                <span id="contador-rel-convidados" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold">0 convidados</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
+                                            <th class="pb-2.5">Convidado</th>
+                                            <th class="pb-2.5">Telefone</th>
+                                            <th class="pb-2.5">Valor Diária</th>
+                                            <th class="pb-2.5 text-right">Participações (Jogos)</th>
+                                            <th class="pb-2.5 text-right">Total Arrecadado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-convidados"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -927,15 +954,6 @@
                 if (elNome) elNome.innerText = `Olá, ${toTitleCase(usuarioLogado.nome.split(' ')[0])}!`;
             }
 
-            if (perfil === 'secretario') {
-                document.getElementById('nav-financeiro')?.remove();
-                document.getElementById('mob-nav-financeiro')?.remove();
-                document.getElementById('card-saldo-caixa')?.remove();
-                document.getElementById('container-input-mensalidade')?.remove();
-                const dashGrid = document.getElementById('dashboard-cards-grid');
-                if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
-            }
-
             if (perfil === 'tesoureiro') {
                 document.getElementById('nav-presenca')?.remove();
                 document.getElementById('mob-nav-presenca')?.remove();
@@ -964,26 +982,17 @@
 
             alterarCompetenciaGlobal(anoMes);
             await carregarConfiguracoes();
-            if (perfil !== 'secretario') {
-                carregarFinanceiro();
-            }
+            carregarFinanceiro();
             carregarUsuariosSistema();
             await carregarHistoricoSorteios();
             renderConvidados();
+            renderRelatorioConvidados();
             atualizarDataRodada();
         });
 
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
 
         function switchTab(tabId) {
-            if (tabId === 'financeiro' && usuarioLogado.perfil === 'secretario') {
-                showToast('Acesso não autorizado ao módulo financeiro.', 'erro');
-                return;
-            }
-            if ((tabId === 'presenca' || tabId === 'sorteio') && usuarioLogado.perfil === 'tesoureiro') {
-                showToast('Acesso não autorizado a este módulo.', 'erro');
-                return;
-            }
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(b => {
                 b.classList.remove('bg-gradient-to-r', 'from-emerald-500/20', 'to-transparent', 'text-emerald-400', 'border', 'border-emerald-500/30');
@@ -1206,6 +1215,7 @@
             showToast('Convidado salvo com sucesso!');
             closeModal('modal-convidado');
             renderConvidados();
+            renderRelatorioConvidados();
         }
 
         function excluirConvidado(id) {
@@ -1214,6 +1224,7 @@
             localStorage.setItem('cmv_convidados', JSON.stringify(listaConvidadosGlobal));
             showToast('Convidado removido.');
             renderConvidados();
+            renderRelatorioConvidados();
         }
 
         function registrarPresencaConvidado(id) {
@@ -1222,12 +1233,12 @@
             conv.participacoes = (conv.participacoes || 0) + 1;
             localStorage.setItem('cmv_convidados', JSON.stringify(listaConvidadosGlobal));
 
-            // Perguntar se deseja lançar a diária no caixa
             if (confirm(`Presença registrada para ${toTitleCase(conv.nome)}! Deseja lançar a diária de R$ ${conv.valor_diaria.toFixed(2)} no Caixa do clube agora?`)) {
                 lancarDiariaNoCaixaAutomatico(conv);
             } else {
                 showToast(`Participação registrada (+1 Jogo para ${toTitleCase(conv.nome)})!`);
                 renderConvidados();
+                renderRelatorioConvidados();
             }
         }
 
@@ -1254,6 +1265,7 @@
                 console.error(err);
             }
             renderConvidados();
+            renderRelatorioConvidados();
         }
 
         function renderConvidados() {
@@ -1293,6 +1305,31 @@
                             <button onclick="excluirConvidado(${c.id})" class="bg-pitch-800 hover:bg-pitch-700 text-rose-400 p-2 rounded-xl text-xs transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
+                `;
+            });
+        }
+
+        function renderRelatorioConvidados() {
+            const tbody = document.getElementById('tabela-relatorio-convidados');
+            const contador = document.getElementById('contador-rel-convidados');
+            if (!tbody) return;
+            const convidados = JSON.parse(localStorage.getItem('cmv_convidados') || '[]');
+            if (contador) contador.innerText = `${convidados.length} convidados`;
+            if (convidados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum convidado cadastrado.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            convidados.forEach(c => {
+                const totalArrecadado = (c.participacoes || 0) * (c.valor_diaria || 0);
+                tbody.innerHTML += `
+                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                        <td class="py-3 font-bold text-white">${toTitleCase(c.nome)}</td>
+                        <td class="py-3 text-gray-300">${c.telefone || '-'}</td>
+                        <td class="py-3 text-amber-400">R$ ${parseFloat(c.valor_diaria || 0).toFixed(2)}</td>
+                        <td class="py-3 text-right font-black text-emerald-400">${c.participacoes || 0}</td>
+                        <td class="py-3 text-right font-black text-amber-400">R$ ${totalArrecadado.toFixed(2)}</td>
+                    </tr>
                 `;
             });
         }
@@ -1456,9 +1493,7 @@
                 }
 
                 const listaFin = document.getElementById('perfil-lista-financeiro');
-                if (usuarioLogado.perfil === 'secretario') {
-                    listaFin.innerHTML = '<span class="text-gray-500 italic">Restrito.</span>';
-                } else if (!dados.competencias || dados.competencias.length === 0) {
+                if (!dados.competencias || dados.competencias.length === 0) {
                     listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhuma competência paga.</span>';
                 } else {
                     listaFin.innerHTML = dados.competencias.map(c => {
@@ -1576,6 +1611,13 @@
             } catch (err) { console.error(err); }
         }
 
+        function abrirModalNovoJogador() {
+            document.getElementById('form-novo-jogador').reset();
+            document.getElementById('input-jogador-id').value = '';
+            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta';
+            openModal('modal-novo-jogador');
+        }
+
         async function salvarJogador(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-jogador');
@@ -1606,7 +1648,7 @@
                     showToast('Jogador salvo!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
-                    if (usuarioLogado.perfil !== 'secretario') carregarFinanceiro();
+                    carregarFinanceiro();
                 } else { showToast('Erro ao salvar.', 'erro'); }
             } catch (err) { console.error(err); }
             finally { setBotaoCarregando(btn, false, 'Salvar'); }
@@ -1676,7 +1718,6 @@
         }
 
         async function carregarFinanceiro() {
-            if (usuarioLogado.perfil === 'secretario') return;
             try {
                 const res = await fetch(`${API_URL}/api/financeiro`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) throw new Error();
