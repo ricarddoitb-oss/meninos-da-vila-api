@@ -58,7 +58,7 @@
     <aside class="w-68 bg-pitch-900/95 backdrop-blur-xl border-r border-pitch-800/80 flex-col justify-between hidden md:flex print:hidden sticky top-0 h-screen shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-30">
         <div>
             <div class="p-5 border-b border-pitch-800/60 text-center relative">
-                <div class="w-16 h-16 mx-auto mb-2.5 rounded-2xl overflow-hidden border-2 border-amber-400/80 shadow-xl bg-pitch-950 ring-4 ring-emerald-500/10">
+                <div class="w-16 h-16 mx-auto mb-2.5 rounded-2xl overflow-hidden border-2 border-amber-400/85 shadow-xl bg-pitch-950 ring-4 ring-emerald-500/10">
                     <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
                 <h1 id="sidebar-nome-clube" class="font-black text-xs text-amber-400 tracking-wider">MENINOS DA VILA</h1>
@@ -69,19 +69,19 @@
             </div>
             <nav class="p-3 space-y-1" id="sidebar-nav-container">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-semibold bg-gradient-to-r from-emerald-500/20 to-transparent text-emerald-400 border border-emerald-500/30 transition group">
-                    <i class="fa-solid fa-chart-pie w-4 text-emerald-400"></i><span>Dashboard Pro</span>
+                    <i class="fa-solid fa-chart-pie w-4 text-emerald-400"></i><span>Início</span>
                 </button>
                 <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
-                    <i class="fa-solid fa-users w-4 text-gray-400"></i><span>Elenco & Atletas</span>
+                    <i class="fa-solid fa-users w-4 text-gray-400"></i><span>Jogadores</span>
                 </button>
                 <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
                     <i class="fa-solid fa-clipboard-check w-4 text-gray-400"></i><span>Lista de Presença</span>
                 </button>
                 <button onclick="switchTab('sorteio')" id="nav-sorteio" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
-                    <i class="fa-solid fa-shuffle w-4 text-gray-400"></i><span>Sorteio de Times</span>
+                    <i class="fa-solid fa-shuffle w-4 text-gray-400"></i><span>Sorteio de Coletes</span>
                 </button>
                 <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
-                    <i class="fa-solid fa-wallet w-4 text-amber-400"></i><span>Financeiro / Caixa</span>
+                    <i class="fa-solid fa-wallet w-4 text-amber-400"></i><span>Financeiro</span>
                 </button>
                 <button onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
                     <i class="fa-solid fa-file-lines w-4 text-gray-400"></i><span>Relatórios</span>
@@ -101,7 +101,7 @@
     <!-- MOBILE TOP BAR -->
     <header class="md:hidden bg-pitch-900/95 backdrop-blur-md border-b border-pitch-800 px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-xl print:hidden">
         <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/80 bg-pitch-950 shadow">
+            <div class="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/85 bg-pitch-950 shadow">
                 <img id="mobile-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" class="w-full h-full object-cover">
             </div>
             <div>
@@ -121,7 +121,7 @@
             <i class="fa-solid fa-chart-pie text-base mb-0.5"></i><span>Início</span>
         </button>
         <button onclick="switchTab('elenco')" id="mob-nav-elenco" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-users text-base mb-0.5"></i><span>Elenco</span>
+            <i class="fa-solid fa-users text-base mb-0.5"></i><span>Jogadores</span>
         </button>
         <button onclick="switchTab('presenca')" id="mob-nav-presenca" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
             <i class="fa-solid fa-clipboard-check text-base mb-0.5"></i><span>Presença</span>
@@ -130,10 +130,10 @@
             <i class="fa-solid fa-shuffle text-base mb-0.5"></i><span>Sorteio</span>
         </button>
         <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-wallet text-base mb-0.5"></i><span>Caixa</span>
+            <i class="fa-solid fa-wallet text-base mb-0.5"></i><span>Financeiro</span>
         </button>
         <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
-            <i class="fa-solid fa-file-lines text-base mb-0.5"></i><span>Relatórios</span>
+            <i class="fa-solid fa-file-lines text-base mb-0.5"></i><span>Mais</span>
         </button>
     </nav>
 
@@ -141,7 +141,7 @@
     <main class="flex-1 flex flex-col min-h-screen">
         <header class="hidden md:flex bg-pitch-900/40 backdrop-blur-xl border-b border-pitch-800/60 px-8 py-4 justify-between items-center print:hidden sticky top-0 z-20">
             <div>
-                <h2 id="page-title" class="text-lg font-black text-white tracking-wide">Dashboard Pro</h2>
+                <h2 id="page-title" class="text-lg font-black text-white tracking-wide">Painel Pro</h2>
                 <p class="text-xs text-gray-400 mt-0.5">Bem-vindo ao centro de operações do clube.</p>
             </div>
             <div class="flex items-center space-x-3">
@@ -159,6 +159,22 @@
 
             <!-- ABA DASHBOARD PRO -->
             <div id="tab-dashboard" class="tab-content space-y-5">
+                
+                <!-- BANNER DE BOAS-VINDAS ESTILO NOVO LAYOUT -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-pitch-900 to-pitch-950 border border-emerald-500/30 p-5 md:p-7 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 pointer-events-none bg-cover bg-center" style="background-image: url('https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png');"></div>
+                    <div class="z-10">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-2 inline-block">Gestão Ativa</span>
+                        <h3 id="dashboard-saudacao-nome" class="text-xl md:text-2xl font-black text-white tracking-wide">Olá, Diretor!</h3>
+                        <p class="text-xs md:text-sm text-gray-300 mt-1 font-medium">Bem-vindo ao painel de gestão do Clube Meninos da Vila. Juntos somos mais fortes!</p>
+                    </div>
+                    <div class="z-10 flex items-center space-x-2 w-full md:w-auto">
+                        <button onclick="switchTab('presenca')" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-clipboard-check"></i><span>Fazer Chamada</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/20 via-pitch-900 to-pitch-950 border border-amber-500/40 p-4 md:p-5 rounded-3xl shadow-xl flex items-center space-x-4 animate-pulse">
                     <div class="bg-amber-500 text-gray-950 p-3.5 rounded-2xl text-xl font-black shadow-md">
                         <i class="fa-solid fa-cake-candles"></i>
@@ -171,39 +187,67 @@
 
                 <!-- CARDS DE ESTATÍSTICAS COM QUEBRA DE LINHA SEGURA -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6" id="dashboard-cards-grid">
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Elenco Total</p>
-                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white my-1.5 truncate">0</h3>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Jogadores</p>
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white my-1 truncate">0</h3>
                         <span class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
                     </div>
                     
-                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group flex flex-col justify-between">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Afastados</p>
-                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 my-1.5 truncate">0</h3>
-                        <span class="text-[10px] md:text-[11px] text-rose-400 font-semibold block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Suspensos</span>
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Em Atraso</p>
+                            <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        </div>
+                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 my-1 truncate">0</h3>
+                        <span class="text-[10px] md:text-[11px] text-rose-400 font-semibold block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Pendentes</span>
                     </div>
 
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Em Dia <span id="dash-lbl-comp" class="normal-case font-normal text-gray-400">(-)</span></p>
-                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 my-1.5 truncate">0/0</h3>
-                        <span class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitados</span>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Mensalidades</p>
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-clipboard-check"></i></div>
+                        </div>
+                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 my-1 truncate">0/0</h3>
+                        <span id="dash-lbl-comp" class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitadas (-)</span>
                     </div>
 
-                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-3.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group flex flex-col justify-between">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Saldo em Caixa</p>
-                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 my-1.5 truncate">R$ 0,00</h3>
+                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Saldo Atual</p>
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-wallet"></i></div>
+                        </div>
+                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 my-1 truncate">R$ 0,00</h3>
                         <span class="text-[10px] md:text-[11px] text-amber-400 font-semibold block truncate"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
                     </div>
                 </div>
 
-                <!-- SEÇÃO SECUNDÁRIA DO DASHBOARD -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- SEÇÃO DE MOVIMENTAÇÕES RECENTES (ESTILO NOVO LAYOUT) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="md:col-span-2 bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                                <div class="flex items-center space-x-2.5 min-w-0">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                                    <h3 class="font-black text-sm text-white truncate">Movimentações Recentes</h3>
+                                </div>
+                                <button onclick="switchTab('financeiro')" class="text-xs text-emerald-400 font-bold hover:underline">Ver todas ></button>
+                            </div>
+                            <div id="dashboard-movimentacoes-recentes" class="space-y-2.5">
+                                <!-- Preenchido dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRÓXIMA PARTIDA -->
                     <div class="bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
                                 <div class="flex items-center space-x-2.5 min-w-0">
                                     <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0"><i class="fa-solid fa-futbol"></i></div>
-                                    <h3 class="font-black text-sm text-white truncate">Próxima Partida Oficial</h3>
+                                    <h3 class="font-black text-sm text-white truncate">Próxima Partida</h3>
                                 </div>
                                 <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-bold hidden transition shrink-0">Editar</button>
                             </div>
@@ -214,7 +258,7 @@
                                 </div>
                                 <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
                                     <span class="text-gray-400 font-bold uppercase">Local</span>
-                                    <strong id="lbl-partida-local" class="text-white truncate max-w-[180px]">-</strong>
+                                    <strong id="lbl-partida-local" class="text-white truncate max-w-[150px]">-</strong>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2.5">
                                     <div class="bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
@@ -222,84 +266,69 @@
                                         <strong id="lbl-partida-horario" class="text-white">-</strong>
                                     </div>
                                     <div class="bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
-                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-0.5">Custo Aluguel</span>
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-0.5">Custo</span>
                                         <strong id="lbl-partida-custo" class="text-amber-400">-</strong>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <button onclick="dispararConvocacaoGeralWhatsApp()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
-                            <i class="fa-brands fa-whatsapp text-sm"></i><span>Disparar Convocação Geral (Lista 1 a 36)</span>
+                            <i class="fa-brands fa-whatsapp text-sm"></i><span>Convocação Geral WhatsApp</span>
                         </button>
-                    </div>
-
-                    <!-- CARD DE ATALHOS OPERACIONAIS -->
-                    <div id="card-atalhos-operacionais" class="bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2.5 mb-3">
-                                <div class="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xs font-bold"><i class="fa-solid fa-bolt"></i></div>
-                                <h3 class="font-black text-sm text-white">Atalhos Operacionais</h3>
-                            </div>
-                            <p class="text-xs text-gray-400 mb-4 leading-relaxed">Gerencie presenças instantaneamente, escale os coletes com o sorteio automático ou consulte relatórios.</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="switchTab('presenca')" id="shortcut-presenca" class="bg-pitch-800 hover:bg-pitch-700/80 p-3.5 rounded-2xl text-xs font-bold text-emerald-400 text-left transition border border-pitch-700/50 shadow group">
-                                <i class="fa-solid fa-clipboard-check mb-1.5 block text-lg group-hover:scale-110 transition"></i>
-                                <span class="block">Lista de Presença</span>
-                            </button>
-                            <button onclick="switchTab('sorteio')" id="shortcut-sorteio" class="bg-pitch-800 hover:bg-pitch-700/80 p-3.5 rounded-2xl text-xs font-bold text-amber-400 text-left transition border border-pitch-700/50 shadow group">
-                                <i class="fa-solid fa-shuffle mb-1.5 block text-lg group-hover:scale-110 transition"></i>
-                                <span class="block">Sorteio de Coletes</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA ELENCO -->
+            <!-- ABA JOGADORES (ELENCO) -->
             <div id="tab-elenco" class="tab-content hidden space-y-4">
-                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-3.5 md:p-4 rounded-3xl shadow-xl grid grid-cols-2 md:grid-cols-5 gap-2.5 md:gap-3">
-                    <div class="col-span-2 md:col-span-1">
-                        <label class="text-[10px] text-amber-400 block mb-1 font-extrabold uppercase tracking-wider">Competência:</label>
-                        <input type="month" id="filtro-elenco-competencia" onchange="alterarCompetenciaGlobal(this.value)" class="w-full bg-pitch-950 border border-amber-500/40 rounded-xl px-2.5 py-2 text-xs text-amber-400 font-bold focus:outline-none">
+                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-3.5 md:p-4 rounded-3xl shadow-xl space-y-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
+                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Buscar jogador..." class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500">
                     </div>
-                    <div class="col-span-2 md:col-span-1">
-                        <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Buscar Atleta:</label>
-                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Nome..." class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div class="col-span-1 md:col-span-1">
-                        <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Posição:</label>
-                        <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="">Todas</option>
-                            <option value="Goleiro">Goleiro</option>
-                            <option value="Zagueiro">Zagueiro</option>
-                            <option value="Lateral">Lateral</option>
-                            <option value="Meia">Meia</option>
-                            <option value="Atacante">Atacante</option>
-                        </select>
-                    </div>
-                    <div class="col-span-1 md:col-span-1">
-                        <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Mensalidade:</label>
-                        <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="">Todos</option>
-                            <option value="Pago">Pago</option>
-                            <option value="Pendente">Pendente</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2 md:col-span-1">
-                        <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Aptidão:</label>
-                        <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="">Todos</option>
-                            <option value="Ativo">Ativos (Aptos)</option>
-                            <option value="Afastados">Afastados</option>
-                        </select>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                        <div>
+                            <label class="text-[10px] text-amber-400 block mb-1 font-extrabold uppercase tracking-wider">Competência:</label>
+                            <input type="month" id="filtro-elenco-competencia" onchange="alterarCompetenciaGlobal(this.value)" class="w-full bg-pitch-950 border border-amber-500/40 rounded-xl px-2.5 py-2 text-xs text-amber-400 font-bold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Posição:</label>
+                            <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todas</option>
+                                <option value="Goleiro">Goleiro</option>
+                                <option value="Zagueiro">Zagueiro</option>
+                                <option value="Lateral">Lateral</option>
+                                <option value="Meia">Meia</option>
+                                <option value="Atacante">Atacante</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Mensalidade:</label>
+                            <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todos</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Pendente">Pendente</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Aptidão:</label>
+                            <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todos</option>
+                                <option value="Ativo">Ativos (Aptos)</option>
+                                <option value="Afastados">Afastados</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div id="jogadores-grid" class="bg-pitch-900/90 border border-pitch-800 rounded-3xl shadow-xl overflow-hidden divide-y divide-pitch-800/60"></div>
+                
+                <button onclick="abrirModalNovoJogador()" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg transition flex items-center justify-center space-x-2 hidden">
+                    <i class="fa-solid fa-user-plus"></i><span>Cadastrar Jogador</span>
+                </button>
             </div>
 
-            <!-- ABA 1: LISTA DE PRESENÇA -->
+            <!-- ABA LISTA DE PRESENÇA -->
             <div id="tab-presenca" class="tab-content hidden space-y-5">
                 <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
                     <div class="text-xs text-gray-300">
@@ -329,7 +358,7 @@
                 </div>
             </div>
 
-            <!-- ABA 2: SORTEIO DE TIMES -->
+            <!-- ABA SORTEIO DE TIMES -->
             <div id="tab-sorteio" class="tab-content hidden space-y-5">
                 <div id="alerta-rodada-travada" class="hidden bg-amber-500/10 border border-amber-500/40 text-amber-300 p-3.5 rounded-2xl text-xs flex items-center space-x-3 shadow">
                     <i class="fa-solid fa-triangle-exclamation text-lg"></i>
@@ -395,18 +424,37 @@
             <!-- ABA FINANCEIRO -->
             <div id="tab-financeiro" class="tab-content hidden space-y-5">
                 <div id="financeiro-relatorio-impressao" class="space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl">
-                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saldo Acumulado</p>
-                            <h3 id="fin-saldo" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h3>
+                    
+                    <!-- CARD SALDO ATUAL DESTAQUE -->
+                    <div class="bg-gradient-to-r from-emerald-900/60 via-pitch-900 to-pitch-950 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block mb-1">Tesouraria Consolidada</span>
+                            <h3 id="fin-saldo" class="text-3xl font-black text-amber-400">R$ 0,00</h3>
                         </div>
-                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl">
-                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Entradas (Mês)</p>
-                            <h3 id="fin-entradas" class="text-2xl font-black text-emerald-400 mt-2">R$ 0,00</h3>
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-lg hidden transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-plus"></i><span>Novo Lançamento</span>
+                            </button>
+                            <button onclick="imprimirRelatorioGeral()" class="flex-1 md:flex-initial bg-pitch-800 hover:bg-pitch-700 px-4 py-3 rounded-2xl text-xs font-bold text-amber-400 shadow transition flex items-center justify-center space-x-1.5 border border-pitch-700">
+                                <i class="fa-solid fa-print"></i><span>Imprimir PDF</span>
+                            </button>
                         </div>
-                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl">
-                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saídas (Mês)</p>
-                            <h3 id="fin-saidas" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg font-bold"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Entradas (Mês)</p>
+                                <h3 id="fin-entradas" class="text-xl font-black text-emerald-400 mt-0.5">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg font-bold"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saídas (Mês)</p>
+                                <h3 id="fin-saidas" class="text-xl font-black text-rose-400 mt-0.5">R$ 0,00</h3>
+                            </div>
                         </div>
                     </div>
 
@@ -415,18 +463,10 @@
                         <div class="h-56 w-full"><canvas id="grafico-financeiro"></canvas></div>
                     </div>
 
-                    <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3 print:hidden">
+                    <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex justify-between items-center print:hidden">
                         <div>
                             <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Filtrar por Mês:</label>
                             <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-950 border border-pitch-800 rounded-xl px-3.5 py-2 text-xs text-white">
-                        </div>
-                        <div class="flex items-center space-x-2.5 w-full md:w-auto">
-                            <button onclick="imprimirRelatorioGeral()" class="flex-1 md:flex-initial bg-amber-600 hover:bg-amber-500 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow transition flex items-center justify-center space-x-1.5">
-                                <i class="fa-solid fa-print"></i><span>PDF</span>
-                            </button>
-                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow hidden transition flex items-center justify-center space-x-1.5">
-                                <i class="fa-solid fa-plus"></i><span>Novo Lançamento</span>
-                            </button>
                         </div>
                     </div>
 
@@ -450,7 +490,7 @@
                 </div>
             </div>
 
-            <!-- ABA RELATÓRIOS -->
+            <!-- ABA RELATÓRIOS / MAIS -->
             <div id="tab-relatorios" class="tab-content hidden space-y-5">
                 <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3 print:hidden">
                     <div>
@@ -847,10 +887,7 @@
             
             const lblFmt = formatarCompetenciaLabel(novaComp);
             const elDashComp = document.getElementById('dash-lbl-comp');
-            if (elDashComp) elDashComp.innerText = `(${lblFmt})`;
-
-            const elModalComp = document.getElementById('modal-lbl-comp');
-            if (elModalComp) elModalComp.innerText = lblFmt;
+            if (elDashComp) elDashComp.innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i>Quitadas (${lblFmt})`;
 
             const elCompInad = document.getElementById('rel-comp-inadimplentes');
             if (elCompInad) elCompInad.innerText = lblFmt;
@@ -863,6 +900,11 @@
             if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             if (['admin', 'gestor', 'tesoureiro', 'secretario'].includes(perfil)) {
                 document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
+            }
+
+            if (usuarioLogado.nome) {
+                const elNome = document.getElementById('dashboard-saudacao-nome');
+                if (elNome) elNome.innerText = `Olá, ${toTitleCase(usuarioLogado.nome.split(' ')[0])}!`;
             }
 
             if (perfil === 'secretario') {
@@ -881,13 +923,11 @@
                 document.getElementById('mob-nav-sorteio')?.remove();
                 document.getElementById('card-atalhos-operacionais')?.remove();
 
-                // Tesoureiro tem acesso apenas ao relatório de Inadimplentes
                 document.getElementById('btn-rel-posicoes')?.remove();
                 document.getElementById('btn-rel-presencas')?.remove();
                 document.getElementById('bloco-rel-posicoes')?.remove();
                 document.getElementById('bloco-rel-presencas')?.remove();
                 
-                // Força exibição exclusiva do bloco de inadimplentes sem misturar relatórios
                 document.getElementById('container-botoes-relatorios')?.remove();
                 mudarRelatorio('inadimplentes');
             } else {
@@ -976,7 +1016,6 @@
         function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
         function mudarRelatorio(tipo) {
-            // Se for tesoureiro, força sempre o bloco de inadimplentes para evitar qualquer mistura
             if (usuarioLogado.perfil === 'tesoureiro') {
                 tipo = 'inadimplentes';
             }
@@ -1168,7 +1207,7 @@
             const isSecretario = usuarioLogado.perfil === 'secretario';
 
             if (jogadores.length === 0) {
-                grid.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">Nenhum atleta encontrado com os filtros aplicados.</div>`;
+                grid.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">Nenhum jogador encontrado com os filtros aplicados.</div>`;
                 return;
             }
 
@@ -1211,7 +1250,7 @@
                 grid.innerHTML += `
                     <div class="p-3.5 flex items-center justify-between hover:bg-pitch-800/40 transition gap-2">
                         <div class="flex items-center space-x-3 min-w-0 flex-1">
-                            <div class="w-9 h-9 rounded-xl bg-pitch-950 border border-pitch-800 flex items-center justify-center font-black text-xs text-emerald-400 shrink-0">
+                            <div class="w-10 h-10 rounded-2xl bg-pitch-950 border border-pitch-800 flex items-center justify-center font-black text-xs text-emerald-400 shrink-0 shadow-inner">
                                 ${j.posicao ? j.posicao.charAt(0) : 'J'}
                             </div>
                             <div class="min-w-0 flex-1">
@@ -1219,7 +1258,7 @@
                                     <span class="truncate">${toTitleCase(j.nome)}</span> ${aptidaoTag}
                                 </h4>
                                 <div class="flex items-center space-x-1.5 mt-0.5 text-[10px] text-gray-400 truncate">
-                                    <span class="shrink-0">${j.posicao}</span>
+                                    <span class="shrink-0 font-medium text-emerald-400">${j.posicao}</span>
                                     <span class="shrink-0">•</span>
                                     <span class="shrink-0">${idadeStr}</span>
                                     <span class="shrink-0">•</span>
@@ -1411,7 +1450,7 @@
             try {
                 const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
                 if (res.ok) {
-                    showToast('Atleta salvo!');
+                    showToast('Jogador salvo!');
                     closeModal('modal-novo-jogador');
                     carregarJogadores();
                     if (usuarioLogado.perfil !== 'secretario') carregarFinanceiro();
@@ -1432,12 +1471,12 @@
             const inputMens = document.getElementById('input-mensalidade');
             if (inputMens) inputMens.value = j.status_mensalidade || 'Pendente';
 
-            document.getElementById('modal-jogador-titulo').innerText = 'Editar Atleta';
+            document.getElementById('modal-jogador-titulo').innerText = 'Editar Jogador';
             openModal('modal-novo-jogador');
         }
 
         async function excluirJogador(id) {
-            if (!confirm('Excluir atleta?')) return;
+            if (!confirm('Excluir jogador?')) return;
             try {
                 const res = await fetch(`${API_URL}/api/jogadores/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 if (res.ok) { showToast('Excluído.'); carregarJogadores(); }
@@ -1501,7 +1540,10 @@
                     let mesEntradas = 0, mesSaidas = 0;
                     const tbody = document.getElementById('tabela-financeiro-body');
                     tbody.innerHTML = '';
-                    dados.forEach(l => {
+                    const recentesContainer = document.getElementById('dashboard-movimentacoes-recentes');
+                    if (recentesContainer) recentesContainer.innerHTML = '';
+
+                    dados.forEach((l, index) => {
                         const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
                         const val = parseFloat(l.valor) || 0;
                         if (mesFiltro && dataStr.startsWith(mesFiltro)) {
@@ -1510,6 +1552,24 @@
                         if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
                         const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                         const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
+
+                        // Popular movimentações recentes no Dashboard (até 3 itens)
+                        if (recentesContainer && index < 3) {
+                            const iconeMov = l.tipo === 'Entrada' ? 'fa-arrow-trend-up text-emerald-400 bg-emerald-500/10' : 'fa-arrow-trend-down text-rose-400 bg-rose-500/10';
+                            recentesContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-2xl border border-pitch-800/60">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${iconeMov}"><i class="fa-solid ${l.tipo === 'Entrada' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i></div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">${l.descricao}</h4>
+                                            <p class="text-[10px] text-gray-400">${dataFmt}</p>
+                                        </div>
+                                    </div>
+                                    <strong class="text-xs font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">${l.tipo === 'Entrada' ? '+' : '-'} R$ ${val.toFixed(2)}</strong>
+                                </div>
+                            `;
+                        }
+
                         tbody.innerHTML += `
                             <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                                 <td class="py-3 text-gray-300">${dataFmt}</td>
