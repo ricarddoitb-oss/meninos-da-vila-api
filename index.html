@@ -132,6 +132,9 @@
         <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
             <i class="fa-solid fa-wallet text-base mb-0.5"></i><span>Caixa</span>
         </button>
+        <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[10px] font-medium transition">
+            <i class="fa-solid fa-file-lines text-base mb-0.5"></i><span>Relatórios</span>
+        </button>
     </nav>
 
     <!-- CONTEÚDO PRINCIPAL -->
@@ -166,30 +169,30 @@
                     </div>
                 </div>
 
-                <!-- CARDS DE ESTATÍSTICAS LIMPOS -->
+                <!-- CARDS DE ESTATÍSTICAS COM PROTEÇÃO CONTRA ESTOURO DE TEXTO -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 md:gap-6" id="dashboard-cards-grid">
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Elenco Total</p>
-                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white mt-2">0</h3>
-                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group min-w-0 overflow-hidden">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Elenco Total</p>
+                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white mt-2 truncate">0</h3>
+                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
                     </div>
                     
-                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Afastados</p>
-                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 mt-2">0</h3>
-                        <span class="text-[11px] text-rose-400 font-semibold mt-1 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Suspensos</span>
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group min-w-0 overflow-hidden">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Afastados</p>
+                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 mt-2 truncate">0</h3>
+                        <span class="text-[11px] text-rose-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Suspensos</span>
                     </div>
 
-                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Em Dia (<span id="dash-lbl-comp">-</span>)</p>
-                        <h3 id="dash-pagos-count" class="text-2xl md:text-3xl font-black text-emerald-400 mt-2">0/0</h3>
-                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block"><i class="fa-solid fa-shield-halved mr-1"></i>Quitados</span>
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group min-w-0 overflow-hidden">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Em Dia (<span id="dash-lbl-comp">-</span>)</p>
+                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 mt-2 truncate">0/0</h3>
+                        <span class="text-[11px] text-emerald-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitados</span>
                     </div>
 
-                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group">
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saldo em Caixa</p>
-                        <h3 id="dash-saldo-val" class="text-xl md:text-3xl font-black text-amber-400 mt-2 truncate">R$ 0,00</h3>
-                        <span class="text-[11px] text-amber-400 font-semibold mt-1 block"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
+                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="bg-pitch-900/90 border border-pitch-800/80 p-4.5 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group min-w-0 overflow-hidden">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider truncate">Saldo em Caixa</p>
+                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 mt-2 truncate">R$ 0,00</h3>
+                        <span class="text-[11px] text-amber-400 font-semibold mt-1 block truncate"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
                     </div>
                 </div>
 
@@ -198,11 +201,11 @@
                     <div class="bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
-                                <div class="flex items-center space-x-2.5">
-                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold"><i class="fa-solid fa-futbol"></i></div>
-                                    <h3 class="font-black text-sm text-white">Próxima Partida Oficial</h3>
+                                <div class="flex items-center space-x-2.5 min-w-0">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0"><i class="fa-solid fa-futbol"></i></div>
+                                    <h3 class="font-black text-sm text-white truncate">Próxima Partida Oficial</h3>
                                 </div>
-                                <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-bold hidden transition">Editar</button>
+                                <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-bold hidden transition shrink-0">Editar</button>
                             </div>
                             <div class="space-y-3 text-xs text-gray-300">
                                 <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
@@ -230,7 +233,7 @@
                         </button>
                     </div>
 
-                    <!-- CARD DE ATALHOS OPERACIONAIS (Ocultado para Tesoureiro) -->
+                    <!-- CARD DE ATALHOS OPERACIONAIS -->
                     <div id="card-atalhos-operacionais" class="bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
                         <div>
                             <div class="flex items-center space-x-2.5 mb-3">
@@ -253,7 +256,7 @@
                 </div>
             </div>
 
-            <!-- ABA ELENCO (FILTROS COMPACTOS NO MOBILE E MANTIDO NO PC) -->
+            <!-- ABA ELENCO -->
             <div id="tab-elenco" class="tab-content hidden space-y-4">
                 <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-3.5 md:p-4 rounded-3xl shadow-xl grid grid-cols-2 md:grid-cols-5 gap-2.5 md:gap-3">
                     <div class="col-span-2 md:col-span-1">
@@ -293,7 +296,6 @@
                     </div>
                 </div>
 
-                <!-- LISTA COMPACTA COM PROTEÇÃO DE TEXTO CONTRA ESTOURO -->
                 <div id="jogadores-grid" class="bg-pitch-900/90 border border-pitch-800 rounded-3xl shadow-xl overflow-hidden divide-y divide-pitch-800/60"></div>
             </div>
 
@@ -878,11 +880,15 @@
                 document.getElementById('nav-sorteio')?.remove();
                 document.getElementById('mob-nav-sorteio')?.remove();
                 document.getElementById('card-atalhos-operacionais')?.remove();
-            }
 
-            if (!['admin', 'tesoureiro'].includes(perfil)) {
-                document.getElementById('btn-rel-inadimplentes')?.remove();
-                document.getElementById('bloco-rel-inadimplentes')?.remove();
+                // Tesoureiro tem acesso apenas ao relatório de Inadimplentes
+                document.getElementById('btn-rel-posicoes')?.remove();
+                document.getElementById('btn-rel-presencas')?.remove();
+                document.getElementById('bloco-rel-posicoes')?.remove();
+                document.getElementById('bloco-rel-presencas')?.remove();
+                mudarRelatorio('inadimplentes');
+            } else {
+                mudarRelatorio('posicoes');
             }
 
             const dataAtual = new Date();
