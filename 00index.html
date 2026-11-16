@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Pro - Clube Meninos da Vila</title>
+    
+    <!-- Configurações PWA / Mobile App -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#060a08">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Painel CMV">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pitch: { 950: '#060a08', 900: '#0d1711', 800: '#14241a', 700: '#1d3525', accent: '#10b981', gold: '#f59e0b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @page { size: A4 portrait; margin: 10mm; }
+        @media print {
+            body { background: white !important; color: black !important; font-size: 11px !important; }
+            body * { visibility: hidden; }
+            body.imprimindo-recibo #modal-recibo-conteudo, body.imprimindo-recibo #modal-recibo-conteudo * { visibility: visible; }
+            body.imprimindo-recibo #modal-recibo-conteudo { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: 1px solid #ccc; }
+            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao, body:not(.imprimindo-recibo) #relatorios-conteudo-impressao * { visibility: visible; }
+            body:not(.imprimindo-recibo) #relatorios-conteudo-impressao { position: absolute; left: 0; top: 0; width: 100%; }
+            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao, body:not(.imprimindo-relatorio) #financeiro-relatorio-impressao * { visibility: visible; }
+            body:not(.imprimindo-recibo) #financeiro-relatorio-impressao { position: absolute; left: 0; top: 0; width: 100%; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { padding: 5px 8px !important; border-bottom: 1px solid #ddd !important; color: black !important; }
+            .bg-pitch-800, .bg-pitch-900, .bg-pitch-950 { background: transparent !important; border-color: #ccc !important; box-shadow: none !important; }
+            .text-white, .text-gray-300, .text-gray-400 { color: #111 !important; }
+            .print\:hidden { display: none !important; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #060a08; }
+        ::-webkit-scrollbar-thumb { background: #1d3525; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    </style>
+</head>
+<body class="bg-pitch-950 text-white min-h-screen flex flex-col md:flex-row pb-24 md:pb-0 selection:bg-emerald-500 selection:text-gray-950">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col space-y-3 pointer-events-none print:hidden"></div>
+
+    <!-- SIDEBAR DESKTOP PREMIUM -->
+    <aside class="w-68 bg-pitch-900/95 backdrop-blur-xl border-r border-pitch-800/80 flex-col justify-between hidden md:flex print:hidden sticky top-0 h-screen shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-30">
+        <div>
+            <div class="p-5 border-b border-pitch-800/60 text-center relative">
+                <div class="w-16 h-16 mx-auto mb-2.5 rounded-2xl overflow-hidden border-2 border-amber-400/85 shadow-xl bg-pitch-950 ring-4 ring-emerald-500/10">
+                    <img id="sidebar-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <h1 id="sidebar-nome-clube" class="font-black text-xs text-amber-400 tracking-wider">MENINOS DA VILA</h1>
+                <p id="sidebar-subtitulo-clube" class="text-[11px] text-emerald-400 font-semibold mt-0.5"><i class="fa-brands fa-instagram mr-1"></i>@cmvitb</p>
+                <button onclick="abrirModalConfigClube()" class="admin-only absolute top-2.5 right-2.5 bg-pitch-800 hover:bg-pitch-700 text-amber-400 p-2 rounded-xl text-xs shadow hidden transition" title="Configurações">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+            <nav class="p-3 space-y-1" id="sidebar-nav-container">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-semibold bg-gradient-to-r from-emerald-500/20 to-transparent text-emerald-400 border border-emerald-500/30 transition group">
+                    <i class="fa-solid fa-chart-pie w-4 text-emerald-400"></i><span>Início</span>
+                </button>
+                <button onclick="switchTab('elenco')" id="nav-elenco" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-users w-4 text-gray-400"></i><span>Jogadores</span>
+                </button>
+                <button onclick="switchTab('convidados')" id="nav-convidados" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-user-clock w-4 text-amber-400"></i><span>Convidados (Diárias)</span>
+                </button>
+                <button onclick="switchTab('presenca')" id="nav-presenca" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-clipboard-check w-4 text-gray-400"></i><span>Lista de Presença</span>
+                </button>
+                <button onclick="switchTab('sorteio')" id="nav-sorteio" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-shuffle w-4 text-gray-400"></i><span>Sorteio de Coletes</span>
+                </button>
+                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn financeiro-nav-item w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-wallet w-4 text-amber-400"></i><span>Financeiro</span>
+                </button>
+                <button onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group">
+                    <i class="fa-solid fa-file-lines w-4 text-gray-400"></i><span>Relatórios</span>
+                </button>
+                <button onclick="switchTab('usuarios')" id="nav-usuarios" class="nav-btn admin-only w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-xs font-medium text-gray-300 hover:bg-pitch-800/60 hover:text-white transition group hidden">
+                    <i class="fa-solid fa-user-shield w-4 text-rose-400"></i><span>Usuários & Acessos</span>
+                </button>
+            </nav>
+        </div>
+        <div class="p-3 border-t border-pitch-800/60">
+            <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition">
+                <i class="fa-solid fa-right-from-bracket"></i><span>Sair da Conta</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MOBILE TOP BAR -->
+    <header class="md:hidden bg-pitch-900/95 backdrop-blur-md border-b border-pitch-800 px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-xl print:hidden">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/85 bg-pitch-950 shadow">
+                <img id="mobile-logo" src="https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h1 class="font-black text-[11px] text-amber-400 tracking-wider">MENINOS DA VILA</h1>
+                <p class="text-[9px] text-emerald-400 font-semibold">Painel Pro</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador-mob" class="manager-access bg-emerald-600 text-white p-2 rounded-xl text-xs hidden shadow"><i class="fa-solid fa-user-plus"></i></button>
+            <button onclick="logout()" class="bg-pitch-800 text-rose-400 p-2 rounded-xl text-xs shadow"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+    </header>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-pitch-900/95 backdrop-blur-xl border-t border-pitch-800/80 flex justify-around p-2 z-50 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.5)] overflow-x-auto" id="mobile-nav-container">
+        <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center text-emerald-400 text-[9px] font-bold transition shrink-0 px-2">
+            <i class="fa-solid fa-chart-pie text-sm mb-0.5"></i><span>Início</span>
+        </button>
+        <button onclick="switchTab('elenco')" id="mob-nav-elenco" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-users text-sm mb-0.5"></i><span>Jogadores</span>
+        </button>
+        <button onclick="switchTab('convidados')" id="mob-nav-convidados" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-user-clock text-sm mb-0.5"></i><span>Convidados</span>
+        </button>
+        <button onclick="switchTab('presenca')" id="mob-nav-presenca" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-clipboard-check text-sm mb-0.5"></i><span>Presença</span>
+        </button>
+        <button onclick="switchTab('sorteio')" id="mob-nav-sorteio" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-shuffle text-sm mb-0.5"></i><span>Sorteio</span>
+        </button>
+        <button onclick="switchTab('financeiro')" id="mob-nav-financeiro" class="mob-nav-btn financeiro-nav-item flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-wallet text-sm mb-0.5"></i><span>Caixa</span>
+        </button>
+        <button onclick="switchTab('relatorios')" id="mob-nav-relatorios" class="mob-nav-btn flex flex-col items-center text-gray-400 text-[9px] font-medium transition shrink-0 px-2">
+            <i class="fa-solid fa-file-lines text-sm mb-0.5"></i><span>Mais</span>
+        </button>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col min-h-screen">
+        <header class="hidden md:flex bg-pitch-900/40 backdrop-blur-xl border-b border-pitch-800/60 px-8 py-4 justify-between items-center print:hidden sticky top-0 z-20">
+            <div>
+                <h2 id="page-title" class="text-lg font-black text-white tracking-wide">Painel Pro</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Bem-vindo ao centro de operações do clube.</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="bg-pitch-900 border border-pitch-800 px-3.5 py-1.5 rounded-2xl flex items-center space-x-2 shadow-inner">
+                    <span class="text-[10px] text-gray-400 uppercase font-extrabold">Competência:</span>
+                    <input type="month" id="seletor-competencia-global" onchange="alterarCompetenciaGlobal(this.value)" class="bg-transparent text-xs font-bold text-amber-400 focus:outline-none cursor-pointer">
+                </div>
+                <button onclick="abrirModalNovoJogador()" id="btn-novo-jogador" class="manager-access bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-lg shadow-emerald-900/30 transition flex items-center space-x-2 hidden">
+                    <i class="fa-solid fa-user-plus text-xs"></i><span>Novo Atleta</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-3.5 md:p-8 flex-1 overflow-y-auto max-w-7xl mx-auto w-full space-y-5">
+
+            <!-- ABA DASHBOARD PRO -->
+            <div id="tab-dashboard" class="tab-content space-y-5">
+                
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-pitch-900 to-pitch-950 border border-emerald-500/30 p-5 md:p-7 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 pointer-events-none bg-cover bg-center" style="background-image: url('https://raw.githubusercontent.com/ricarddoitb-oss/meninos-da-vila-api/refs/heads/main/logo.png');"></div>
+                    <div class="z-10">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-2 inline-block">Gestão Ativa</span>
+                        <h3 id="dashboard-saudacao-nome" class="text-xl md:text-2xl font-black text-white tracking-wide">Olá, Diretor!</h3>
+                        <p class="text-xs md:text-sm text-gray-300 mt-1 font-medium">Bem-vindo ao painel de gestão do Clube Meninos da Vila. Juntos somos mais fortes!</p>
+                    </div>
+                    <div class="z-10 flex items-center space-x-2 w-full md:w-auto">
+                        <button onclick="switchTab('presenca')" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-clipboard-check"></i><span>Fazer Chamada</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="aniversariante-banner" class="hidden bg-gradient-to-r from-amber-600/20 via-pitch-900 to-pitch-950 border border-amber-500/40 p-4 md:p-5 rounded-3xl shadow-xl flex items-center space-x-4 animate-pulse">
+                    <div class="bg-amber-500 text-gray-950 p-3.5 rounded-2xl text-xl font-black shadow-md">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-amber-400 font-extrabold text-sm md:text-base tracking-wide">Aniversariante do Dia! 🎉</h3>
+                        <p id="aniversariante-texto" class="text-xs md:text-sm text-gray-200 mt-0.5 font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- CARDS DE ESTATÍSTICAS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6" id="dashboard-cards-grid">
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Jogadores</p>
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <h3 id="dash-total-jogadores" class="text-2xl md:text-3xl font-black text-white my-1 truncate">0</h3>
+                        <span class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Plantel ativo</span>
+                    </div>
+                    
+                    <div onclick="filtrarAfastadosDashboard()" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-rose-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Em Atraso</p>
+                            <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        </div>
+                        <h3 id="dash-afastados-count" class="text-2xl md:text-3xl font-black text-rose-400 my-1 truncate">0</h3>
+                        <span class="text-[10px] md:text-[11px] text-rose-400 font-semibold block truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>DM / Pendentes</span>
+                    </div>
+
+                    <div onclick="switchTab('elenco')" class="bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Mensalidades</p>
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-clipboard-check"></i></div>
+                        </div>
+                        <h3 id="dash-pagos-count" class="text-xl md:text-3xl font-black text-emerald-400 my-1 truncate">0/0</h3>
+                        <span id="dash-lbl-comp" class="text-[10px] md:text-[11px] text-emerald-400 font-semibold block truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Quitadas (-)</span>
+                    </div>
+
+                    <div id="card-saldo-caixa" onclick="switchTab('financeiro')" class="financeiro-card-view bg-pitch-900/90 border border-pitch-800/80 p-4 md:p-6 rounded-3xl shadow-xl cursor-pointer hover:border-amber-500/50 transition group flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider leading-tight">Saldo Atual</p>
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-wallet"></i></div>
+                        </div>
+                        <h3 id="dash-saldo-val" class="text-lg md:text-3xl font-black text-amber-400 my-1 truncate">R$ 0,00</h3>
+                        <span class="text-[10px] md:text-[11px] text-amber-400 font-semibold block truncate"><i class="fa-solid fa-coins mr-1"></i>Consolidado</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="md:col-span-2 bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                                <div class="flex items-center space-x-2.5 min-w-0">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                                    <h3 class="font-black text-sm text-white truncate">Movimentações Recentes</h3>
+                                </div>
+                                <button onclick="switchTab('financeiro')" class="financeiro-link-btn text-xs text-emerald-400 font-bold hover:underline">Ver todas ></button>
+                            </div>
+                            <div id="dashboard-movimentacoes-recentes" class="space-y-2.5"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-pitch-900/90 border border-pitch-800/80 p-5 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                                <div class="flex items-center space-x-2.5 min-w-0">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0"><i class="fa-solid fa-futbol"></i></div>
+                                    <h3 class="font-black text-sm text-white truncate">Próxima Partida</h3>
+                                </div>
+                                <button onclick="abrirModalPartida()" class="admin-only bg-pitch-800 hover:bg-pitch-700 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-bold hidden transition shrink-0">Editar</button>
+                            </div>
+                            <div class="space-y-3 text-xs text-gray-300">
+                                <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
+                                    <span class="text-gray-400 font-bold uppercase">Data</span>
+                                    <strong id="lbl-partida-data" class="text-white">-</strong>
+                                </div>
+                                <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
+                                    <span class="text-gray-400 font-bold uppercase">Local</span>
+                                    <strong id="lbl-partida-local" class="text-white truncate max-w-[150px]">-</strong>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div class="bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-0.5">Horário</span>
+                                        <strong id="lbl-partida-horario" class="text-white">-</strong>
+                                    </div>
+                                    <div class="bg-pitch-950 p-3 rounded-xl border border-pitch-800/60">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold block mb-0.5">Custo</span>
+                                        <strong id="lbl-partida-custo" class="text-amber-400">-</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="dispararConvocacaoGeralWhatsApp()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
+                            <i class="fa-brands fa-whatsapp text-sm"></i><span>Convocação Geral WhatsApp</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA JOGADORES (ELENCO) -->
+            <div id="tab-elenco" class="tab-content hidden space-y-4">
+                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-3.5 md:p-4 rounded-3xl shadow-xl space-y-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
+                        <input type="text" id="filtro-elenco-nome" oninput="aplicarFiltrosElenco()" placeholder="Buscar jogador..." class="w-full bg-pitch-950 border border-pitch-800 rounded-2xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                        <div>
+                            <label class="text-[10px] text-amber-400 block mb-1 font-extrabold uppercase tracking-wider">Competência:</label>
+                            <input type="month" id="filtro-elenco-competencia" onchange="alterarCompetenciaGlobal(this.value)" class="w-full bg-pitch-950 border border-amber-500/40 rounded-xl px-2.5 py-2 text-xs text-amber-400 font-bold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Posição:</label>
+                            <select id="filtro-elenco-posicao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todas</option>
+                                <option value="Goleiro">Goleiro</option>
+                                <option value="Zagueiro">Zagueiro</option>
+                                <option value="Lateral">Lateral</option>
+                                <option value="Meia">Meia</option>
+                                <option value="Atacante">Atacante</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Mensalidade:</label>
+                            <select id="filtro-elenco-mensalidade" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todos</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Pendente">Pendente</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Aptidão:</label>
+                            <select id="filtro-elenco-aptidao" onchange="aplicarFiltrosElenco()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <option value="">Todos</option>
+                                <option value="Ativo">Ativos (Aptos)</option>
+                                <option value="Afastados">Afastados</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="jogadores-grid" class="bg-pitch-900/90 border border-pitch-800 rounded-3xl shadow-xl overflow-hidden divide-y divide-pitch-800/60"></div>
+                
+                <button onclick="abrirModalNovoJogador()" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl text-xs shadow-lg transition flex items-center justify-center space-x-2 hidden">
+                    <i class="fa-solid fa-user-plus"></i><span>Cadastrar Jogador</span>
+                </button>
+            </div>
+
+            <!-- ABA: CONVIDADOS (DIÁRIAS NO BANCO) -->
+            <div id="tab-convidados" class="tab-content hidden space-y-4">
+                <div class="bg-pitch-900/90 backdrop-blur-xl border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
+                    <div>
+                        <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-user-clock mr-2"></i>Gestão de Convidados & Diárias</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Cadastro sincronizado na nuvem com valor de diária personalizado e contagem de participações.</p>
+                    </div>
+                    <button onclick="abrirModalNovoConvidado()" class="manager-access bg-amber-500 hover:bg-amber-400 text-gray-950 font-black px-4 py-2.5 rounded-2xl text-xs shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-user-plus"></i><span>Novo Convidado</span>
+                    </button>
+                </div>
+
+                <div id="convidados-grid" class="bg-pitch-900/90 border border-pitch-800 rounded-3xl shadow-xl overflow-hidden divide-y divide-pitch-800/60">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+
+            <!-- ABA LISTA DE PRESENÇA (DEDICADA APENAS AOS ATLETAS DO CLUBE) -->
+            <div id="tab-presenca" class="tab-content hidden space-y-5">
+                <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3">
+                    <div class="text-xs text-gray-300">
+                        <strong class="text-amber-400">Convocação Oficial (Lista 1 a 36):</strong> Envie os confirmados para o grupo do WhatsApp.
+                    </div>
+                    <button onclick="dispararConvocacaoGeralWhatsApp()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
+                        <i class="fa-brands fa-whatsapp text-sm"><span>Disparar Convocação</span></i>
+                    </button>
+                </div>
+
+                <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl max-w-3xl mx-auto space-y-5">
+                    <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                        <h3 class="font-black text-sm text-emerald-400"><i class="fa-solid fa-clipboard-check mr-2"></i>Gestão de Presença da Rodada</h3>
+                        <label class="flex items-center space-x-2 text-xs text-gray-300 cursor-pointer font-bold">
+                            <input type="checkbox" id="selecionar-todos" onclick="toggleSelecionarTodos(this)" class="w-4 h-4 accent-emerald-500 rounded">
+                            <span>Selecionar Todos</span>
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-[11px] text-gray-400 block mb-1 font-bold uppercase">Data da Rodada:</label>
+                        <input type="date" id="data-presenca-manual" onchange="atualizarDataRodada()" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-xs text-white font-semibold text-amber-400">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-black text-emerald-400 uppercase">Atletas Mensalistas:</h4>
+                        <div id="presenca-lista" class="space-y-1.5 max-h-[400px] overflow-y-auto pr-2"></div>
+                    </div>
+
+                    <button id="btn-salvar-presencas" onclick="salvarPresencasManualmente(this)" class="manager-access w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs shadow-lg transition">
+                        <i class="fa-solid fa-check-double mr-2"></i>Salvar Presenças da Rodada
+                    </button>
+                </div>
+            </div>
+
+            <!-- ABA SORTEIO DE TIMES -->
+            <div id="tab-sorteio" class="tab-content hidden space-y-5">
+                <div id="alerta-rodada-travada" class="hidden bg-amber-500/10 border border-amber-500/40 text-amber-300 p-3.5 rounded-2xl text-xs flex items-center space-x-3 shadow">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    <div><strong>Sorteio travado!</strong> Sorteio oficial já confirmado para esta data.</div>
+                </div>
+
+                <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                    <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                        <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-shuffle mr-2"></i>Algoritmo de Sorteio de Coletes</h3>
+                        <div id="status-sorteio-badge" class="hidden text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold">
+                            <i class="fa-solid fa-lock mr-1"></i> Sorteio Confirmado
+                        </div>
+                    </div>
+                    <div id="detalhes-partida-sorteio" class="bg-pitch-950 border border-pitch-800 p-3 rounded-xl mb-4 text-xs flex justify-between items-center text-gray-300">
+                        <span>📅 Data: <strong id="sorteio-lbl-data" class="text-amber-400">-</strong></span>
+                        <span>📍 Local: <strong id="sorteio-lbl-local" class="text-white">-</strong></span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="text-[11px] text-gray-400 font-bold uppercase mb-1 block">Qtd de Times (Coletes):</label>
+                            <select id="qtd-times" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-xs text-white">
+                                <option value="2">2 Times</option>
+                                <option value="3">3 Times</option>
+                                <option value="4">4 Times</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="btn-gerar-sorteio" onclick="iniciarSorteioIndependente()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-black py-3 rounded-xl text-xs shadow transition">
+                                <i class="fa-solid fa-shuffle mr-1"></i> Sortear Atletas Presentes
+                            </button>
+                        </div>
+                    </div>
+                    <div id="times-empty-state" class="text-center py-10 text-gray-400 text-xs">
+                        Marque as presenças na aba <strong>"Lista de Presença"</strong> e clique em <strong>"Sortear"</strong>.
+                    </div>
+                    <div id="times-result-container" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 hidden"></div>
+                    <div id="container-btn-confirmar" class="mt-5 pt-4 border-t border-pitch-800 hidden">
+                        <button id="btn-confirmar-sorteio" onclick="confirmarETravarSorteio(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs shadow-xl transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-lock"></i><span>Confirmar e Travar Sorteio no Histórico</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                    <h3 class="font-black text-sm mb-3 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Histórico de Sorteios</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
+                                    <th class="pb-2.5">Data</th>
+                                    <th class="pb-2.5">Times</th>
+                                    <th class="pb-2.5">Escalação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico-sorteios">
+                                <tr><td colspan="3" class="py-3 text-center text-gray-400 text-xs">Nenhum sorteio registrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA FINANCEIRO -->
+            <div id="tab-financeiro" class="tab-content hidden space-y-5">
+                <div id="financeiro-relatorio-impressao" class="space-y-5">
+                    
+                    <div class="bg-gradient-to-r from-emerald-900/60 via-pitch-900 to-pitch-950 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block mb-1">Tesouraria Consolidada</span>
+                            <h3 id="fin-saldo" class="text-3xl font-black text-amber-400">R$ 0,00</h3>
+                        </div>
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <button onclick="openModal('modal-lancamento')" id="btn-novo-lancamento" class="manager-access flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-lg transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-plus"></i><span>Novo Lançamento</span>
+                            </button>
+                            <button onclick="imprimirRelatorioGeral()" class="flex-1 md:flex-initial bg-pitch-800 hover:bg-pitch-700 px-4 py-3 rounded-2xl text-xs font-bold text-amber-400 shadow transition flex items-center justify-center space-x-1.5 border border-pitch-700">
+                                <i class="fa-solid fa-print"></i><span>Imprimir PDF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg font-bold"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Entradas (Mês)</p>
+                                <h3 id="fin-entradas" class="text-xl font-black text-emerald-400 mt-0.5">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg font-bold"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Saídas (Mês)</p>
+                                <h3 id="fin-saidas" class="text-xl font-black text-rose-400 mt-0.5">R$ 0,00</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl print:hidden">
+                        <h3 class="font-bold text-xs text-amber-400 mb-3"><i class="fa-solid fa-chart-column mr-2"></i>Comparativo Anual (Entradas vs. Saídas)</h3>
+                        <div class="h-56 w-full"><canvas id="grafico-financeiro"></canvas></div>
+                    </div>
+
+                    <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex justify-between items-center print:hidden">
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-1 font-bold uppercase tracking-wider">Filtrar por Mês:</label>
+                            <input type="month" id="filtro-mes" onchange="carregarFinanceiro()" class="bg-pitch-950 border border-pitch-800 rounded-xl px-3.5 py-2 text-xs text-white">
+                        </div>
+                    </div>
+
+                    <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl space-y-3">
+                        <h3 class="font-black text-sm mb-3 text-white"><i class="fa-solid fa-book mr-2"></i>Extrato do Livro Caixa</h3>
+                        <div id="tabela-financeiro-body" class="space-y-2.5"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA RELATÓRIOS / MAIS (GERAÇÃO SOB DEMANDA) -->
+            <div id="tab-relatorios" class="tab-content hidden space-y-5">
+                <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3 print:hidden">
+                    <div>
+                        <h3 class="font-black text-xs text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Central de Relatórios Gerenciais</h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Selecione uma das opções abaixo para gerar o relatório sob demanda.</p>
+                    </div>
+                    <button id="btn-imprimir-relatorio" onclick="imprimirRelatorioGeral()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-print"></i><span>Imprimir Relatório Gerado</span>
+                    </button>
+                </div>
+
+                <!-- BOTÕES DE GERAÇÃO DE RELATÓRIOS -->
+                <div class="flex flex-wrap gap-2 print:hidden" id="container-botoes-relatorios">
+                    <button onclick="gerarRelatorio('posicoes')" id="btn-rel-posicoes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-chart-bar mr-1.5 text-emerald-400"></i>Gerar: Por Posição
+                    </button>
+                    <button onclick="gerarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-clipboard-user mr-1.5 text-emerald-400"></i>Gerar: Presenças (Mensalistas)
+                    </button>
+                    <button onclick="gerarRelatorio('convidados')" id="btn-rel-convidados" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-user-clock mr-1.5 text-amber-400"></i>Gerar: Convidados
+                    </button>
+                    <button onclick="gerarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5 text-rose-400"></i>Gerar: Inadimplentes (WhatsApp)
+                    </button>
+                </div>
+
+                <!-- ESTADO INICIAL VAZIO ANTES DE GERAR -->
+                <div id="relatorios-placeholder" class="bg-pitch-900/60 border border-pitch-800/80 rounded-3xl p-12 text-center space-y-3 print:hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-pitch-800 text-amber-400 flex items-center justify-center mx-auto text-lg shadow">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <h4 class="text-sm font-black text-white">Nenhum relatório gerado no momento</h4>
+                    <p class="text-xs text-gray-400 max-w-md mx-auto">Clique em um dos botões acima para processar e visualizar os dados atualizados do clube.</p>
+                </div>
+
+                <!-- ÁREA DOS RELATÓRIOS GERADOS -->
+                <div id="relatorios-conteudo-impressao" class="space-y-5 hidden">
+                    <div id="bloco-rel-posicoes" class="rel-bloco space-y-5 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl space-y-3">
+                                <h3 class="font-black text-xs text-emerald-400">Membros por Posição</h3>
+                                <div id="relatorio-posicoes-lista" class="space-y-2 text-xs"></div>
+                            </div>
+                            <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-black text-xs text-amber-400 mb-2">Resumo do Plantel</h3>
+                                    <p class="text-xs text-gray-300">Consolidado total de membros cadastrados.</p>
+                                </div>
+                                <div class="pt-3 border-t border-pitch-800 flex justify-between items-center text-sm">
+                                    <span class="text-gray-400 text-xs font-bold uppercase">Total:</span>
+                                    <strong id="rel-total-membros" class="text-emerald-400 text-xl font-black">0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bloco-rel-presencas" class="rel-bloco space-y-5 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                            <h3 class="font-black text-sm mb-3 text-white">Participações por Atleta Mensalista</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
+                                            <th class="pb-2.5">Atleta</th>
+                                            <th class="pb-2.5">Posição</th>
+                                            <th class="pb-2.5">Datas (Dia/Mês)</th>
+                                            <th class="pb-2.5 text-right">Presenças</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-presencas"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bloco-rel-convidados" class="rel-bloco space-y-5 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-black text-sm text-amber-400">Relatório de Convidados & Participações</h3>
+                                <span id="contador-rel-convidados" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold">0 convidados</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
+                                            <th class="pb-2.5">Convidado</th>
+                                            <th class="pb-2.5">Telefone</th>
+                                            <th class="pb-2.5">Datas (Dia/Mês)</th>
+                                            <th class="pb-2.5 text-right">Jogos</th>
+                                            <th class="pb-2.5 text-right">Total Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-convidados"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bloco-rel-inadimplentes" class="rel-bloco space-y-5 hidden">
+                        <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-black text-sm text-rose-400">Atletas Pendentes (<span id="rel-comp-inadimplentes">-</span>)</h3>
+                                <span id="contador-inadimplentes" class="text-[11px] px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-bold">0 pendentes</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
+                                            <th class="pb-2.5">Atleta</th>
+                                            <th class="pb-2.5">Telefone</th>
+                                            <th class="pb-2.5">Posição</th>
+                                            <th class="pb-2.5">Status</th>
+                                            <th class="pb-2.5 text-right">Cobrança</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-inadimplentes"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA USUÁRIOS (ADMIN) -->
+            <div id="tab-usuarios" class="tab-content hidden">
+                <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl max-w-4xl mx-auto shadow-2xl">
+                    <div class="flex justify-between items-center mb-4 border-b border-pitch-800 pb-3">
+                        <div>
+                            <h3 class="font-black text-sm text-emerald-400">Gestão de Usuários & Acessos</h3>
+                            <p class="text-[11px] text-gray-400 mt-0.5">Controle de permissões do painel.</p>
+                        </div>
+                        <button onclick="abrirModalNovoUsuario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-user-plus"></i><span>Novo Usuário</span>
+                        </button>
+                    </div>
+                    <div id="usuarios-lista" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DE PERFIL DO ATLETA -->
+    <div id="modal-perfil-atleta" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('modal-perfil-atleta')" class="absolute top-5 right-5 text-gray-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center border-b border-pitch-800 pb-4 mb-4">
+                <h3 id="perfil-nome" class="font-black text-lg md:text-xl text-amber-400">-</h3>
+                <p id="perfil-detalhes-gerais" class="text-xs text-gray-400 mt-0.5">-</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Total de Jogos</span>
+                    <strong id="perfil-total-jogos" class="text-xl text-emerald-400 font-black mt-0.5 block">0</strong>
+                </div>
+                <div class="bg-pitch-950 p-3.5 rounded-2xl border border-pitch-800">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Competência</span>
+                    <strong id="perfil-status-mensalidade" class="text-xs font-bold mt-1 block">-</strong>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-bold text-xs text-emerald-400 uppercase mb-2"><i class="fa-solid fa-calendar-days mr-1.5"></i>Datas Presentes</h4>
+                    <div id="perfil-lista-presencas" class="bg-pitch-950 p-3 rounded-2xl border border-pitch-800 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum registro.
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-xs text-amber-400 uppercase mb-2"><i class="fa-solid fa-wallet mr-1.5"></i>Competências Pagas</h4>
+                    <div id="perfil-lista-financeiro" class="bg-pitch-950 p-3 rounded-2xl border border-pitch-800 max-h-36 overflow-y-auto text-xs space-y-1 text-gray-300">
+                        Nenhum lançamento.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-5 mt-5 border-t border-pitch-800 text-right">
+                <button type="button" onclick="closeModal('modal-perfil-atleta')" class="bg-pitch-800 hover:bg-pitch-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE CONVIDADO -->
+    <div id="modal-convidado" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 id="modal-convidado-titulo" class="text-sm font-bold text-amber-400 mb-4">Cadastrar / Editar Convidado</h3>
+            <form id="form-convidado" onsubmit="salvarConvidado(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="input-convidado-id">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nome do Convidado *</label><input type="text" id="conv-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">WhatsApp *</label><input type="text" id="conv-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Valor da Diária (R$) *</label><input type="number" step="0.01" id="conv-valor" required placeholder="15.00" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-amber-400 font-bold"></div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-convidado')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-convidado" class="w-1/2 bg-amber-500 hover:bg-amber-400 py-3 rounded-xl font-bold text-gray-950 transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE RECIBO -->
+    <div id="modal-recibo" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white text-gray-900 rounded-3xl p-6 w-full max-w-md shadow-2xl relative" id="modal-recibo-conteudo">
+            <div class="text-center border-b pb-3 mb-3">
+                <h2 id="recibo-clube-nome" class="font-black text-base text-emerald-800 uppercase tracking-wider">CLUBE MENINOS DA VILA</h2>
+                <p class="text-[10px] text-gray-500">Comprovativo Oficial de Tesouraria</p>
+            </div>
+            <div class="flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-xl text-xs font-medium">
+                <div><span class="text-gray-500 block">Recibo:</span><strong id="recibo-id" class="text-xs">#0001</strong></div>
+                <div class="text-right"><span class="text-gray-500 block">Data:</span><strong id="recibo-data" class="text-xs">-</strong></div>
+            </div>
+            <div class="space-y-2.5 text-xs mb-5">
+                <p>Recebemos de: <strong id="recibo-descricao" class="text-gray-800">-</strong></p>
+                <p>Quantia: <strong id="recibo-valor" class="text-emerald-700 text-sm font-bold">R$ 0,00</strong></p>
+            </div>
+            <div class="pt-6 border-t text-center mt-6">
+                <div class="w-36 mx-auto border-b border-gray-400 mb-1"></div>
+                <p class="text-[10px] text-gray-600 font-bold">Tesouraria</p>
+            </div>
+            <div class="flex space-x-2.5 pt-4 mt-4 border-t print:hidden">
+                <button type="button" onclick="fecharModalRecibo()" class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-xl text-xs font-bold transition">Fechar</button>
+                <button type="button" onclick="imprimirReciboIndividual()" class="w-1/2 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-print mr-1"></i>Imprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIG CLUBE -->
+    <div id="modal-config-clube" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 class="text-sm font-bold text-amber-400 mb-4">Editar Identidade do Clube</h3>
+            <form onsubmit="salvarConfigClube(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nome</label><input type="text" id="cfg-nome-clube" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Instagram</label><input type="text" id="cfg-subtitulo-clube" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Logo URL</label><input type="url" id="cfg-logo-url" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-config-clube')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL JOGADOR -->
+    <div id="modal-novo-jogador" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 id="modal-jogador-titulo" class="text-sm font-bold text-emerald-400 mb-4">Cadastrar / Editar Atleta</h3>
+            <form id="form-novo-jogador" onsubmit="salvarJogador(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="input-jogador-id">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nome *</label><input type="text" id="input-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nascimento *</label><input type="date" id="input-nascimento" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">WhatsApp *</label><input type="text" id="input-telefone" required placeholder="(93) 9XXXX-XXXX" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Função</label>
+                        <select id="input-funcao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                            <option value="Atleta">Atleta (Mensalista)</option>
+                            <option value="Diretor">Diretor</option>
+                            <option value="Vice Diretor">Vice Diretor</option>
+                            <option value="Secretário">Secretário</option>
+                            <option value="Tesoureiro">Tesoureiro</option>
+                            <option value="Coordenador de Patrimônio">Coordenador de Patrimônio</option>
+                            <option value="Mídia">Mídia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Aptidão</label>
+                        <select id="input-aptidao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                            <option value="Ativo">Ativo (Apto)</option>
+                            <option value="Suspenso">Suspenso</option>
+                            <option value="Bloqueado">Bloqueado</option>
+                            <option value="Disciplinado">Disciplinado</option>
+                            <option value="DM">DM (Lesionado)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Posição</label>
+                        <select id="input-posicao" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                            <option value="Goleiro">Goleiro (R$ 20)</option>
+                            <option value="Zagueiro">Zagueiro (R$ 40)</option>
+                            <option value="Lateral">Lateral (R$ 40)</option>
+                            <option value="Meia">Meia (R$ 40)</option>
+                            <option value="Atacante">Atacante (R$ 40)</option>
+                        </select>
+                    </div>
+                    <div id="container-input-mensalidade">
+                        <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Mensalidade</label>
+                        <select id="input-mensalidade" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Pago">Pago</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-novo-jogador')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-jogador" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PARTIDA -->
+    <div id="modal-partida" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 class="text-sm font-bold text-emerald-400 mb-4">Editar Próxima Partida</h3>
+            <form onsubmit="salvarPartidaConfig(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Data</label><input type="date" id="cfg-data" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Local</label><input type="text" id="cfg-local" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Horário</label><input type="text" id="cfg-horario" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Custo (R$)</label><input type="number" step="0.01" id="cfg-custo" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-partida')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LANÇAMENTO -->
+    <div id="modal-lancamento" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 class="text-sm font-bold text-emerald-400 mb-3">Novo Lançamento no Caixa</h3>
+            <div class="flex flex-wrap gap-1.5 mb-3">
+                <button type="button" onclick="preencherValorFin('Mensalidade Goleiro', 20, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold border border-pitch-700">Goleiro (R$ 20)</button>
+                <button type="button" onclick="preencherValorFin('Mensalidade Jogador', 40, 'Entrada')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold border border-pitch-700">Jogador (R$ 40)</button>
+                <button type="button" onclick="preencherValorFin('Aluguel do Campo', 100, 'Saida')" class="bg-pitch-800 hover:bg-pitch-700 text-[10px] px-2.5 py-1.5 rounded-lg text-rose-400 font-bold border border-pitch-700">Campo (R$ 100)</button>
+            </div>
+            <form onsubmit="salvarLancamento(event)" class="space-y-3 text-xs">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Descrição</label><input type="text" id="fin-desc" required placeholder="Ex: Mensalidade..." class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Tipo</label>
+                        <select id="fin-tipo" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                            <option value="Entrada">Entrada (Receita)</option>
+                            <option value="Saida">Saída (Despesa)</option>
+                        </select>
+                    </div>
+                    <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Valor (R$)</label><input type="number" step="0.01" id="fin-valor" required placeholder="0.00" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                </div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Data</label><input type="date" id="fin-data" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-lancamento')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-lancamento" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL USUÁRIO -->
+    <div id="modal-usuario" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-pitch-900 border border-pitch-800 rounded-3xl p-5 md:p-7 w-full max-w-md shadow-2xl">
+            <h3 id="modal-usuario-titulo" class="text-sm font-bold text-emerald-400 mb-4">Gerenciar Usuário</h3>
+            <form onsubmit="salvarUsuario(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="input-usuario-id">
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Nome</label><input type="text" id="user-nome" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">E-mail</label><input type="email" id="user-email" required class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div><label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Senha <span class="text-gray-500 font-normal">(Opcional)</span></label><input type="password" id="user-senha" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white"></div>
+                <div>
+                    <label class="text-gray-300 font-bold mb-1 block uppercase text-[10px]">Permissão</label>
+                    <select id="user-perfil" class="w-full bg-pitch-950 border border-pitch-800 rounded-xl p-3 text-white">
+                        <option value="usuario">Usuário Comum</option>
+                        <option value="secretario">Secretário</option>
+                        <option value="tesoureiro">Tesoureiro</option>
+                        <option value="gestor">Gestor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2.5 pt-3">
+                    <button type="button" onclick="closeModal('modal-usuario')" class="w-1/2 bg-pitch-800 hover:bg-pitch-700 py-3 rounded-xl font-bold text-gray-300 transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-usuario" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-white transition shadow">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
+
+        const API_URL = 'https://meninos-da-vila-api.onrender.com';
+        let listaAtletasGlobal = [];
+        let listaConvidadosGlobal = [];
+        let configsGlobal = {};
+        let historicoSorteiosGlobal = [];
+        let ultimoSorteioGerado = null;
+        let chartFinanceiroInstance = null;
+        let competenciaAtual = new Date().toISOString().slice(0, 7);
+
+        const token = localStorage.getItem('token');
+        let usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
+        if (!token && !window.location.pathname.endsWith('login.html')) {
+            window.location.href = 'login.html';
+        }
+
+        function showToast(mensagem, tipo = 'sucesso') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const cores = { sucesso: 'bg-emerald-600 border-emerald-400 text-white', erro: 'bg-rose-600 border-rose-400 text-white', aviso: 'bg-amber-500 border-amber-300 text-gray-950' };
+            const icones = { sucesso: 'fa-circle-check', erro: 'fa-circle-exclamation', aviso: 'fa-triangle-exclamation' };
+            toast.className = `pointer-events-auto flex items-center space-x-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs font-bold transform transition-all duration-300 translate-x-full opacity-0 ${cores[tipo] || cores.sucesso}`;
+            toast.innerHTML = `<i class="fa-solid ${icones[tipo]} text-sm"></i><span>${mensagem}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+            setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+
+        function setBotaoCarregando(btn, carregando, textoOriginal = '') {
+            if (!btn) return;
+            if (carregando) {
+                btn.dataset.textoOriginal = btn.innerHTML;
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Processando...`;
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                btn.innerHTML = textoOriginal || btn.dataset.textoOriginal || 'Salvar';
+            }
+        }
+
+        function formatarCompetenciaLabel(compStr) {
+            if (!compStr) return '';
+            const [ano, mes] = compStr.split('-');
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${meses[parseInt(mes, 10) - 1]}/${ano}`;
+        }
+
+        function toTitleCase(str) {
+            if (!str) return '';
+            return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        function alterarCompetenciaGlobal(novaComp) {
+            if (!novaComp) return;
+            competenciaAtual = novaComp;
+            const elGlobal = document.getElementById('seletor-competencia-global');
+            const elElenco = document.getElementById('filtro-elenco-competencia');
+            if (elGlobal) elGlobal.value = novaComp;
+            if (elElenco) elElenco.value = novaComp;
+            
+            const lblFmt = formatarCompetenciaLabel(novaComp);
+            const elDashComp = document.getElementById('dash-lbl-comp');
+            if (elDashComp) elDashComp.innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i>Quitadas (${lblFmt})`;
+
+            const elCompInad = document.getElementById('rel-comp-inadimplentes');
+            if (elCompInad) elCompInad.innerText = lblFmt;
+            
+            carregarJogadores();
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const perfil = usuarioLogado.perfil;
+            if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            if (['admin', 'gestor', 'tesoureiro', 'secretario'].includes(perfil)) {
+                document.querySelectorAll('.manager-access').forEach(el => el.classList.remove('hidden'));
+            }
+
+            if (usuarioLogado.nome) {
+                const elNome = document.getElementById('dashboard-saudacao-nome');
+                if (elNome) elNome.innerText = `Olá, ${toTitleCase(usuarioLogado.nome.split(' ')[0])}!`;
+            }
+
+            if (perfil === 'secretario') {
+                document.querySelectorAll('.financeiro-nav-item').forEach(el => el.remove());
+                document.querySelectorAll('.financeiro-card-view').forEach(el => el.remove());
+                document.querySelectorAll('.financeiro-link-btn').forEach(el => el.remove());
+                const dashGrid = document.getElementById('dashboard-cards-grid');
+                if(dashGrid) dashGrid.className = "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6";
+            }
+
+            if (perfil === 'tesoureiro') {
+                document.getElementById('nav-presenca')?.remove();
+                document.getElementById('mob-nav-presenca')?.remove();
+                document.getElementById('nav-sorteio')?.remove();
+                document.getElementById('mob-nav-sorteio')?.remove();
+
+                document.getElementById('btn-rel-posicoes')?.remove();
+                document.getElementById('btn-rel-presencas')?.remove();
+                document.getElementById('bloco-rel-posicoes')?.remove();
+                document.getElementById('bloco-rel-presencas')?.remove();
+            }
+
+            const dataAtual = new Date();
+            const anoMes = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}`;
+            competenciaAtual = anoMes;
+
+            document.getElementById('filtro-mes').value = anoMes;
+            document.getElementById('fin-data').valueAsDate = dataAtual;
+            document.getElementById('data-presenca-manual').value = dataAtual.toISOString().split('T')[0];
+
+            alterarCompetenciaGlobal(anoMes);
+            await carregarConfiguracoes();
+            await carregarConvidados();
+            if (perfil !== 'secretario') {
+                carregarFinanceiro();
+            }
+            carregarUsuariosSistema();
+            await carregarHistoricoSorteios();
+            atualizarDataRodada();
+        });
+
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.href = 'login.html'; }
+
+        function switchTab(tabId) {
+            if (tabId === 'financeiro' && usuarioLogado.perfil === 'secretario') {
+                showToast('Acesso não autorizado ao módulo financeiro.', 'erro');
+                return;
+            }
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('bg-gradient-to-r', 'from-emerald-500/20', 'to-transparent', 'text-emerald-400', 'border', 'border-emerald-500/30');
+                b.classList.add('text-gray-300');
+            });
+            document.querySelectorAll('.mob-nav-btn').forEach(b => {
+                b.classList.remove('text-emerald-400', 'font-bold');
+                b.classList.add('text-gray-400', 'font-medium');
+            });
+
+            document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
+            
+            const btn = document.getElementById(`nav-${tabId}`);
+            if (btn) {
+                btn.classList.add('bg-gradient-to-r', 'from-emerald-500/20', 'to-transparent', 'text-emerald-400', 'border', 'border-emerald-500/30');
+                btn.classList.remove('text-gray-300');
+            }
+
+            const mobBtn = document.getElementById(`mob-nav-${tabId}`);
+            if (mobBtn) {
+                mobBtn.classList.add('text-emerald-400', 'font-bold');
+                mobBtn.classList.remove('text-gray-400', 'font-medium');
+            }
+        }
+
+        function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+
+        function filtrarAfastadosDashboard() {
+            switchTab('elenco');
+            document.getElementById('filtro-elenco-aptidao').value = 'Afastados';
+            aplicarFiltrosElenco();
+        }
+
+        function atualizarDataRodada() {
+            const val = document.getElementById('data-presenca-manual').value;
+            if (val) {
+                const dataFmt = new Date(val + 'T00:00:00').toLocaleDateString('pt-BR');
+                document.getElementById('sorteio-lbl-data').innerText = dataFmt;
+            }
+            verificarTravaRodadaAtual();
+        }
+
+        function imprimirReciboIndividual() {
+            document.body.classList.add('imprimindo-recibo');
+            window.print();
+            setTimeout(() => document.body.classList.remove('imprimindo-recibo'), 500);
+        }
+
+        function fecharModalRecibo() { document.body.classList.remove('imprimindo-recibo'); closeModal('modal-recibo'); }
+        function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
+
+        // ==========================================
+        // GERAÇÃO DE RELATÓRIOS SOB DEMANDA
+        // ==========================================
+        async function gerarRelatorio(tipo) {
+            document.getElementById('relatorios-placeholder')?.classList.add('hidden');
+            document.getElementById('relatorios-conteudo-impressao')?.classList.remove('hidden');
+            document.getElementById('btn-imprimir-relatorio')?.classList.remove('hidden');
+
+            document.querySelectorAll('.rel-bloco').forEach(b => b.classList.add('hidden'));
+            document.querySelectorAll('.rel-btn').forEach(b => {
+                b.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow";
+            });
+
+            const btnAtivo = document.getElementById(`btn-rel-${tipo}`);
+            if (btnAtivo) {
+                btnAtivo.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-emerald-500/40 shadow";
+            }
+
+            if (tipo === 'convidados') {
+                await carregarConvidados();
+                renderRelatorioConvidados();
+            } else {
+                await carregarJogadores();
+                renderRelatorios(listaAtletasGlobal);
+            }
+
+            document.getElementById(`bloco-rel-${tipo}`)?.classList.remove('hidden');
+            showToast('Relatório gerado com sucesso!');
+        }
+
+        function dispararConvocacaoGeralWhatsApp() {
+            const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
+            const nomesSelecionados = Array.from(checkboxes).map(cb => toTitleCase(cb.dataset.nome));
+
+            let linhasLista = '';
+            for (let i = 1; i <= 36; i++) {
+                const nomeAtleta = nomesSelecionados[i - 1] || '';
+                linhasLista += `${i}. ${nomeAtleta}\n`;
+            }
+
+            const texto = `C.M.V. - Clube Meninos Da Vila (Igreja Batista Bela Vista)\n\n` +
+                          `Sábado 16h Cabos E Soldados\n` +
+                          `${linhasLista}`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        function enviarWhatsApp(telefone, tipo, nomeAtleta, valorExtra = '40.00') {
+            if (!telefone || telefone.trim() === '') {
+                showToast('Sem número de telefone cadastrado!', 'erro');
+                return;
+            }
+            let foneLimpo = telefone.replace(/\D/g, '');
+            if (!foneLimpo.startsWith('55')) foneLimpo = '55' + foneLimpo;
+
+            const compLabel = formatarCompetenciaLabel(competenciaAtual);
+            let mensagem = '';
+            if (tipo === 'cobranca') {
+                mensagem = `Olá ${toTitleCase(nomeAtleta)}, tudo bem? Passando para lembrar da sua mensalidade referente a *${compLabel}* no Clube Meninos da Vila no valor de R$ ${valorExtra}. Segue a chave Pix para pagamento: [PIX_CLUBE]. Qualquer dúvida, estamos à disposição! ⚽🔥`;
+            } else if (tipo === 'cobranca_diaria') {
+                mensagem = `Olá ${toTitleCase(nomeAtleta)}, tudo bem? Passando para lembrar da sua diária no valor de *R$ ${parseFloat(valorExtra).toFixed(2)}* referente à sua participação no Clube Meninos da Vila. Segue a chave Pix para pagamento: [PIX_CLUBE]. Tamo junto! ⚽🔥`;
+            } else if (tipo === 'convocacao') {
+                mensagem = `Salve ${toTitleCase(nomeAtleta)}! ⚽ Você está convocado para a nossa próxima partida oficial do Clube Meninos da Vila. Tamo junto!`;
+            }
+
+            const url = `https://api.whatsapp.com/send?phone=${foneLimpo}&text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        async function carregarConfiguracoes() {
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`);
+                configsGlobal = await res.json();
+                if (configsGlobal.nome_clube) {
+                    document.getElementById('sidebar-nome-clube').innerText = configsGlobal.nome_clube;
+                    document.getElementById('recibo-clube-nome').innerText = configsGlobal.nome_clube;
+                }
+                if (configsGlobal.subtitulo_clube) document.getElementById('sidebar-subtitulo-clube').innerHTML = `<i class="fa-brands fa-instagram mr-1"></i>${configsGlobal.subtitulo_clube}`;
+                if (configsGlobal.logo_url) {
+                    const imgEl = document.getElementById('sidebar-logo');
+                    const mobImg = document.getElementById('mobile-logo');
+                    if(imgEl) imgEl.src = configsGlobal.logo_url;
+                    if(mobImg) mobImg.src = configsGlobal.logo_url;
+                }
+                document.getElementById('lbl-partida-data').innerText = configsGlobal.partida_data ? new Date(configsGlobal.partida_data + 'T00:00:00').toLocaleDateString('pt-BR') : 'A definir';
+                document.getElementById('lbl-partida-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
+                document.getElementById('lbl-partida-horario').innerText = configsGlobal.partida_horario || '19:00';
+                document.getElementById('lbl-partida-custo').innerText = `R$ ${parseFloat(configsGlobal.partida_custo || 100).toFixed(2)}`;
+                document.getElementById('sorteio-lbl-local').innerText = configsGlobal.partida_local || 'Campo Principal - CMV';
+                if (configsGlobal.partida_data) {
+                    document.getElementById('data-presenca-manual').value = configsGlobal.partida_data;
+                    atualizarDataRodada();
+                }
+                verificarTravaRodadaAtual();
+            } catch (err) { console.error('Erro configs:', err); }
+        }
+
+        function abrirModalConfigClube() {
+            document.getElementById('cfg-nome-clube').value = configsGlobal.nome_clube || 'MENINOS DA VILA';
+            document.getElementById('cfg-subtitulo-clube').value = configsGlobal.subtitulo_clube || '@cmvitb';
+            document.getElementById('cfg-logo-url').value = configsGlobal.logo_url || '';
+            openModal('modal-config-clube');
+        }
+
+        async function salvarConfigClube(e) {
+            e.preventDefault();
+            const payload = { ...configsGlobal, nome_clube: document.getElementById('cfg-nome-clube').value, subtitulo_clube: document.getElementById('cfg-subtitulo-clube').value, logo_url: document.getElementById('cfg-logo-url').value };
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+                if (res.ok) { showToast('Identidade atualizada!'); closeModal('modal-config-clube'); carregarConfiguracoes(); }
+                else { showToast('Erro ao atualizar.', 'erro'); }
+            } catch (err) { console.error(err); }
+        }
+
+        function abrirModalPartida() {
+            document.getElementById('cfg-data').value = configsGlobal.partida_data || '';
+            document.getElementById('cfg-local').value = configsGlobal.partida_local || 'Campo Principal - CMV';
+            document.getElementById('cfg-horario').value = configsGlobal.partida_horario || '19:00';
+            document.getElementById('cfg-custo').value = configsGlobal.partida_custo || '100.00';
+            openModal('modal-partida');
+        }
+
+        async function salvarPartidaConfig(e) {
+            e.preventDefault();
+            const payload = { ...configsGlobal, partida_data: document.getElementById('cfg-data').value, partida_local: document.getElementById('cfg-local').value, partida_horario: document.getElementById('cfg-horario').value, partida_custo: document.getElementById('cfg-custo').value };
+            try {
+                const res = await fetch(`${API_URL}/api/configuracoes`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+                if (res.ok) { showToast('Partida atualizada!'); closeModal('modal-partida'); await carregarConfiguracoes(); verificarTravaRodadaAtual(); }
+                else { showToast('Erro ao atualizar.', 'erro'); }
+            } catch (err) { console.error(err); }
+        }
+
+        // ==========================================
+        // GESTÃO DE CONVIDADOS NA NUVEM (API)
+        // ==========================================
+        async function carregarConvidados() {
+            try {
+                const res = await fetch(`${API_URL}/api/convidados`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    listaConvidadosGlobal = await res.json();
+                    renderConvidados();
+                }
+            } catch (err) {
+                console.error('Erro ao carregar convidados:', err);
+            }
+        }
+
+        function abrirModalNovoConvidado() {
+            document.getElementById('form-convidado').reset();
+            document.getElementById('input-convidado-id').value = '';
+            document.getElementById('conv-valor').value = '15.00';
+            document.getElementById('modal-convidado-titulo').innerText = 'Cadastrar Novo Convidado';
+            openModal('modal-convidado');
+        }
+
+        function prepararEdicaoConvidado(id) {
+            const conv = listaConvidadosGlobal.find(c => c.id === id);
+            if (!conv) return;
+            document.getElementById('input-convidado-id').value = conv.id;
+            document.getElementById('conv-nome').value = conv.nome;
+            document.getElementById('conv-telefone').value = conv.telefone || '';
+            document.getElementById('conv-valor').value = conv.valor_diaria || 15.00;
+            document.getElementById('modal-convidado-titulo').innerText = 'Editar Convidado';
+            openModal('modal-convidado');
+        }
+
+        async function salvarConvidado(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-convidado');
+            setBotaoCarregando(btn, true);
+
+            const id = document.getElementById('input-convidado-id').value;
+            const dados = {
+                nome: document.getElementById('conv-nome').value,
+                telefone: document.getElementById('conv-telefone').value,
+                valor_diaria: parseFloat(document.getElementById('conv-valor').value) || 15.00
+            };
+
+            const metodo = id ? 'PUT' : 'POST';
+            const url = id ? `${API_URL}/api/convidados/${id}` : `${API_URL}/api/convidados`;
+
+            try {
+                const res = await fetch(url, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(dados)
+                });
+                if (res.ok) {
+                    showToast('Convidado salvo com sucesso!');
+                    closeModal('modal-convidado');
+                    await carregarConvidados();
+                } else {
+                    showToast('Erro ao salvar convidado.', 'erro');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erro de conexão.', 'erro');
+            } finally {
+                setBotaoCarregando(btn, false, 'Salvar');
+            }
+        }
+
+        async function excluirConvidado(id) {
+            if (!confirm('Deseja realmente remover este convidado?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/convidados/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showToast('Convidado removido.');
+                    await carregarConvidados();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function registrarPresencaConvidado(id, valorSugerido = null) {
+            const conv = listaConvidadosGlobal.find(c => c.id === id);
+            if (!conv) return;
+
+            const valorDiaria = valorSugerido !== null ? valorSugerido : (conv.valor_diaria || 15.00);
+            const dataRodada = document.getElementById('data-presenca-manual')?.value || new Date().toISOString().split('T')[0];
+            const confirmarPagamento = confirm(`Registrar presença para ${toTitleCase(conv.nome)} na data ${new Date(dataRodada + 'T00:00:00').toLocaleDateString('pt-BR')}?\n\nClique em OK se o convidado PAGOU a diária de R$ ${parseFloat(valorDiaria).toFixed(2)} (será lançado no caixa), ou Cancelar para registrar apenas a presença/jogo.`);
+
+            try {
+                const res = await fetch(`${API_URL}/api/convidados/${id}/presenca`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ pagar_diaria: confirmarPagamento, valor_diaria: valorDiaria, data_partida: dataRodada })
+                });
+
+                if (res.ok) {
+                    if (confirmarPagamento) {
+                        showToast(`Presença registrada e diária de R$ ${parseFloat(valorDiaria).toFixed(2)} lançada no Caixa!`);
+                        if (usuarioLogado.perfil !== 'secretario') carregarFinanceiro();
+                    } else {
+                        showToast(`Participação registrada (+1 Jogo para ${toTitleCase(conv.nome)})!`);
+                    }
+                    await carregarConvidados();
+                } else {
+                    showToast('Erro ao registrar presença do convidado.', 'erro');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erro de conexão.', 'erro');
+            }
+        }
+
+        async function removerPresencaConvidado(id, nomeConvidado) {
+            if (!confirm(`Remover 1 participação de "${toTitleCase(nomeConvidado)}"?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/api/convidados/${id}/presenca`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showToast('Participação removida!');
+                    await carregarConvidados();
+                } else {
+                    showToast('Erro ao remover participação.', 'erro');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erro de conexão.', 'erro');
+            }
+        }
+
+        function renderConvidados() {
+            const grid = document.getElementById('convidados-grid');
+            if (!grid) return;
+            const podeGerenciar = ['admin', 'gestor', 'tesoureiro', 'secretario'].includes(usuarioLogado.perfil);
+            const isAdmin = usuarioLogado.perfil === 'admin';
+
+            if (listaConvidadosGlobal.length === 0) {
+                grid.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">Nenhum convidado cadastrado na nuvem. Clique em "Novo Convidado" acima.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            listaConvidadosGlobal.forEach(c => {
+                const btnRemoverPresenca = (podeGerenciar && (c.participacoes > 0)) ? `<button onclick="removerPresencaConvidado(${c.id}, '${c.nome}')" class="text-rose-400 text-[10px] hover:underline ml-1 shrink-0 font-bold" title="Remover 1 participação">-1J</button>` : '';
+                const btnExcluir = isAdmin ? `<button onclick="excluirConvidado(${c.id})" class="bg-pitch-800 hover:bg-pitch-700 text-rose-400 p-2 rounded-xl text-xs transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                grid.innerHTML += `
+                    <div class="p-3.5 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-pitch-800/40 transition gap-3">
+                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-2xl bg-pitch-950 border border-pitch-800 flex items-center justify-center font-black text-xs text-amber-400 shrink-0 shadow-inner">
+                                <i class="fa-solid fa-user-clock"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-white text-xs truncate flex items-center">
+                                    <span class="truncate">${toTitleCase(c.nome)}</span>
+                                    <span class="ml-2 text-[9px] px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-300">Diária: R$ ${parseFloat(c.valor_diaria || 0).toFixed(2)}</span>
+                                </h4>
+                                <div class="flex items-center space-x-2 mt-0.5 text-[10px] text-gray-400">
+                                    <span>📞 ${c.telefone || 'Sem tel'}</span>
+                                    <span>•</span>
+                                    <span class="text-emerald-400 font-bold">📋 ${c.participacoes || 0} participações ${btnRemoverPresenca}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-0 border-pitch-800">
+                            <button onclick="registrarPresencaConvidado(${c.id})" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1" title="Registrar Presença / Jogo e Pagamento">
+                                <i class="fa-solid fa-check"></i><span>+1 Jogo / Pagar</span>
+                            </button>
+                            ${c.telefone ? `<button onclick="enviarWhatsApp('${c.telefone}', 'cobranca_diaria', '${c.nome}', '${c.valor_diaria}')" class="bg-pitch-800 hover:bg-pitch-700 text-emerald-400 p-2 rounded-xl text-xs transition" title="Cobrar Diária WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}
+                            <button onclick="prepararEdicaoConvidado(${c.id})" class="bg-pitch-800 hover:bg-pitch-700 text-amber-400 p-2 rounded-xl text-xs transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            ${btnExcluir}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderRelatorioConvidados() {
+            const tbody = document.getElementById('tabela-relatorio-convidados');
+            const contador = document.getElementById('contador-rel-convidados');
+            if (!tbody) return;
+            if (contador) contador.innerText = `${listaConvidadosGlobal.length} convidados`;
+            if (listaConvidadosGlobal.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum convidado cadastrado.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            listaConvidadosGlobal.forEach(c => {
+                const totalArrecadado = (c.participacoes || 0) * (c.valor_diaria || 0);
+                const datasFmt = (Array.isArray(c.datas_presencas) && c.datas_presencas.length > 0) 
+                    ? c.datas_presencas.join(', ') 
+                    : '<span class="text-gray-500 italic">Sem datas</span>';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                        <td class="py-3 font-bold text-white">${toTitleCase(c.nome)}</td>
+                        <td class="py-3 text-gray-300">${c.telefone || '-'}</td>
+                        <td class="py-3 text-amber-300 font-medium">${datasFmt}</td>
+                        <td class="py-3 text-right font-black text-emerald-400">${c.participacoes || 0}</td>
+                        <td class="py-3 text-right font-black text-amber-400">R$ ${totalArrecadado.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function carregarJogadores() {
+            try {
+                const res = await fetch(`${API_URL}/api/jogadores?competencia=${competenciaAtual}`);
+                const dados = await res.json();
+                if (Array.isArray(dados)) {
+                    listaAtletasGlobal = dados;
+                    renderDashboard(dados);
+                    aplicarFiltrosElenco();
+                    renderPresenca(dados);
+                }
+            } catch (err) { console.error('Erro ao buscar atletas:', err); }
+        }
+
+        function aplicarFiltrosElenco() {
+            const termo = (document.getElementById('filtro-elenco-nome')?.value || '').toLowerCase();
+            const pos = document.getElementById('filtro-elenco-posicao')?.value || '';
+            const mens = document.getElementById('filtro-elenco-mensalidade')?.value || '';
+            const apt = document.getElementById('filtro-elenco-aptidao')?.value || '';
+
+            const filtrados = listaAtletasGlobal.filter(j => {
+                const matchNome = j.nome.toLowerCase().includes(termo);
+                const matchPos = !pos || j.posicao === pos;
+                const matchMens = !mens || (j.status_mensalidade || 'Pendente') === mens;
+                const matchApt = !apt || (apt === 'Ativo' ? (!j.status_aptidao || j.status_aptidao === 'Ativo') : (j.status_aptidao && j.status_aptidao !== 'Ativo'));
+                return matchNome && matchPos && matchMens && matchApt;
+            });
+            renderElencoCompacto(filtrados);
+        }
+
+        function renderDashboard(jogadores) {
+            document.getElementById('dash-total-jogadores').innerText = jogadores.length;
+            const afastados = jogadores.filter(j => j.status_aptidao && j.status_aptidao !== 'Ativo').length;
+            document.getElementById('dash-afastados-count').innerText = afastados;
+            const pagos = jogadores.filter(j => j.status_mensalidade === 'Pago').length;
+            document.getElementById('dash-pagos-count').innerText = `${pagos}/${jogadores.length}`;
+            verificarAniversariantes(jogadores);
+        }
+
+        function verificarAniversariantes(jogadores) {
+            const hoje = new Date();
+            const diaMesHoje = `${String(hoje.getDate()).padStart(2, '0')}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+            const aniversariantes = jogadores.filter(j => {
+                if (!j.data_nascimento) return false;
+                const partes = j.data_nascimento.split('T')[0].split('-');
+                return `${partes[2]}-${partes[1]}` === diaMesHoje;
+            });
+            const banner = document.getElementById('aniversariante-banner');
+            const texto = document.getElementById('aniversariante-texto');
+            if (aniversariantes.length > 0) {
+                texto.innerHTML = `Hoje é aniversário de: ${aniversariantes.map(a => `<strong>${toTitleCase(a.nome)}</strong>`).join(', ')}! 🎂⚽`;
+                banner.classList.remove('hidden');
+            } else { banner.classList.add('hidden'); }
+        }
+
+        function renderElencoCompacto(jogadores) {
+            const grid = document.getElementById('jogadores-grid');
+            if (!grid) return;
+            const podeGerenciar = ['admin', 'gestor', 'tesoureiro', 'secretario'].includes(usuarioLogado.perfil);
+            const isAdmin = usuarioLogado.perfil === 'admin';
+            const isSecretario = usuarioLogado.perfil === 'secretario';
+
+            if (jogadores.length === 0) {
+                grid.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">Nenhum jogador encontrado com os filtros aplicados.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            jogadores.forEach(j => {
+                let idadeStr = '-';
+                if (j.data_nascimento) {
+                    const nascimento = new Date(j.data_nascimento);
+                    const diff = Date.now() - nascimento.getTime();
+                    idadeStr = `${Math.abs(new Date(diff).getUTCFullYear() - 1970)}a`;
+                }
+
+                let botoesAcao = '';
+                if (podeGerenciar) botoesAcao += `<button onclick='prepararEdicaoJogador(${JSON.stringify(j)})' class="text-amber-400 hover:text-amber-300 p-1.5 transition shrink-0" title="Editar"><i class="fa-solid fa-pen text-xs"></i></button>`;
+                
+                if (j.telefone) {
+                    const tipoWp = (j.status_mensalidade === 'Pago') ? 'convocacao' : 'cobranca';
+                    const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
+                    const permitirWp = !(isSecretario && tipoWp === 'cobranca');
+
+                    if (permitirWp) {
+                        const iconeWp = (j.status_mensalidade === 'Pago') ? 'fa-whatsapp text-emerald-400' : 'fa-whatsapp text-amber-400';
+                        botoesAcao += `<button onclick="enviarWhatsApp('${j.telefone}', '${tipoWp}', '${j.nome}', '${valorCobranca}')" class="p-1.5 transition shrink-0" title="WhatsApp"><i class="fa-brands ${iconeWp} text-xs"></i></button>`;
+                    }
+                }
+
+                if (isAdmin) botoesAcao += `<button onclick="excluirJogador(${j.id})" class="text-rose-400 hover:text-rose-300 p-1.5 transition shrink-0" title="Excluir"><i class="fa-solid fa-trash text-xs"></i></button>`;
+
+                const statusMens = j.status_mensalidade || 'Pendente';
+                const mensalidadeBadge = statusMens === 'Pago' 
+                    ? `<span class="text-[9px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-300 shrink-0">Pago</span>`
+                    : `<span class="text-[9px] px-2 py-0.5 rounded font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0">Pendente</span>`;
+
+                const aptidaoTag = (j.status_aptidao && j.status_aptidao !== 'Ativo') 
+                    ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold ml-1 shrink-0">${j.status_aptidao}</span>` 
+                    : '';
+
+                const btnRemoverPresenca = (podeGerenciar && (j.total_participacoes > 0)) ? `<button onclick="removerPresencaAtleta(${j.id}, '${j.nome}')" class="text-rose-400 text-[10px] hover:underline ml-1 shrink-0" title="Remover presença">-1J</button>` : '';
+
+                grid.innerHTML += `
+                    <div class="p-3.5 flex items-center justify-between hover:bg-pitch-800/40 transition gap-2">
+                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-2xl bg-pitch-950 border border-pitch-800 flex items-center justify-center font-black text-xs text-emerald-400 shrink-0 shadow-inner">
+                                ${j.posicao ? j.posicao.charAt(0) : 'J'}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 onclick="abrirPerfilAtleta(${j.id})" class="font-bold text-white text-xs truncate cursor-pointer hover:text-emerald-400 transition flex items-center">
+                                    <span class="truncate">${toTitleCase(j.nome)}</span> ${aptidaoTag}
+                                </h4>
+                                <div class="flex items-center space-x-1.5 mt-0.5 text-[10px] text-gray-400 truncate">
+                                    <span class="shrink-0 font-medium text-emerald-400">${j.posicao}</span>
+                                    <span class="shrink-0">•</span>
+                                    <span class="shrink-0">${idadeStr}</span>
+                                    <span class="shrink-0">•</span>
+                                    <span class="truncate">📋 ${j.total_participacoes || 0} jogos ${btnRemoverPresenca}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0">
+                            ${mensalidadeBadge}
+                            <div class="flex items-center space-x-0.5 border-l border-pitch-800 pl-1.5">
+                                ${botoesAcao}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function abrirPerfilAtleta(jogadorId) {
+            try {
+                const res = await fetch(`${API_URL}/api/jogadores/${jogadorId}/perfil`);
+                if (!res.ok) { showToast('Erro ao carregar perfil.', 'erro'); return; }
+                const dados = await res.json();
+                const j = dados.jogador;
+
+                document.getElementById('perfil-nome').innerText = toTitleCase(j.nome);
+                document.getElementById('perfil-detalhes-gerais').innerText = `${j.posicao} • ${j.funcao_grupo || 'Atleta'} • ${j.status_aptidao || 'Ativo'} • 📞 ${j.telefone || '-'}`;
+                document.getElementById('perfil-total-jogos').innerText = dados.presencas.length;
+                
+                const spanMens = document.getElementById('perfil-status-mensalidade');
+                spanMens.innerText = j.status_mensalidade || 'Pendente';
+                spanMens.className = `text-xs font-black ${j.status_mensalidade === 'Pago' ? 'text-emerald-400' : 'text-rose-400'}`;
+
+                const listaPres = document.getElementById('perfil-lista-presencas');
+                if (dados.presencas.length === 0) {
+                    listaPres.innerHTML = '<span class="text-gray-500 italic">Nenhum registro.</span>';
+                } else {
+                    listaPres.innerHTML = dados.presencas.map(p => {
+                        const dt = new Date(p.data_partida).toLocaleDateString('pt-BR');
+                        return `<div class="flex justify-between py-1 border-b border-pitch-800/50"><span>Rodada</span><strong class="text-emerald-400">${dt}</strong></div>`;
+                    }).join('');
+                }
+
+                const listaFin = document.getElementById('perfil-lista-financeiro');
+                if (usuarioLogado.perfil === 'secretario') {
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Restrito.</span>';
+                } else if (!dados.competencias || dados.competencias.length === 0) {
+                    listaFin.innerHTML = '<span class="text-gray-500 italic">Nenhuma competência paga.</span>';
+                } else {
+                    listaFin.innerHTML = dados.competencias.map(c => {
+                        const compFmt = formatarCompetenciaLabel(c.competencia);
+                        return `<div class="flex justify-between py-1 border-b border-pitch-800/50"><span>${compFmt}</span><strong class="text-emerald-400">R$ ${parseFloat(c.valor || 0).toFixed(2)}</strong></div>`;
+                    }).join('');
+                }
+
+                openModal('modal-perfil-atleta');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao buscar perfil.', 'erro');
+            }
+        }
+
+        function renderPresenca(jogadores) {
+            const lista = document.getElementById('presenca-lista');
+            if (!lista) return;
+            lista.innerHTML = '';
+            const ativos = jogadores.filter(j => !j.status_aptidao || j.status_aptidao === 'Ativo');
+            if(ativos.length === 0) { lista.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nenhum atleta ativo.</p>'; return; }
+            ativos.forEach((j) => {
+                lista.innerHTML += `
+                    <label class="flex items-center space-x-3 p-3 rounded-xl bg-pitch-950 border border-pitch-800 cursor-pointer mb-1.5 hover:bg-pitch-800/40 transition">
+                        <input type="checkbox" class="atleta-checkbox w-4 h-4 accent-emerald-500 rounded" value="${j.id}" data-nome="${j.nome}" data-posicao="${j.posicao}">
+                        <span class="text-xs font-semibold text-white">${toTitleCase(j.nome)} <span class="text-gray-400">(${j.posicao})</span></span>
+                    </label>
+                `;
+            });
+        }
+
+        function renderRelatorios(jogadores) {
+            const elTotalMembros = document.getElementById('rel-total-membros');
+            if (elTotalMembros) elTotalMembros.innerText = jogadores.length;
+            
+            const posicoesCount = { Goleiro: 0, Zagueiro: 0, Lateral: 0, Meia: 0, Atacante: 0 };
+            jogadores.forEach(j => { if (posicoesCount[j.posicao] !== undefined) posicoesCount[j.posicao]++; });
+            const listaPos = document.getElementById('relatorio-posicoes-lista');
+            if (listaPos) {
+                listaPos.innerHTML = '';
+                for (const [pos, qtd] of Object.entries(posicoesCount)) {
+                    listaPos.innerHTML += `<div class="flex justify-between items-center p-3 bg-pitch-950 rounded-xl border border-pitch-800"><span class="text-gray-300">${pos}</span><span class="px-3 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold text-xs">${qtd}</span></div>`;
+                }
+            }
+
+            const tbodyPres = document.getElementById('tabela-relatorio-presencas');
+            if (tbodyPres) {
+                tbodyPres.innerHTML = '';
+                [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
+                    const datasFmt = (Array.isArray(j.datas_presencas) && j.datas_presencas.length > 0) 
+                        ? j.datas_presencas.join(', ') 
+                        : '<span class="text-gray-500 italic">Sem datas</span>';
+
+                    tbodyPres.innerHTML += `
+                        <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                            <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
+                            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                            <td class="py-3 text-emerald-300 font-medium">${datasFmt}</td>
+                            <td class="py-3 text-right font-black text-amber-400">${j.total_participacoes || 0}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const blocoInad = document.getElementById('bloco-rel-inadimplentes');
+            if (blocoInad) {
+                const inadimplentes = jogadores.filter(j => (j.status_mensalidade || 'Pendente') === 'Pendente');
+                const contadorInad = document.getElementById('contador-inadimplentes');
+                if (contadorInad) contadorInad.innerText = `${inadimplentes.length} pendentes`;
+                
+                const tbodyInad = document.getElementById('tabela-relatorio-inadimplentes');
+                if (tbodyInad) {
+                    if (inadimplentes.length === 0) {
+                        tbodyInad.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">Nenhum atleta pendente! 🎉</td></tr>`;
+                    } else {
+                        tbodyInad.innerHTML = '';
+                        inadimplentes.forEach(j => {
+                            const valorCobranca = (j.posicao === 'Goleiro') ? '20.00' : '40.00';
+                            const btnWp = j.telefone ? `<button onclick="enviarWhatsApp('${j.telefone}', 'cobranca', '${j.nome}', '${valorCobranca}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1 ml-auto"><i class="fa-brands fa-whatsapp text-sm"><span>Cobrar</span></i></button>` : '-';
+                            tbodyInad.innerHTML += `
+                                <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
+                                    <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
+                                    <td class="py-3 text-gray-300">${j.telefone || '-'}</td>
+                                    <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
+                                    <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">Pendente</span></td>
+                                    <td class="py-3 text-right">${btnWp}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                }
+            }
+        }
+
+        function toggleSelecionarTodos(masterCb) { document.querySelectorAll('.atleta-checkbox').forEach(cb => cb.checked = masterCb.checked); }
+
+        async function salvarPresencasManualmente(btn) {
+            const checkboxes = document.querySelectorAll('.atleta-checkbox:checked');
+            const dataPresenca = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
+            const jogadorIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            setBotaoCarregando(btn, true);
+            try {
+                const res = await fetch(`${API_URL}/api/presencas`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ data_partida: dataPresenca, jogador_ids: jogadorIds }) });
+                if (res.ok) { showToast('Presenças registradas!'); carregarJogadores(); }
+                else { const err = await res.json(); showToast(err.erro || 'Erro ao salvar presenças.', 'erro'); }
+            } catch (err) { console.error(err); showToast('Erro de conexão.', 'erro'); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-check-double mr-2"></i>Salvar Presenças da Rodada'); }
+        }
+
+        async function removerPresencaAtleta(jogadorId, nomeAtleta) {
+            const dataPartida = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
+            if (!confirm(`Remover presença de "${toTitleCase(nomeAtleta)}"?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/api/presencas`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ jogador_id: jogadorId, data_partida: dataPartida }) });
+                if (res.ok) { showToast('Removido!'); carregarJogadores(); }
+            } catch (err) { console.error(err); }
+        }
+
+        function abrirModalNovoJogador() {
+            document.getElementById('form-novo-jogador').reset();
+            document.getElementById('input-jogador-id').value = '';
+            document.getElementById('modal-jogador-titulo').innerText = 'Cadastrar Novo Atleta';
+            openModal('modal-novo-jogador');
+        }
+
+        async function salvarJogador(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-jogador');
+            setBotaoCarregando(btn, true);
+
+            const id = document.getElementById('input-jogador-id').value;
+            const dados = {
+                nome: document.getElementById('input-nome').value,
+                data_nascimento: document.getElementById('input-nascimento').value,
+                telefone: document.getElementById('input-telefone').value,
+                funcao_grupo: document.getElementById('input-funcao').value,
+                status_aptidao: document.getElementById('input-aptidao').value,
+                posicao: document.getElementById('input-posicao').value,
+                competencia: competenciaAtual
+            };
+
+            const inputMens = document.getElementById('input-mensalidade');
+            if (inputMens && usuarioLogado.perfil !== 'secretario') {
+                dados.status_mensalidade = inputMens.value;
+            }
+
+            const metodo = id ? 'PUT' : 'POST';
+            const url = id ? `${API_URL}/api/jogadores/${id}` : `${API_URL}/api/jogadores`;
+
+            try {
+                const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
+                if (res.ok) {
+                    showToast('Jogador salvo!');
+                    closeModal('modal-novo-jogador');
+                    carregarJogadores();
+                    if (usuarioLogado.perfil !== 'secretario') carregarFinanceiro();
+                } else { showToast('Erro ao salvar.', 'erro'); }
+            } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
+        }
+
+        function prepararEdicaoJogador(j) {
+            document.getElementById('input-jogador-id').value = j.id;
+            document.getElementById('input-nome').value = j.nome;
+            document.getElementById('input-nascimento').value = j.data_nascimento ? j.data_nascimento.split('T')[0] : '';
+            document.getElementById('input-telefone').value = j.telefone || '';
+            document.getElementById('input-funcao').value = j.funcao_grupo || 'Atleta';
+            document.getElementById('input-aptidao').value = j.status_aptidao || 'Ativo';
+            document.getElementById('input-posicao').value = j.posicao;
+            
+            const inputMens = document.getElementById('input-mensalidade');
+            if (inputMens) inputMens.value = j.status_mensalidade || 'Pendente';
+
+            document.getElementById('modal-jogador-titulo').innerText = 'Editar Jogador';
+            openModal('modal-novo-jogador');
+        }
+
+        async function excluirJogador(id) {
+            if (!confirm('Excluir jogador?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/jogadores/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Excluído.'); carregarJogadores(); }
+            } catch (err) { console.error(err); }
+        }
+
+        function preencherValorFin(desc, valor, tipo) {
+            document.getElementById('fin-desc').value = desc;
+            document.getElementById('fin-valor').value = valor;
+            document.getElementById('fin-tipo').value = tipo;
+        }
+
+        function atualizarGraficoFinanceiro(lancamentos) {
+            const ctx = document.getElementById('grafico-financeiro');
+            if (!ctx) return;
+            const anoAtual = new Date().getFullYear().toString();
+            const mesesLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const entradasPorMes = Array(12).fill(0);
+            const saidasPorMes = Array(12).fill(0);
+
+            lancamentos.forEach(l => {
+                if (!l.data_lancamento) return;
+                const dataStr = l.data_lancamento.split('T')[0];
+                if (dataStr.startsWith(anoAtual)) {
+                    const mesIdx = parseInt(dataStr.split('-')[1], 10) - 1;
+                    const val = parseFloat(l.valor) || 0;
+                    if (l.tipo === 'Entrada') entradasPorMes[mesIdx] += val;
+                    else saidasPorMes[mesIdx] += val;
+                }
+            });
+
+            if (chartFinanceiroInstance) chartFinanceiroInstance.destroy();
+            chartFinanceiroInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mesesLabels,
+                    datasets: [
+                        { label: 'Entradas (R$)', data: entradasPorMes, backgroundColor: '#10b981', borderRadius: 6, barThickness: 'flex' },
+                        { label: 'Saídas (R$)', data: saidasPorMes, backgroundColor: '#f43f5e', borderRadius: 6, barThickness: 'flex' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d1d5db', font: { size: 10 } } } }, scales: { x: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
+            });
+        }
+
+        async function carregarFinanceiro() {
+            if (usuarioLogado.perfil === 'secretario') return;
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error();
+                const dados = await res.json();
+                if (Array.isArray(dados)) {
+                    atualizarGraficoFinanceiro(dados);
+                    const mesFiltro = document.getElementById('filtro-mes').value;
+                    let saldoGeral = 0;
+                    dados.forEach(l => {
+                        const val = parseFloat(l.valor) || 0;
+                        if (l.tipo === 'Entrada') saldoGeral += val; else saldoGeral -= val;
+                    });
+
+                    let mesEntradas = 0, mesSaidas = 0;
+                    const containerLivroCaixa = document.getElementById('tabela-financeiro-body');
+                    containerLivroCaixa.innerHTML = '';
+                    const recentesContainer = document.getElementById('dashboard-movimentacoes-recentes');
+                    if (recentesContainer) recentesContainer.innerHTML = '';
+
+                    dados.forEach((l, index) => {
+                        const dataStr = l.data_lancamento ? l.data_lancamento.split('T')[0] : '';
+                        const val = parseFloat(l.valor) || 0;
+                        if (mesFiltro && dataStr.startsWith(mesFiltro)) {
+                            if (l.tipo === 'Entrada') mesEntradas += val; else mesSaidas += val;
+                        }
+                        if (mesFiltro && !dataStr.startsWith(mesFiltro)) return;
+                        const dataFmt = dataStr ? new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                        const podeExcluirFin = ['admin', 'gestor', 'tesoureiro'].includes(usuarioLogado.perfil);
+
+                        if (recentesContainer && index < 3) {
+                            const iconeMov = l.tipo === 'Entrada' ? 'fa-arrow-trend-up text-emerald-400 bg-emerald-500/10' : 'fa-arrow-trend-down text-rose-400 bg-rose-500/10';
+                            recentesContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-pitch-950 p-3 rounded-2xl border border-pitch-800/60">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${iconeMov}"><i class="fa-solid ${l.tipo === 'Entrada' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i></div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">${l.descricao}</h4>
+                                            <p class="text-[10px] text-gray-400">${dataFmt}</p>
+                                        </div>
+                                    </div>
+                                    <strong class="text-xs font-black ${l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'}">${l.tipo === 'Entrada' ? '+' : '-'} R$ ${val.toFixed(2)}</strong>
+                                </div>
+                            `;
+                        }
+
+                        const corTipo = l.tipo === 'Entrada' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400';
+                        const corValor = l.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400';
+                        
+                        let botoesAcao = '';
+                        if (l.tipo === 'Entrada') {
+                            botoesAcao += `<button onclick="gerarRecibo('${l.id}', '${l.descricao}', ${val}, '${dataFmt}')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"><i class="fa-solid fa-receipt"></i><span>Recibo</span></button>`;
+                        }
+                        if (podeExcluirFin) {
+                            botoesAcao += `<button onclick="excluirLancamento(${l.id})" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"><i class="fa-solid fa-trash"></i><span>Excluir</span></button>`;
+                        }
+
+                        containerLivroCaixa.innerHTML += `
+                            <div class="bg-pitch-950 p-4 rounded-2xl border border-pitch-800/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 hover:border-emerald-500/30 transition">
+                                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                    <div class="w-10 h-10 rounded-xl bg-pitch-900 border border-pitch-800 flex items-center justify-center shrink-0 ${corValor}">
+                                        <i class="fa-solid ${l.tipo === 'Entrada' ? 'fa-arrow-down' : 'fa-arrow-up'} text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="text-xs font-black text-white truncate">${l.descricao}</h4>
+                                            <span class="px-2 py-0.5 rounded text-[9px] ${corTipo} font-bold shrink-0">${l.tipo}</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">📅 ${dataFmt}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between md:justify-end w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-pitch-800/60 gap-4">
+                                    <span class="text-sm font-black ${corValor}">R$ ${val.toFixed(2)}</span>
+                                    <div class="flex items-center space-x-2 print:hidden">
+                                        ${botoesAcao}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('fin-saldo').innerText = `R$ ${saldoGeral.toFixed(2)}`;
+                    document.getElementById('fin-entradas').innerText = `R$ ${mesEntradas.toFixed(2)}`;
+                    document.getElementById('fin-saidas').innerText = `R$ ${mesSaidas.toFixed(2)}`;
+                    const dashSaldo = document.getElementById('dash-saldo-val');
+                    if(dashSaldo) dashSaldo.innerText = `R$ ${saldoGeral.toFixed(2)}`;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function gerarRecibo(id, descricao, valor, data) {
+            document.getElementById('recibo-id').innerText = `#${String(id).padStart(4, '0')}`;
+            document.getElementById('recibo-data').innerText = data;
+            document.getElementById('recibo-descricao').innerText = descricao;
+            document.getElementById('recibo-valor').innerText = `R$ ${parseFloat(valor).toFixed(2)}`;
+            openModal('modal-recibo');
+        }
+
+        async function salvarLancamento(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-lancamento');
+            setBotaoCarregando(btn, true);
+            const dados = { descricao: document.getElementById('fin-desc').value, tipo: document.getElementById('fin-tipo').value, valor: parseFloat(document.getElementById('fin-valor').value), data_lancamento: document.getElementById('fin-data').value || new Date() };
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
+                if (res.ok) { showToast('Lançado!'); closeModal('modal-lancamento'); document.getElementById('fin-desc').value = ''; document.getElementById('fin-valor').value = ''; carregarFinanceiro(); }
+            } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
+        }
+
+        async function excluirLancamento(id) {
+            if (!confirm('Deseja realmente excluir este lançamento do caixa?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/financeiro/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Removido.'); carregarFinanceiro(); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function carregarUsuariosSistema() {
+            const container = document.getElementById('usuarios-lista');
+            if (!container) return;
+            try {
+                const res = await fetch(`${API_URL}/api/usuarios`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const usuarios = await res.json();
+                    container.innerHTML = usuarios.map(u => `
+                        <div class="p-3.5 bg-pitch-950 rounded-2xl border border-pitch-800 flex justify-between items-center shadow">
+                            <div><p class="text-xs font-bold text-white">${toTitleCase(u.nome)} <span class="text-gray-400 font-normal">(${u.email})</span></p><span class="text-[9px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 mt-1 inline-block uppercase font-bold">${u.perfil}</span></div>
+                            <div class="space-x-2">
+                                <button onclick='prepararEdicaoUsuario(${JSON.stringify(u)})' class="text-amber-400 text-xs font-bold">Editar</button>
+                                <button onclick="excluirUsuario(${u.id})" class="text-rose-400 text-xs font-bold">Excluir</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function abrirModalNovoUsuario() {
+            document.getElementById('input-usuario-id').value = '';
+            document.getElementById('user-nome').value = '';
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-senha').value = '';
+            document.getElementById('user-perfil').value = 'usuario';
+            document.getElementById('modal-usuario-titulo').innerText = 'Novo Usuário';
+            openModal('modal-usuario');
+        }
+
+        function prepararEdicaoUsuario(u) {
+            document.getElementById('input-usuario-id').value = u.id;
+            document.getElementById('user-nome').value = u.nome;
+            document.getElementById('user-email').value = u.email;
+            document.getElementById('user-senha').value = '';
+            document.getElementById('user-perfil').value = u.perfil;
+            document.getElementById('modal-usuario-titulo').innerText = 'Editar Usuário';
+            openModal('modal-usuario');
+        }
+
+        async function salvarUsuario(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-usuario');
+            setBotaoCarregando(btn, true);
+            const id = document.getElementById('input-usuario-id').value;
+            const dados = { nome: document.getElementById('user-nome').value, email: document.getElementById('user-email').value, senha: document.getElementById('user-senha').value, perfil: document.getElementById('user-perfil').value };
+            const metodo = id ? 'PUT' : 'POST';
+            const url = id ? `${API_URL}/api/usuarios/${id}` : `${API_URL}/api/usuarios`;
+            try {
+                const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(dados) });
+                if (res.ok) {
+                    const usuarioAtualizado = await res.json();
+                    showToast('Usuário salvo!'); 
+                    closeModal('modal-usuario'); 
+                    carregarUsuariosSistema(); 
+                    carregarJogadores();
+
+                    if (usuarioAtualizado.id === usuarioLogado.id) {
+                        usuarioLogado.perfil = usuarioAtualizado.perfil;
+                        localStorage.setItem('usuario', JSON.stringify(usuarioLogado));
+                        window.location.reload();
+                    }
+                }
+                else { showToast('Erro.', 'erro'); }
+            } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, 'Salvar'); }
+        }
+
+        async function excluirUsuario(id) {
+            if (!confirm('Excluir usuário?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/usuarios/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showToast('Removido.'); carregarUsuariosSistema(); }
+            } catch (err) { console.error(err); }
+        }
+
+        function verificarTravaRodadaAtual() {
+            const dataRodadaAtual = document.getElementById('data-presenca-manual')?.value || new Date().toISOString().split('T')[0];
+            const alerta = document.getElementById('alerta-rodada-travada');
+            const btnGerar = document.getElementById('btn-gerar-sorteio');
+            const jaExiste = historicoSorteiosGlobal.some(s => s.data_partida && s.data_partida.split('T')[0] === dataRodadaAtual);
+            if (jaExiste) {
+                if (alerta) alerta.classList.remove('hidden');
+                if (btnGerar) { btnGerar.disabled = true; btnGerar.classList.add('opacity-50', 'cursor-not-allowed'); btnGerar.innerText = 'Sorteio Travado'; }
+                return true;
+            } else {
+                if (alerta) alerta.classList.add('hidden');
+                if (btnGerar) { btnGerar.disabled = false; btnGerar.classList.remove('opacity-50', 'cursor-not-allowed'); btnGerar.innerHTML = '<i class="fa-solid fa-shuffle mr-1"></i> Sortear Atletas Presentes'; }
+                return false;
+            }
+        }
+
+        function iniciarSorteioIndependente() {
+            if (verificarTravaRodadaAtual()) { showToast('Sorteio já travado nesta data!', 'aviso'); return; }
+            const selecionados = Array.from(document.querySelectorAll('.atleta-checkbox:checked')).map(cb => ({ id: parseInt(cb.value), nome: cb.dataset.nome, posicao: cb.dataset.posicao }));
+            const numTimes = parseInt(document.getElementById('qtd-times').value) || 2;
+            if (selecionados.length < numTimes) { showToast(`Selecione pelo menos ${numTimes} atletas.`, 'aviso'); return; }
+
+            const goleiros = selecionados.filter(j => j.posicao && j.posicao.toLowerCase() === 'goleiro');
+            const linha = selecionados.filter(j => !j.posicao || j.posicao.toLowerCase() !== 'goleiro');
+            goleiros.sort(() => 0.5 - Math.random());
+            linha.sort(() => 0.5 - Math.random());
+
+            const times = Array.from({ length: numTimes }, () => []);
+            goleiros.forEach((g, idx) => times[idx % numTimes].push(g));
+            linha.forEach((atleta, index) => times[index % numTimes].push(atleta));
+
+            const paletaCores = [
+                { nome: 'Time Colete Preto', classe: 'border-gray-500/80 text-gray-200 bg-black/60 shadow' },
+                { nome: 'Time Colete Vermelho', classe: 'border-rose-500/80 text-rose-400 bg-rose-950/20 shadow' },
+                { nome: 'Time Colete Azul', classe: 'border-blue-500/80 text-blue-400 bg-blue-950/20 shadow' },
+                { nome: 'Time Colete Laranja', classe: 'border-orange-500/80 text-orange-400 bg-orange-950/20 shadow' }
+            ];
+
+            const dataRodadaSelecionada = document.getElementById('data-presenca-manual').value || new Date().toISOString().split('T')[0];
+
+            ultimoSorteioGerado = {
+                data_partida: dataRodadaSelecionada,
+                local_partida: configsGlobal.partida_local || 'Campo Principal - CMV',
+                num_times: numTimes,
+                dados_times: times.map((t, idx) => ({ nome: paletaCores[idx % paletaCores.length].nome, jogadores: t }))
+            };
+
+            const container = document.getElementById('times-result-container');
+            document.getElementById('times-empty-state').classList.add('hidden');
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+
+            times.forEach((tJogadores, idx) => {
+                const cor = paletaCores[idx % paletaCores.length];
+                container.innerHTML += `
+                    <div class="bg-pitch-950 border ${cor.classe} rounded-2xl p-3.5 mb-3">
+                        <h4 class="font-black text-xs uppercase tracking-wider mb-2.5">${cor.nome} (${tJogadores.length})</h4>
+                        <div class="space-y-1">${tJogadores.map(j => `<div class="p-2 bg-pitch-900 rounded-xl border border-pitch-800 text-xs text-white flex justify-between font-medium"><span>${toTitleCase(j.nome)}</span><span class="text-gray-400 text-[10px]">${j.posicao}</span></div>`).join('')}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('container-btn-confirmar').classList.remove('hidden');
+            document.getElementById('status-sorteio-badge').classList.add('hidden');
+            showToast('Sorteio gerado com sucesso!');
+        }
+
+        async function confirmarETravarSorteio(btn) {
+            if (!ultimoSorteioGerado) return;
+            if (!confirm('Deseja confirmar e travar este sorteio?')) return;
+            setBotaoCarregando(btn, true);
+            try {
+                const res = await fetch(`${API_URL}/api/sorteios`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(ultimoSorteioGerado) });
+                if (!res.ok) { const err = await res.json(); showToast(err.erro || 'Erro.', 'erro'); return; }
+                showToast('Sorteio travado!');
+                document.getElementById('container-btn-confirmar').classList.add('hidden');
+                document.getElementById('status-sorteio-badge').classList.remove('hidden');
+                await carregarHistoricoSorteios();
+            } catch (err) { console.error(err); }
+            finally { setBotaoCarregando(btn, false, '<i class="fa-solid fa-lock"></i><span>Confirmar e Travar Sorteio no Histórico</span>'); }
+        }
+
+        async function carregarHistoricoSorteios() {
+            const tbody = document.getElementById('tabela-historico-sorteios');
+            if (!tbody) return;
+            try {
+                const res = await fetch(`${API_URL}/api/sorteios`);
+                if (res.ok) {
+                    historicoSorteiosGlobal = await res.json();
+                    verificarTravaRodadaAtual();
+                    if (historicoSorteiosGlobal.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-gray-400 text-xs">Nenhum sorteio registrado.</td></tr>`; return; }
+                    tbody.innerHTML = '';
+                    historicoSorteiosGlobal.forEach(s => {
+                        let dataFmt = s.data_partida ? s.data_partida.split('T')[0].split('-').reverse().join('/') : '-';
+                        let timesHtml = Array.isArray(s.dados_times) ? s.dados_times.map(t => `<div class="mb-1.5 p-2.5 bg-pitch-950 rounded-xl border border-pitch-800"><strong class="text-amber-400 text-[11px]">${t.nome}:</strong> <span class="text-[11px] text-gray-300">${t.jogadores.map(j => toTitleCase(j.nome)).join(', ')}</span></div>`).join('') : '';
+                        tbody.innerHTML += `
+                            <tr class="border-b border-pitch-800 hover:bg-pitch-800/30 align-top">
+                                <td class="py-3 font-bold text-white"><div class="text-emerald-400 font-extrabold">${dataFmt}</div></td>
+                                <td class="py-3 text-gray-300 font-semibold">${s.num_times} Times</td>
+                                <td class="py-3">${timesHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+    </script>
+</body>
+</html>

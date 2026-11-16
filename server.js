@@ -162,6 +162,61 @@ app.get('/api/jogadores/:id/perfil', async (req, res) => {
     }
 });
 
+// ================= ATALHO RÁPIDO DE STATUS DE MENSALIDADE =================
+app.put('/api/jogadores/:id/status-mensalidade', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro']), async (req, res) => {
+    const { id } = req.params;
+    const { status_mensalidade, competencia } = req.body;
+    const compAlvo = competencia || new Date().toISOString().slice(0, 7);
+
+    try {
+        const atletaRes = await pool.query('SELECT * FROM jogadores WHERE id = $1', [id]);
+        if (atletaRes.rows.length === 0) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+        const atleta = atletaRes.rows[0];
+
+        const compAntigaRes = await pool.query('SELECT status FROM mensalidades_competencia WHERE jogador_id = $1 AND competencia = $2', [id, compAlvo]);
+        const statusAnterior = compAntigaRes.rows[0]?.status || 'Pendente';
+        const novoStatus = status_mensalidade || (statusAnterior === 'Pago' ? 'Pendente' : 'Pago');
+
+        await pool.query('UPDATE jogadores SET status_mensalidade = $1 WHERE id = $2', [novoStatus, id]);
+        const descricaoMensalidade = `Mensalidade (${compAlvo}) - ${atleta.nome}`;
+
+        if (statusAnterior !== 'Pago' && novoStatus === 'Pago') {
+            const valorMensalidade = (atleta.posicao === 'Goleiro') ? 20.00 : 40.00;
+            
+            await pool.query(
+                `INSERT INTO mensalidades_competencia (jogador_id, competencia, status, valor) VALUES ($1, $2, 'Pago', $3) ON CONFLICT (jogador_id, competencia) DO UPDATE SET status = 'Pago', valor = $3`,
+                [id, compAlvo, valorMensalidade]
+            );
+
+            const existe = await pool.query(
+                `SELECT id FROM financeiro_lancamentos WHERE descricao = $1`,
+                [descricaoMensalidade]
+            );
+
+            if (existe.rows.length === 0) {
+                await pool.query(
+                    `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, 'Entrada', $2, CURRENT_DATE)`,
+                    [descricaoMensalidade, valorMensalidade]
+                );
+            }
+        } else if (statusAnterior === 'Pago' && novoStatus === 'Pendente') {
+            await pool.query(
+                `DELETE FROM mensalidades_competencia WHERE jogador_id = $1 AND competencia = $2`,
+                [id, compAlvo]
+            );
+            await pool.query(
+                `DELETE FROM financeiro_lancamentos WHERE descricao = $1 AND tipo = 'Entrada'`,
+                [descricaoMensalidade]
+            );
+        }
+
+        res.json({ mensagem: 'Status da mensalidade atualizado com sucesso!', status_mensalidade: novoStatus });
+    } catch (err) {
+        console.error('Erro ao atualizar status rápido da mensalidade:', err);
+        res.status(500).json({ erro: 'Erro ao atualizar status da mensalidade.' });
+    }
+});
+
 app.post('/api/jogadores', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     const { nome, data_nascimento, telefone, posicao, nivel, status_mensalidade, funcao_grupo, status_aptidao, competencia } = req.body;
     
@@ -369,7 +424,6 @@ app.post('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'ge
             return res.status(404).json({ erro: 'Convidado não encontrado.' });
         }
 
-        // Registrar a data exata da presença do convidado
         await pool.query(
             `INSERT INTO presencas_convidados (convidado_id, data_partida) VALUES ($1, $2)`,
             [id, dataFinal]
@@ -405,7 +459,6 @@ app.delete('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', '
             return res.status(404).json({ erro: 'Convidado não encontrado.' });
         }
 
-        // Remove o registro de data mais recente deste convidado
         await pool.query(`
             DELETE FROM presencas_convidados 
             WHERE id = (SELECT id FROM presencas_convidados WHERE convidado_id = $1 ORDER BY data_partida DESC, id DESC LIMIT 1)
