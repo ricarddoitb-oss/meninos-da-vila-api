@@ -26,8 +26,8 @@ pool.connect()
     .then(() => console.log('🟢 Conectado ao PostgreSQL com segurança!'))
     .catch(err => console.error('🔴 Erro na conexão com o banco:', err));
 
-// ================= CRIAÇÃO AUTOMÁTICA DA TABELA DE CONVIDADOS =================
-async function criarTabelaConvidados() {
+// ================= CRIAÇÃO AUTOMÁTICA DAS TABELAS DE CONVIDADOS =================
+async function criarTabelasConvidados() {
     try {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS convidados (
@@ -37,13 +37,19 @@ async function criarTabelaConvidados() {
                 valor_diaria NUMERIC(10, 2) DEFAULT 15.00,
                 participacoes INTEGER DEFAULT 0
             );
+
+            CREATE TABLE IF NOT EXISTS presencas_convidados (
+                id SERIAL PRIMARY KEY,
+                convidado_id INTEGER REFERENCES convidados(id) ON DELETE CASCADE,
+                data_partida DATE DEFAULT CURRENT_DATE
+            );
         `);
-        console.log('🟢 Tabela de convidados verificada/criada com sucesso!');
+        console.log('🟢 Tabelas de convidados e presenças verificadas/criadas com sucesso!');
     } catch (err) {
-        console.error('🔴 Erro ao criar tabela de convidados:', err);
+        console.error('🔴 Erro ao criar tabelas de convidados:', err);
     }
 }
-criarTabelaConvidados();
+criarTabelasConvidados();
 
 // ================= MIDDLEWARES DE AUTORIZAÇÃO =================
 function verificarTokenBase(req, res, next) {
@@ -104,14 +110,19 @@ async function processarLogin(req, res) {
 app.post('/api/login', processarLogin);
 app.post('/api/auth/login', processarLogin);
 
-// ================= JOGADORES (COM COMPETÊNCIA MENSAL) =================
+// ================= JOGADORES (COM COMPETÊNCIA MENSAL E DATAS DE PRESENÇA) =================
 app.get('/api/jogadores', async (req, res) => {
     const competencia = req.query.competencia || new Date().toISOString().slice(0, 7);
     try {
         const r = await pool.query(`
             SELECT j.*, 
             COALESCE(mc.status, 'Pendente') as status_mensalidade,
-            (SELECT COUNT(*) FROM presencas_partidas p WHERE p.jogador_id = j.id) as total_participacoes 
+            (SELECT COUNT(*) FROM presencas_partidas p WHERE p.jogador_id = j.id) as total_participacoes,
+            COALESCE(
+                (SELECT ARRAY_AGG(TO_CHAR(p.data_partida, 'DD/MM') ORDER BY p.data_partida ASC) 
+                 FROM presencas_partidas p WHERE p.jogador_id = j.id), 
+                '{}'
+            ) as datas_presencas
             FROM jogadores j 
             LEFT JOIN mensalidades_competencia mc ON mc.jogador_id = j.id AND mc.competencia = $1
             ORDER BY j.id ASC
@@ -285,10 +296,18 @@ app.delete('/api/jogadores/:id', verificarAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: 'Erro ao excluir jogador.' }); }
 });
 
-// ================= GESTÃO DE CONVIDADOS (API) =================
+// ================= GESTÃO DE CONVIDADOS (API COM DATAS DE PRESENÇA) =================
 app.get('/api/convidados', verificarTokenBase, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM convidados ORDER BY nome ASC');
+        const result = await pool.query(`
+            SELECT c.*,
+            COALESCE(
+                (SELECT ARRAY_AGG(TO_CHAR(pc.data_partida, 'DD/MM') ORDER BY pc.data_partida ASC)
+                 FROM presencas_convidados pc WHERE pc.convidado_id = c.id),
+                '{}'
+            ) as datas_presencas
+            FROM convidados c ORDER BY c.nome ASC
+        `);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ erro: err.message });
@@ -338,7 +357,8 @@ app.delete('/api/convidados/:id', verificarAdmin, async (req, res) => {
 app.post('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     try {
         const { id } = req.params;
-        const { pagar_diaria, valor_diaria } = req.body;
+        const { pagar_diaria, valor_diaria, data_partida } = req.body;
+        const dataFinal = data_partida || new Date().toISOString().split('T')[0];
 
         const convResult = await pool.query(
             `UPDATE convidados SET participacoes = participacoes + 1 WHERE id = $1 RETURNING nome`,
@@ -349,17 +369,22 @@ app.post('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'ge
             return res.status(404).json({ erro: 'Convidado não encontrado.' });
         }
 
+        // Registrar a data exata da presença do convidado
+        await pool.query(
+            `INSERT INTO presencas_convidados (convidado_id, data_partida) VALUES ($1, $2)`,
+            [id, dataFinal]
+        );
+
         const nomeConvidado = convResult.rows[0].nome;
 
         if (pagar_diaria) {
             const descricao = `Diária Convidado: ${nomeConvidado}`;
             const tipo = 'Entrada';
             const valor = parseFloat(valor_diaria) || 15.00;
-            const data_lancamento = new Date().toISOString().split('T')[0];
 
             await pool.query(
                 `INSERT INTO financeiro_lancamentos (descricao, tipo, valor, data_lancamento) VALUES ($1, $2, $3, $4)`,
-                [descricao, tipo, valor, data_lancamento]
+                [descricao, tipo, valor, dataFinal]
             );
         }
 
@@ -368,7 +393,7 @@ app.post('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'ge
         res.status(500).json({ erro: err.message });
     }
 });
-// Remover 1 participação do convidado (-1J)
+
 app.delete('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', 'gestor', 'tesoureiro', 'secretario']), async (req, res) => {
     try {
         const { id } = req.params;
@@ -379,6 +404,13 @@ app.delete('/api/convidados/:id/presenca', verificarPerfisPermitidos(['admin', '
         if (result.rows.length === 0) {
             return res.status(404).json({ erro: 'Convidado não encontrado.' });
         }
+
+        // Remove o registro de data mais recente deste convidado
+        await pool.query(`
+            DELETE FROM presencas_convidados 
+            WHERE id = (SELECT id FROM presencas_convidados WHERE convidado_id = $1 ORDER BY data_partida DESC, id DESC LIMIT 1)
+        `, [id]);
+
         res.json({ mensagem: 'Participação removida com sucesso!', convidado: result.rows[0] });
     } catch (err) {
         res.status(500).json({ erro: err.message });

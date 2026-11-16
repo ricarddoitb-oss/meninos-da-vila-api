@@ -499,34 +499,46 @@
                 </div>
             </div>
 
-            <!-- ABA RELATÓRIOS / MAIS -->
+            <!-- ABA RELATÓRIOS / MAIS (GERAÇÃO SOB DEMANDA) -->
             <div id="tab-relatorios" class="tab-content hidden space-y-5">
                 <div class="bg-pitch-900 border border-pitch-800 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-3 print:hidden">
                     <div>
                         <h3 class="font-black text-xs text-amber-400"><i class="fa-solid fa-file-pdf mr-2"></i>Central de Relatórios Gerenciais</h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Selecione uma das opções abaixo para gerar o relatório sob demanda.</p>
                     </div>
-                    <button onclick="imprimirRelatorioGeral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center space-x-1.5">
-                        <i class="fa-solid fa-print"></i><span>Imprimir Ativo</span>
+                    <button id="btn-imprimir-relatorio" onclick="imprimirRelatorioGeral()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-print"></i><span>Imprimir Relatório Gerado</span>
                     </button>
                 </div>
 
+                <!-- BOTÕES DE GERAÇÃO DE RELATÓRIOS -->
                 <div class="flex flex-wrap gap-2 print:hidden" id="container-botoes-relatorios">
-                    <button onclick="mudarRelatorio('posicoes')" id="btn-rel-posicoes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-emerald-500/40 shadow">
-                        <i class="fa-solid fa-chart-bar mr-1.5"></i>Por Posição
+                    <button onclick="gerarRelatorio('posicoes')" id="btn-rel-posicoes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-chart-bar mr-1.5 text-emerald-400"></i>Gerar: Por Posição
                     </button>
-                    <button onclick="mudarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
-                        <i class="fa-solid fa-clipboard-user mr-1.5"></i>Presenças
+                    <button onclick="gerarRelatorio('presencas')" id="btn-rel-presencas" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-clipboard-user mr-1.5 text-emerald-400"></i>Gerar: Presenças (Mensalistas)
                     </button>
-                    <button onclick="mudarRelatorio('convidados')" id="btn-rel-convidados" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
-                        <i class="fa-solid fa-user-clock mr-1.5"></i>Convidados
+                    <button onclick="gerarRelatorio('convidados')" id="btn-rel-convidados" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-user-clock mr-1.5 text-amber-400"></i>Gerar: Convidados
                     </button>
-                    <button onclick="mudarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
-                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Inadimplentes (WhatsApp)
+                    <button onclick="gerarRelatorio('inadimplentes')" id="btn-rel-inadimplentes" class="rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5 text-rose-400"></i>Gerar: Inadimplentes (WhatsApp)
                     </button>
                 </div>
 
-                <div id="relatorios-conteudo-impressao" class="space-y-5">
-                    <div id="bloco-rel-posicoes" class="rel-bloco space-y-5">
+                <!-- ESTADO INICIAL VAZIO ANTES DE GERAR -->
+                <div id="relatorios-placeholder" class="bg-pitch-900/60 border border-pitch-800/80 rounded-3xl p-12 text-center space-y-3 print:hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-pitch-800 text-amber-400 flex items-center justify-center mx-auto text-lg shadow">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <h4 class="text-sm font-black text-white">Nenhum relatório gerado no momento</h4>
+                    <p class="text-xs text-gray-400 max-w-md mx-auto">Clique em um dos botões acima para processar e visualizar os dados atualizados do clube.</p>
+                </div>
+
+                <!-- ÁREA DOS RELATÓRIOS GERADOS -->
+                <div id="relatorios-conteudo-impressao" class="space-y-5 hidden">
+                    <div id="bloco-rel-posicoes" class="rel-bloco space-y-5 hidden">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="bg-pitch-900 border border-pitch-800 p-5 rounded-3xl shadow-xl space-y-3">
                                 <h3 class="font-black text-xs text-emerald-400">Membros por Posição</h3>
@@ -547,15 +559,14 @@
 
                     <div id="bloco-rel-presencas" class="rel-bloco space-y-5 hidden">
                         <div class="bg-pitch-900 border border-pitch-800 p-5 md:p-7 rounded-3xl shadow-xl">
-                            <h3 class="font-black text-sm mb-3 text-white">Participações por Atleta</h3>
+                            <h3 class="font-black text-sm mb-3 text-white">Participações por Atleta Mensalista</h3>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs">
                                     <thead>
                                         <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
                                             <th class="pb-2.5">Atleta</th>
-                                            <th class="pb-2.5">Função</th>
                                             <th class="pb-2.5">Posição</th>
-                                            <th class="pb-2.5">Status</th>
+                                            <th class="pb-2.5">Datas (Dia/Mês)</th>
                                             <th class="pb-2.5 text-right">Presenças</th>
                                         </tr>
                                     </thead>
@@ -577,9 +588,9 @@
                                         <tr class="border-b border-pitch-800 text-gray-400 uppercase text-[10px] font-bold">
                                             <th class="pb-2.5">Convidado</th>
                                             <th class="pb-2.5">Telefone</th>
-                                            <th class="pb-2.5">Valor Diária</th>
-                                            <th class="pb-2.5 text-right">Participações (Jogos)</th>
-                                            <th class="pb-2.5 text-right">Total Arrecadado</th>
+                                            <th class="pb-2.5">Datas (Dia/Mês)</th>
+                                            <th class="pb-2.5 text-right">Jogos</th>
+                                            <th class="pb-2.5 text-right">Total Pago</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-relatorio-convidados"></tbody>
@@ -958,7 +969,6 @@
                 if (elNome) elNome.innerText = `Olá, ${toTitleCase(usuarioLogado.nome.split(' ')[0])}!`;
             }
 
-            // Ocultar financeiro se for secretário
             if (perfil === 'secretario') {
                 document.querySelectorAll('.financeiro-nav-item').forEach(el => el.remove());
                 document.querySelectorAll('.financeiro-card-view').forEach(el => el.remove());
@@ -977,11 +987,6 @@
                 document.getElementById('btn-rel-presencas')?.remove();
                 document.getElementById('bloco-rel-posicoes')?.remove();
                 document.getElementById('bloco-rel-presencas')?.remove();
-                
-                document.getElementById('container-botoes-relatorios')?.remove();
-                mudarRelatorio('inadimplentes');
-            } else {
-                mudarRelatorio('posicoes');
             }
 
             const dataAtual = new Date();
@@ -1062,20 +1067,34 @@
         function fecharModalRecibo() { document.body.classList.remove('imprimindo-recibo'); closeModal('modal-recibo'); }
         function imprimirRelatorioGeral() { document.body.classList.remove('imprimindo-recibo'); window.print(); }
 
-        function mudarRelatorio(tipo) {
-            if (usuarioLogado.perfil === 'tesoureiro') {
-                tipo = 'inadimplentes';
-            }
+        // ==========================================
+        // GERAÇÃO DE RELATÓRIOS SOB DEMANDA
+        // ==========================================
+        async function gerarRelatorio(tipo) {
+            document.getElementById('relatorios-placeholder')?.classList.add('hidden');
+            document.getElementById('relatorios-conteudo-impressao')?.classList.remove('hidden');
+            document.getElementById('btn-imprimir-relatorio')?.classList.remove('hidden');
+
             document.querySelectorAll('.rel-bloco').forEach(b => b.classList.add('hidden'));
             document.querySelectorAll('.rel-btn').forEach(b => {
                 b.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-pitch-800 shadow";
             });
 
-            document.getElementById(`bloco-rel-${tipo}`)?.classList.remove('hidden');
             const btnAtivo = document.getElementById(`btn-rel-${tipo}`);
             if (btnAtivo) {
                 btnAtivo.className = "rel-btn bg-pitch-800 hover:bg-pitch-700 text-emerald-400 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-emerald-500/40 shadow";
             }
+
+            if (tipo === 'convidados') {
+                await carregarConvidados();
+                renderRelatorioConvidados();
+            } else {
+                await carregarJogadores();
+                renderRelatorios(listaAtletasGlobal);
+            }
+
+            document.getElementById(`bloco-rel-${tipo}`)?.classList.remove('hidden');
+            showToast('Relatório gerado com sucesso!');
         }
 
         function dispararConvocacaoGeralWhatsApp() {
@@ -1190,7 +1209,6 @@
                 if (res.ok) {
                     listaConvidadosGlobal = await res.json();
                     renderConvidados();
-                    renderRelatorioConvidados();
                 }
             } catch (err) {
                 console.error('Erro ao carregar convidados:', err);
@@ -1273,13 +1291,14 @@
             if (!conv) return;
 
             const valorDiaria = valorSugerido !== null ? valorSugerido : (conv.valor_diaria || 15.00);
-            const confirmarPagamento = confirm(`Registrar presença para ${toTitleCase(conv.nome)}?\n\nClique em OK se o convidado PAGOU a diária de R$ ${parseFloat(valorDiaria).toFixed(2)} (será lançado no caixa), ou Cancelar para registrar apenas a presença/jogo.`);
+            const dataRodada = document.getElementById('data-presenca-manual')?.value || new Date().toISOString().split('T')[0];
+            const confirmarPagamento = confirm(`Registrar presença para ${toTitleCase(conv.nome)} na data ${new Date(dataRodada + 'T00:00:00').toLocaleDateString('pt-BR')}?\n\nClique em OK se o convidado PAGOU a diária de R$ ${parseFloat(valorDiaria).toFixed(2)} (será lançado no caixa), ou Cancelar para registrar apenas a presença/jogo.`);
 
             try {
                 const res = await fetch(`${API_URL}/api/convidados/${id}/presenca`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ pagar_diaria: confirmarPagamento, valor_diaria: valorDiaria })
+                    body: JSON.stringify({ pagar_diaria: confirmarPagamento, valor_diaria: valorDiaria, data_partida: dataRodada })
                 });
 
                 if (res.ok) {
@@ -1377,11 +1396,15 @@
             tbody.innerHTML = '';
             listaConvidadosGlobal.forEach(c => {
                 const totalArrecadado = (c.participacoes || 0) * (c.valor_diaria || 0);
+                const datasFmt = (Array.isArray(c.datas_presencas) && c.datas_presencas.length > 0) 
+                    ? c.datas_presencas.join(', ') 
+                    : '<span class="text-gray-500 italic">Sem datas</span>';
+
                 tbody.innerHTML += `
                     <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                         <td class="py-3 font-bold text-white">${toTitleCase(c.nome)}</td>
                         <td class="py-3 text-gray-300">${c.telefone || '-'}</td>
-                        <td class="py-3 text-amber-400">R$ ${parseFloat(c.valor_diaria || 0).toFixed(2)}</td>
+                        <td class="py-3 text-amber-300 font-medium">${datasFmt}</td>
                         <td class="py-3 text-right font-black text-emerald-400">${c.participacoes || 0}</td>
                         <td class="py-3 text-right font-black text-amber-400">R$ ${totalArrecadado.toFixed(2)}</td>
                     </tr>
@@ -1398,7 +1421,6 @@
                     renderDashboard(dados);
                     aplicarFiltrosElenco();
                     renderPresenca(dados);
-                    renderRelatorios(dados);
                 }
             } catch (err) { console.error('Erro ao buscar atletas:', err); }
         }
@@ -1600,12 +1622,15 @@
             if (tbodyPres) {
                 tbodyPres.innerHTML = '';
                 [...jogadores].sort((a, b) => (b.total_participacoes || 0) - (a.total_participacoes || 0)).forEach(j => {
+                    const datasFmt = (Array.isArray(j.datas_presencas) && j.datas_presencas.length > 0) 
+                        ? j.datas_presencas.join(', ') 
+                        : '<span class="text-gray-500 italic">Sem datas</span>';
+
                     tbodyPres.innerHTML += `
                         <tr class="border-b border-pitch-800 hover:bg-pitch-800/30">
                             <td class="py-3 font-bold text-white">${toTitleCase(j.nome)}</td>
-                            <td class="py-3 text-gray-400 text-xs">${j.funcao_grupo || 'Atleta'}</td>
                             <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-bold">${j.posicao}</span></td>
-                            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">${j.status_aptidao || 'Ativo'}</span></td>
+                            <td class="py-3 text-emerald-300 font-medium">${datasFmt}</td>
                             <td class="py-3 text-right font-black text-amber-400">${j.total_participacoes || 0}</td>
                         </tr>
                     `;
